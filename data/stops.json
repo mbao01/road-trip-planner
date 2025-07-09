@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "London",
+    "driving": "",
+    "dayId": 1,
+    "order": 0,
+    "latitude": 51.5072,
+    "longitude": -0.1276
+  },
+  {
+    "id": 2,
+    "name": "Milton Keynes",
+    "driving": "Drive 54.4 mi (£12.37, 1 hr 29 min)",
+    "dayId": 1,
+    "order": 1,
+    "latitude": 52.0406,
+    "longitude": -0.7594
+  },
+  {
+    "id": 3,
+    "name": "Leicester",
+    "driving": "Drive 54.5 mi (£12.39, 1 hr 12 min)",
+    "dayId": 2,
+    "order": 0,
+    "latitude": 52.6369,
+    "longitude": -1.1398
+  },
+  {
+    "id": 4,
+    "name": "Chesterfield",
+    "driving": "Drive 51.8 mi (£11.77, 1 hr 5 min)",
+    "dayId": 3,
+    "order": 0,
+    "latitude": 53.2353,
+    "longitude": -1.4286
+  },
+  {
+    "id": 5,
+    "name": "Manchester",
+    "driving": "Drive 44.1 mi (£10.02, 1 hr 39 min)",
+    "dayId": 3,
+    "order": 1,
+    "latitude": 53.4808,
+    "longitude": -2.2426
+  }
+]

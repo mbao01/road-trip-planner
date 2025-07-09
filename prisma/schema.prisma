@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  name          String?
+  avatarUrl     String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  ownedTrips    Trip[]
+  collaborations Collaborator[]
+}
+
+model Trip {
+  id            String          @id @default(cuid())
+  name          String
+  dates         String // Storing as "dd/MM/yyyy - dd/MM/yyyy" string for simplicity
+  status        String          @default("active") // "active" or "archived"
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  owner         User            @relation(fields: [ownerId], references: [id])
+  ownerId       Int
+  days          Day[]
+  settings      Settings?
+  collaborators Collaborator[]
+}
+
+model Day {
+  id        Int      @id @default(autoincrement())
+  date      String // "EEE, d MMM"
+  order     Int
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId    String
+  stops     Stop[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tripId, order])
+}
+
+model Stop {
+  id        Int      @id @default(autoincrement())
+  name      String
+  driving   String
+  latitude  Float
+  longitude Float
+  order     Int
+  day       Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  dayId     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([dayId, order])
+}
+
+model Settings {
+  id               Int      @id @default(autoincrement())
+  mapStyle         String   @default("default")
+  calculateCosts   Boolean  @default(true)
+  currency         String   @default("gbp")
+  fuelCostPerLitre Float    @default(1.5)
+  mpg              Int      @default(30)
+  avoidTolls       Boolean  @default(false)
+  avoidMotorways   Boolean  @default(false)
+  distanceUnit     String   @default("mi")
+  trip             Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId           String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Collaborator {
+  id        Int      @id @default(autoincrement())
+  role      Role
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, tripId])
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}

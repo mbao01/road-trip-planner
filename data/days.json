@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "date": "Thu, 14 Aug",
+    "tripId": "northbound-up",
+    "order": 0
+  },
+  {
+    "id": 2,
+    "date": "Fri, 15 Aug",
+    "tripId": "northbound-up",
+    "order": 1
+  },
+  {
+    "id": 3,
+    "date": "Sat, 16 Aug",
+    "tripId": "northbound-up",
+    "order": 2
+  }
+]
