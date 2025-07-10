@@ -11,9 +11,7 @@ export async function GET(request: Request) {
   }
 
   // Note: On the backend, we use a non-public env var for security.
-  // The user will be prompted to create NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-  // but for a production app, you'd use a separate, non-public key here.
-  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!googleMapsApiKey) {
     return NextResponse.json({ error: "Google Maps API key is not configured" }, { status: 500 })
   }

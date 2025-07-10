@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const placeId = searchParams.get("placeId")
-  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
   if (!placeId) {
     return NextResponse.json({ error: "placeId parameter is required" }, { status: 400 })

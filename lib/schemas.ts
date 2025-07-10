@@ -1,54 +1,52 @@
-import { z } from "zod"
+import { Currency, DistanceUnit, MapStyle } from "@prisma/client";
+import { z } from "zod";
 
 export const createTripSchema = z.object({
   name: z.string().min(1, "Trip name is required"),
-  dates: z.object({
-    from: z.string().datetime(),
-    to: z.string().datetime(),
-  }),
+  startDate: z.date(),
+  endDate: z.date(),
   startStop: z.object({
     id: z.string(),
     name: z.string(),
     latitude: z.number(),
     longitude: z.number(),
   }),
-})
+});
 
 export const updateTripSchema = z.object({
   name: z.string().min(1).optional(),
-  dates: z.string().optional(), // Assuming "dd/MM/yyyy - dd/MM/yyyy" format
-})
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+});
 
 export const updateSettingsSchema = z.object({
-  mapStyle: z.enum(["default", "outdoors", "satellite"]).optional(),
+  mapStyle: z.enum(MapStyle).optional(),
   calculateCosts: z.boolean().optional(),
-  currency: z.enum(["gbp", "eur", "usd"]).optional(),
+  currency: z.enum(Currency).optional(),
   fuelCostPerLitre: z.number().positive().optional(),
   mpg: z.number().int().positive().optional(),
   avoidTolls: z.boolean().optional(),
   avoidMotorways: z.boolean().optional(),
-  distanceUnit: z.enum(["mi", "km"]).optional(),
-})
+  distanceUnit: z.enum(DistanceUnit).optional(),
+});
 
 export const addStopSchema = z.object({
   name: z.string(),
-  driving: z.string().optional().default(""),
   latitude: z.number(),
   longitude: z.number(),
-})
+});
 
 export const reorderSchema = z.array(
   z.object({
-    id: z.number(),
+    id: z.string(),
     date: z.string(),
     stops: z.array(
       z.object({
-        id: z.number(),
+        id: z.string(),
         name: z.string(),
-        driving: z.string(),
         latitude: z.number(),
         longitude: z.number(),
-      }),
+      })
     ),
-  }),
-)
+  })
+);

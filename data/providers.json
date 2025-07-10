@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "type": "CREDENTIAL",
+    "providerId": "user-1-credential",
+    "providerData": {
+      "email": "owner@example.com",
+      "password": "xxx"
+    },
+    "emailVerified": true,
+    "expiresAt": null,
+    "userId": "1"
+  }
+]

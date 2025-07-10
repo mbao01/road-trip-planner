@@ -1,0 +1,10 @@
+export const capitalize = (string: string | null | undefined) => {
+  if (!string) return string;
+
+  const capitalizedString = string
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  return capitalizedString;
+};

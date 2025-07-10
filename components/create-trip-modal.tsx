@@ -14,11 +14,12 @@ import { createTrip } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Search, X } from "lucide-react"
 import type { DateRange } from "react-day-picker"
+import type { Trip } from "@prisma/client";
 
 interface CreateTripModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onTripCreated: (tripId: string) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onTripCreated: (tripId: Trip["id"]) => void;
 }
 
 export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTripModalProps) {
@@ -77,7 +78,12 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
     }
     setIsCreating(true)
     try {
-      const result = await createTrip({ name, dates, startStop: selectedStartStop })
+      const result = await createTrip({
+        name,
+        startDate: dates.from,
+        endDate: dates.to,
+        startStop: selectedStartStop,
+      });
       toast({ title: "Trip created successfully!" })
       onTripCreated(result.tripId)
       // Reset form

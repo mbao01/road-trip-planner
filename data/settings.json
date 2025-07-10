@@ -4,11 +4,11 @@
     "tripId": "northbound-up",
     "mapStyle": "default",
     "calculateCosts": true,
-    "currency": "gbp",
+    "currency": "GBP",
     "fuelCostPerLitre": 1.5,
     "mpg": 30,
     "avoidTolls": false,
     "avoidMotorways": false,
-    "distanceUnit": "mi"
+    "distanceUnit": "MI"
   }
 ]

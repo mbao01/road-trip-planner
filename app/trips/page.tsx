@@ -31,7 +31,7 @@ export default function TripsPage() {
 
   const onTripCreated = (tripId: string) => {
     setCreateModalOpen(false)
-    router.push(`/trip/${tripId}`)
+    router.push(`/trips/${tripId}`);
   }
 
   return (

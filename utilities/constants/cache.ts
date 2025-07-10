@@ -1,0 +1,8 @@
+export const CACHE_TIME = {
+  ONE_DAY: 60 * 60 * 24,
+  OFF_ONE_DAY: 60 * 60 * 23,
+  ONE_HOUR: 60 * 60,
+  OFF_ONE_HOUR: 60 * 59,
+  ONE_MINUTE: 60,
+  OFF_ONE_MINUTE: 59,
+};

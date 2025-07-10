@@ -1,19 +1,19 @@
 [
   {
-    "id": 1,
-    "date": "Thu, 14 Aug",
+    "id": "1",
+    "date": "2025-08-14T00:00:00.000Z",
     "tripId": "northbound-up",
     "order": 0
   },
   {
-    "id": 2,
-    "date": "Fri, 15 Aug",
+    "id": "2",
+    "date": "2025-08-15T00:00:00.000Z",
     "tripId": "northbound-up",
     "order": 1
   },
   {
-    "id": 3,
-    "date": "Sat, 16 Aug",
+    "id": "3",
+    "date": "2025-08-16T00:00:00.000Z",
     "tripId": "northbound-up",
     "order": 2
   }

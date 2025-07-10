@@ -1,50 +1,68 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Edit, Share2, Archive, Trash2 } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
-import type { TripTableRow } from "@/types/trip"
-import { DeleteTripConfirmationDialog } from "./delete-trip-confirmation-dialog"
-import { ShareModal } from "./share-modal"
+import type { TripTableRow } from "@/types/trip";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/components/ui/use-toast";
+import { TRIP_ACCESS } from "@/helpers/constants/tripAccess";
+import { TRIP_STATUS } from "@/helpers/constants/tripStatus";
+import { formatDate } from "@/utilities/dates";
+import { TripStatus } from "@prisma/client";
+import { Archive, Edit, MoreHorizontal, Share2, Trash2 } from "lucide-react";
+import { DeleteTripConfirmationDialog } from "./delete-trip-confirmation-dialog";
+import { ShareModal } from "./share-modal";
 
 interface TripsTableProps {
-  initialTrips: TripTableRow[]
+  initialTrips: TripTableRow[];
 }
 
-const statusColors: Record<TripTableRow["status"], string> = {
-  "In Progress": "bg-blue-100 text-blue-800",
-  "Not Started": "bg-gray-100 text-gray-800",
-  Completed: "bg-green-100 text-green-800",
-  Archived: "bg-yellow-100 text-yellow-800",
-}
+const statusColors: Record<TripStatus, string> = {
+  [TripStatus.IN_PROGRESS]: "bg-blue-100 text-blue-800",
+  [TripStatus.NOT_STARTED]: "bg-gray-100 text-gray-800",
+  [TripStatus.COMPLETED]: "bg-green-100 text-green-800",
+  [TripStatus.ARCHIVED]: "bg-yellow-100 text-yellow-800",
+  [TripStatus.ACTIVE]: "bg-blue-100 text-blue-800",
+  [TripStatus.DELETED]: "bg-gray-100 text-gray-800",
+};
 
 export function TripsTable({ initialTrips }: TripsTableProps) {
-  const [trips, setTrips] = useState(initialTrips)
-  const [tripToDelete, setTripToDelete] = useState<TripTableRow | null>(null)
-  const [tripToShare, setTripToShare] = useState<TripTableRow | null>(null)
-  const router = useRouter()
-  const { toast } = useToast()
+  const [trips, setTrips] = useState(initialTrips);
+  const [tripToDelete, setTripToDelete] = useState<TripTableRow | null>(null);
+  const [tripToShare, setTripToShare] = useState<TripTableRow | null>(null);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleArchive = async (tripId: string) => {
     // This is an optimistic update. We can add API logic later.
-    setTrips(trips.map((t) => (t.id === tripId ? { ...t, status: "Archived" } : t)))
-    toast({ title: "Trip archived" })
-  }
+    setTrips(trips.map((t) => (t.id === tripId ? { ...t, status: TripStatus.ARCHIVED } : t)));
+    toast({ title: "Trip archived" });
+  };
 
   const handleDelete = async () => {
-    if (!tripToDelete) return
+    if (!tripToDelete) return;
     // Optimistic update
-    setTrips(trips.filter((t) => t.id !== tripToDelete.id))
-    setTripToDelete(null)
-    toast({ title: "Trip deleted" })
+    setTrips(trips.filter((t) => t.id !== tripToDelete.id));
+    setTripToDelete(null);
+    toast({ title: "Trip deleted" });
     // Add API call here in a real app: await api.deleteTrip(tripToDelete.id)
-  }
+  };
 
   return (
     <>
@@ -68,16 +86,17 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
               <TableRow key={trip.id}>
                 <TableCell className="font-medium">{trip.name}</TableCell>
                 <TableCell>
-                  {trip.startDate} - {trip.endDate}
+                  {formatDate(trip.startDate, "dd/MM/yyyy")} -{" "}
+                  {formatDate(trip.endDate, "dd/MM/yyyy")}
                 </TableCell>
                 <TableCell className="text-center">{trip.dayCount}</TableCell>
                 <TableCell className="text-center">{trip.stopCount}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className={statusColors[trip.status]}>
-                    {trip.status}
+                    {TRIP_STATUS[trip.status]}
                   </Badge>
                 </TableCell>
-                <TableCell>{trip.access}</TableCell>
+                <TableCell>{TRIP_ACCESS[trip.access]}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -88,7 +107,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/trip/${trip.id}`}>
+                        <Link href={`/trips/${trip.id}`}>
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit trip</span>
                         </Link>
@@ -101,7 +120,10 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
                         <Archive className="mr-2 h-4 w-4" />
                         <span>Archive trip</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTripToDelete(trip)} className="text-red-600">
+                      <DropdownMenuItem
+                        onClick={() => setTripToDelete(trip)}
+                        className="text-red-600"
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         <span>Delete trip</span>
                       </DropdownMenuItem>
@@ -122,8 +144,12 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
         />
       )}
       {tripToShare && (
-        <ShareModal open={!!tripToShare} onOpenChange={() => setTripToShare(null)} tripName={tripToShare.name} />
+        <ShareModal
+          open={!!tripToShare}
+          onOpenChange={() => setTripToShare(null)}
+          tripName={tripToShare.name}
+        />
       )}
     </>
-  )
+  );
 }

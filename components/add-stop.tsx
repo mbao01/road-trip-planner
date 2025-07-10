@@ -7,10 +7,11 @@ import { Card } from "@/components/ui/card"
 import { useDebounce } from "@/hooks/use-debounce"
 import { searchPlaces, getPlaceDetails, type PlaceSearchResult, type PlaceDetails } from "@/lib/google-maps-api"
 import { Loader2, Search, X } from "lucide-react"
+import type { Day } from "@prisma/client";
 
 interface AddStopProps {
-  dayId: number
-  onAddStop: (dayId: number, location: PlaceDetails) => void
+  dayId: Day["id"];
+  onAddStop: (dayId: Day["id"], location: PlaceDetails) => void;
 }
 
 export const AddStop: FC<AddStopProps> = ({ dayId, onAddStop }) => {

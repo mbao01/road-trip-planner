@@ -1,31 +1,43 @@
-"use client"
+"use client";
 
-import React, { type FC } from "react"
-import { useDroppable } from "@dnd-kit/core"
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { StopCard } from "./stop-card"
-import { AddStop } from "./add-stop"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreVertical, ArrowUp, ArrowDown, Trash2 } from "lucide-react"
-import type { PlaceDetails } from "@/lib/google-maps-api"
-import type { Settings, Day } from "@/types/trip"
+import type { PlaceDetails } from "@/lib/google-maps-api";
+import type { StopWithTravel } from "@/types/trip";
+import type { FC } from "react";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CURRENCY_SYMBOLS } from "@/helpers/constants/currency";
+import { DISTANCE_UNITS } from "@/helpers/constants/distance";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { Currency, Day, DistanceUnit, Settings, Stop } from "@prisma/client";
+import { format } from "date-fns";
+import { ArrowDown, ArrowUp, MoreVertical, Trash2 } from "lucide-react";
+import { AddStop } from "./add-stop";
+import { StopCard } from "./stop-card";
 
 interface DayCardProps {
-  day: Day
-  dayIndex: number
-  totalDays: number
-  stopNumberOffset: number
-  onMoveDay: (dayId: number, direction: "up" | "down") => void
-  onDeleteDay: () => void
-  onAddStop: (dayId: number, location: PlaceDetails) => void
-  onDeleteStop: (dayId: number, stopId: number) => void
-  settings: Settings
+  day: Day;
+  stops: StopWithTravel[];
+  dayIndex: number;
+  totalDays: number;
+  stopNumberOffset: number;
+  onMoveDay: (dayId: Day["id"], direction: "up" | "down") => void;
+  onDeleteDay: () => void;
+  onAddStop: (dayId: Day["id"], location: PlaceDetails) => void;
+  onDeleteStop: (dayId: Day["id"], stopId: Stop["id"]) => void;
+  settings: Settings;
 }
 
 export const DayCard: FC<DayCardProps> = ({
   day,
+  stops,
   dayIndex,
   totalDays,
   stopNumberOffset,
@@ -38,63 +50,59 @@ export const DayCard: FC<DayCardProps> = ({
   const { setNodeRef } = useDroppable({
     id: `day-${day.id}`,
     data: { type: "day", day: day },
-  })
+  });
 
   const daySummary = React.useMemo(() => {
-    let totalDistance = 0
-    let totalCost = 0
-    let totalDurationMinutes = 0
+    let totalDistance = 0;
+    let totalCost = 0;
+    let totalDurationMinutes = 0;
 
-    day.stops.forEach((stop) => {
-      if (stop.driving) {
-        const distanceMatch = stop.driving.match(/(\d+\.?\d*)\s*(mi|km)/)
-        if (distanceMatch) totalDistance += Number.parseFloat(distanceMatch[1])
-
-        const costMatch = stop.driving.match(/[£€$](\d+\.?\d*)/)
-        if (costMatch) totalCost += Number.parseFloat(costMatch[1])
-
-        const hoursMatch = stop.driving.match(/(\d+)\s*hr/)
-        if (hoursMatch) totalDurationMinutes += Number.parseInt(hoursMatch[1], 10) * 60
-
-        const minutesMatch = stop.driving.match(/(\d+)\s*min/)
-        if (minutesMatch) totalDurationMinutes += Number.parseInt(minutesMatch[1], 10)
+    stops.forEach((stop) => {
+      if (stop.travel) {
+        // TODO: Parse driving details by getting live data from Google Maps API
+        totalDistance += stop.travel.distance;
+        totalCost += stop.travel.cost;
+        totalDurationMinutes += stop.travel.duration;
       }
-    })
+    });
 
-    const CURRENCY_SYMBOLS: Record<Settings["currency"], string> = { gbp: "£", eur: "€", usd: "$" }
-    const currencySymbol = CURRENCY_SYMBOLS[settings.currency]
+    const currencySymbol = settings.currency ? CURRENCY_SYMBOLS[settings.currency] : Currency.GBP;
 
     if (totalDistance === 0 && totalCost === 0 && totalDurationMinutes === 0) {
-      return `0 ${settings.distanceUnit} (${currencySymbol}0.00, 0 min)`
+      return `0 ${DISTANCE_UNITS[settings.distanceUnit ?? DistanceUnit.MI]}, (${currencySymbol}0.00), 0 hr`;
     }
 
-    const hours = Math.floor(totalDurationMinutes / 60)
-    const minutes = totalDurationMinutes % 60
+    const hours = Math.floor(totalDurationMinutes / 60);
+    const minutes = totalDurationMinutes % 60;
 
-    const parts = []
-    parts.push(`${totalDistance.toFixed(1)} ${settings.distanceUnit}`)
+    const parts = [];
+    parts.push(
+      `${totalDistance.toFixed(1)} ${DISTANCE_UNITS[settings.distanceUnit ?? DistanceUnit.MI]}`
+    );
     if (settings.calculateCosts) {
-      parts.push(`(${currencySymbol}${totalCost.toFixed(2)})`)
+      parts.push(`(${currencySymbol}${totalCost.toFixed(2)})`);
     }
 
-    const timeParts = []
-    if (hours > 0) timeParts.push(`${hours} hr`)
-    if (minutes > 0) timeParts.push(`${minutes} min`)
+    const timeParts = [];
+    if (hours > 0) timeParts.push(`${hours} hr`);
+    if (minutes > 0) timeParts.push(`${minutes} min`);
     if (timeParts.length > 0) {
-      parts.push(timeParts.join(" "))
+      parts.push(timeParts.join(" "));
     } else {
-      parts.push("0 min")
+      parts.push("0 min");
     }
 
-    return parts.join(", ")
-  }, [day.stops, settings])
+    return parts.join(", ");
+  }, [stops, settings]);
 
   return (
     <Card ref={setNodeRef} className="p-4">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0">
           <h3 className="font-semibold">Day {dayIndex + 1}</h3>
-          <span className="text-sm text-muted-foreground truncate">{day.date}</span>
+          <span className="text-sm text-muted-foreground truncate">
+            {format(day.date, "EEE, dd MMM")}
+          </span>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -115,7 +123,11 @@ export const DayCard: FC<DayCardProps> = ({
                 <span>Move day down</span>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={onDeleteDay} className="text-red-500" disabled={totalDays <= 1}>
+            <DropdownMenuItem
+              onClick={onDeleteDay}
+              className="text-red-500"
+              disabled={totalDays <= 1}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               <span>Delete day</span>
             </DropdownMenuItem>
@@ -129,13 +141,17 @@ export const DayCard: FC<DayCardProps> = ({
         </div>
       </div>
 
-      <SortableContext items={day.stops.map((stop) => `stop-${stop.id}`)} strategy={verticalListSortingStrategy}>
+      <SortableContext
+        items={stops.map((stop) => `stop-${stop.id}`)}
+        strategy={verticalListSortingStrategy}
+      >
         <div className="space-y-2">
-          {day.stops.map((stop, index) => (
+          {stops.map((stop, index) => (
             <StopCard
               key={stop.id}
               stop={stop}
               dayId={day.id}
+              settings={settings}
               stopNumber={stopNumberOffset + index + 1}
               onDeleteStop={onDeleteStop}
               isFirstStopOfTrip={dayIndex === 0 && index === 0}
@@ -148,5 +164,5 @@ export const DayCard: FC<DayCardProps> = ({
         <AddStop dayId={day.id} onAddStop={onAddStop} />
       </div>
     </Card>
-  )
-}
+  );
+};
