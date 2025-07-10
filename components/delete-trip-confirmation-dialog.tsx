@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   AlertDialog,
@@ -9,13 +9,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 interface DeleteTripConfirmationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-  tripName: string
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  tripName: string;
 }
 
 export function DeleteTripConfirmationDialog({
@@ -30,7 +30,8 @@ export function DeleteTripConfirmationDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure you want to delete '{tripName}'?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the trip, including all its days and stops.
+            This action cannot be undone. This will permanently delete the trip, including all its
+            days and stops.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -41,5 +42,5 @@ export function DeleteTripConfirmationDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

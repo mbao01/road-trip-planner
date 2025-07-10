@@ -19,11 +19,9 @@ export const propertyIdSchema = z.object({
 });
 
 export const propertyIdsSchema = z.object({
-  property_ids: z
-    .array(z.string())
-    .refine((vals) => !vals.some((val) => isNaN(Number(val))), {
-      message: "Certain properties do not exist",
-    }),
+  property_ids: z.array(z.string()).refine((vals) => !vals.some((val) => isNaN(Number(val))), {
+    message: "Certain properties do not exist",
+  }),
 });
 
 export const roleIdSchema = z.object({

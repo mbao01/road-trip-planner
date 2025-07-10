@@ -1,20 +1,26 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { DateRangePicker } from "./date-range-picker"
-import { useDebounce } from "@/hooks/use-debounce"
-import { searchPlaces, getPlaceDetails, type PlaceSearchResult, type PlaceDetails } from "@/lib/google-maps-api"
-import { createTrip } from "@/lib/api"
-import { useToast } from "@/components/ui/use-toast"
-import { Loader2, Search, X } from "lucide-react"
-import type { DateRange } from "react-day-picker"
+import type { PlaceDetails, PlaceSearchResult } from "@/lib/google-maps-api";
 import type { Trip } from "@prisma/client";
+import type React from "react";
+import type { DateRange } from "react-day-picker";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { useDebounce } from "@/hooks/use-debounce";
+import { createTrip } from "@/lib/api";
+import { getPlaceDetails, searchPlaces } from "@/lib/google-maps-api";
+import { Loader2, Search, X } from "lucide-react";
+import { DateRangePicker } from "./date-range-picker";
 
 interface CreateTripModalProps {
   open: boolean;
@@ -23,60 +29,60 @@ interface CreateTripModalProps {
 }
 
 export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTripModalProps) {
-  const [name, setName] = useState("")
-  const [dates, setDates] = useState<DateRange | undefined>()
-  const [startStopQuery, setStartStopQuery] = useState("")
-  const [startStopResults, setStartStopResults] = useState<PlaceSearchResult[]>([])
-  const [selectedStartStop, setSelectedStartStop] = useState<PlaceDetails | null>(null)
-  const [isSearching, setIsSearching] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
-  const { toast } = useToast()
+  const [name, setName] = useState("");
+  const [dates, setDates] = useState<DateRange | undefined>();
+  const [startStopQuery, setStartStopQuery] = useState("");
+  const [startStopResults, setStartStopResults] = useState<PlaceSearchResult[]>([]);
+  const [selectedStartStop, setSelectedStartStop] = useState<PlaceDetails | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const { toast } = useToast();
 
-  const debouncedQuery = useDebounce(startStopQuery, 300)
+  const debouncedQuery = useDebounce(startStopQuery, 300);
 
   useEffect(() => {
     if (debouncedQuery && !selectedStartStop) {
-      setIsSearching(true)
+      setIsSearching(true);
       searchPlaces(debouncedQuery)
         .then((res) => {
-          setStartStopResults(res)
+          setStartStopResults(res);
         })
         .finally(() => {
-          setIsSearching(false)
-        })
+          setIsSearching(false);
+        });
     } else {
-      setStartStopResults([])
+      setStartStopResults([]);
     }
-  }, [debouncedQuery, selectedStartStop])
+  }, [debouncedQuery, selectedStartStop]);
 
   const handleSelectStop = async (location: PlaceSearchResult) => {
-    setStartStopQuery(location.name)
-    setStartStopResults([])
-    setIsSearching(true)
+    setStartStopQuery(location.name);
+    setStartStopResults([]);
+    setIsSearching(true);
     try {
-      const details = await getPlaceDetails(location.id)
-      setSelectedStartStop(details)
+      const details = await getPlaceDetails(location.id);
+      setSelectedStartStop(details);
     } catch (error) {
-      console.error(error)
-      toast({ variant: "destructive", title: "Could not fetch location details." })
+      console.error(error);
+      toast({ variant: "destructive", title: "Could not fetch location details." });
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }
+  };
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStartStopQuery(e.target.value)
+    setStartStopQuery(e.target.value);
     if (selectedStartStop && e.target.value !== selectedStartStop.name) {
-      setSelectedStartStop(null)
+      setSelectedStartStop(null);
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (!name || !dates?.from || !dates?.to || !selectedStartStop) {
-      toast({ variant: "destructive", title: "Please fill all fields" })
-      return
+      toast({ variant: "destructive", title: "Please fill all fields" });
+      return;
     }
-    setIsCreating(true)
+    setIsCreating(true);
     try {
       const result = await createTrip({
         name,
@@ -84,21 +90,21 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
         endDate: dates.to,
         startStop: selectedStartStop,
       });
-      toast({ title: "Trip created successfully!" })
-      onTripCreated(result.tripId)
+      toast({ title: "Trip created successfully!" });
+      onTripCreated(result.tripId);
       // Reset form
-      setName("")
-      setDates(undefined)
-      setStartStopQuery("")
-      setSelectedStartStop(null)
+      setName("");
+      setDates(undefined);
+      setStartStopQuery("");
+      setSelectedStartStop(null);
     } catch (error) {
-      toast({ variant: "destructive", title: "Failed to create trip", description: String(error) })
+      toast({ variant: "destructive", title: "Failed to create trip", description: String(error) });
     } finally {
-      setIsCreating(false)
+      setIsCreating(false);
     }
-  }
+  };
 
-  const isFormValid = name && dates?.from && dates?.to && selectedStartStop
+  const isFormValid = name && dates?.from && dates?.to && selectedStartStop;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,9 +137,14 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
                 placeholder="Search for a city"
                 className="pl-9"
               />
-              {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin" />}
+              {isSearching && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin" />
+              )}
               {startStopQuery && !selectedStartStop && !isSearching && (
-                <button onClick={() => setStartStopQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <button
+                  onClick={() => setStartStopQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
                   <X className="h-4 w-4" />
                 </button>
               )}
@@ -173,5 +184,5 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

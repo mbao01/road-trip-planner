@@ -1,12 +1,4 @@
-import {
-  Currency,
-  Day,
-  DistanceUnit,
-  Role,
-  Stop,
-  Travel,
-  TripStatus,
-} from "@prisma/client";
+import { Currency, Day, DistanceUnit, Role, Stop, Travel, TripStatus } from "@prisma/client";
 
 // Type for the data displayed in the trips table
 export type TripTableRow = {

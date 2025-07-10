@@ -5,19 +5,13 @@ import { updateTripSchema } from "@/lib/schemas";
 const MOCK_USER_ID = "1"; // Hardcoded user
 
 // GET /api/trips/[tripId] - Assembles and returns the full trip object
-export async function GET(
-  request: Request,
-  { params }: { params: { tripId: string } }
-) {
+export async function GET(request: Request, { params }: { params: { tripId: string } }) {
   const { tripId } = params;
   try {
     const trip = await prisma.trip.findFirst({
       where: {
         id: tripId,
-        OR: [
-          { ownerId: MOCK_USER_ID },
-          { collaborators: { some: { userId: MOCK_USER_ID } } },
-        ],
+        OR: [{ ownerId: MOCK_USER_ID }, { collaborators: { some: { userId: MOCK_USER_ID } } }],
       },
       include: {
         days: {
@@ -47,27 +41,18 @@ export async function GET(
     return NextResponse.json({ ...tripData, access });
   } catch (error) {
     console.error(`Failed to retrieve trip ${tripId}:`, error);
-    return NextResponse.json(
-      { error: "Failed to retrieve trip data" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to retrieve trip data" }, { status: 500 });
   }
 }
 
 // PUT /api/trips/[tripId] - Updates only the top-level trip properties (name, dates)
-export async function PUT(
-  request: Request,
-  { params }: { params: { tripId: string } }
-) {
+export async function PUT(request: Request, { params }: { params: { tripId: string } }) {
   const { tripId } = params;
   try {
     const body = await request.json();
     const validation = updateTripSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error.format() },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
     const updatedTrip = await prisma.trip.update({
@@ -78,9 +63,6 @@ export async function PUT(
     return NextResponse.json({ success: true, data: updatedTrip });
   } catch (error) {
     console.error(`Failed to update trip ${tripId}:`, error);
-    return NextResponse.json(
-      { error: "Failed to update trip" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update trip" }, { status: 500 });
   }
 }

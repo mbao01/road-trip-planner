@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { createTripSchema } from "@/lib/schemas"
-import { parse, isBefore, isAfter, format, addDays, differenceInDays } from "date-fns"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { createTripSchema } from "@/lib/schemas";
 import { Role, TripStatus } from "@prisma/client";
+import { addDays, differenceInDays, format, isAfter, isBefore, parse } from "date-fns";
 
 // A hardcoded user for demonstration purposes.
 // In a real app, this would come from an authentication session.
@@ -13,10 +13,7 @@ export async function GET() {
   try {
     const userTrips = await prisma.trip.findMany({
       where: {
-        OR: [
-          { ownerId: MOCK_USER_ID },
-          { collaborators: { some: { userId: MOCK_USER_ID } } },
-        ],
+        OR: [{ ownerId: MOCK_USER_ID }, { collaborators: { some: { userId: MOCK_USER_ID } } }],
       },
       include: {
         days: { include: { stops: true } },
@@ -60,10 +57,7 @@ export async function GET() {
     return NextResponse.json(tripsWithDetails);
   } catch (error) {
     console.error("Failed to retrieve trips:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve trips" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to retrieve trips" }, { status: 500 });
   }
 }
 
@@ -73,10 +67,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validation = createTripSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error.format() },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
     const { name, startDate, endDate, startStop } = validation.data;
     const dayCount = differenceInDays(endDate, startDate) + 1;
@@ -113,15 +104,9 @@ export async function POST(request: Request) {
       })),
     });
 
-    return NextResponse.json(
-      { success: true, tripId: newTrip.id },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, tripId: newTrip.id }, { status: 201 });
   } catch (error) {
     console.error("Failed to create trip:", error);
-    return NextResponse.json(
-      { error: "Failed to create trip" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create trip" }, { status: 500 });
   }
 }

@@ -6,7 +6,9 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "prettier": "prettier --check \"**/*.{js,ts,tsx}\"",
+    "prettier:write": "prettier --write \"**/*.{js,ts,tsx}\""
   },
   "dependencies": {
     "@dnd-kit/core": "latest",

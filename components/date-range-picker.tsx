@@ -1,17 +1,12 @@
-"use client"
+"use client";
 
-import type * as React from "react"
-import { format } from "date-fns"
-import type { DateRange } from "react-day-picker"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import type * as React from "react";
+import type { DateRange } from "react-day-picker";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface DateRangePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   date: DateRange | undefined;
@@ -27,8 +22,8 @@ export function DateRangePicker({
   disabled = false,
   disablePastDates = true,
 }: DateRangePickerProps) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // Reset time to start of day for accurate comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -40,7 +35,7 @@ export function DateRangePicker({
             disabled={disabled}
             className={cn(
               "w-full justify-start text-left font-normal h-auto p-0 text-sm text-muted-foreground",
-              !date && "text-muted-foreground",
+              !date && "text-muted-foreground"
             )}
           >
             {date?.from ? (
@@ -70,5 +65,5 @@ export function DateRangePicker({
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }

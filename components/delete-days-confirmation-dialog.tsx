@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   AlertDialog,
@@ -9,25 +9,25 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+} from "@/components/ui/alert-dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Stop = {
-  id: number
-  name: string
-}
+  id: number;
+  name: string;
+};
 
 type Day = {
-  id: number
-  date: string
-  stops: Stop[]
-}
+  id: number;
+  date: string;
+  stops: Stop[];
+};
 
 interface DeleteDaysConfirmationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-  daysToDelete: Day[]
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  daysToDelete: Day[];
 }
 
 export function DeleteDaysConfirmationDialog({
@@ -37,7 +37,7 @@ export function DeleteDaysConfirmationDialog({
   daysToDelete,
 }: DeleteDaysConfirmationDialogProps) {
   if (!daysToDelete || daysToDelete.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -46,8 +46,8 @@ export function DeleteDaysConfirmationDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            Reducing the date range will permanently delete the following days and all the stops within them. This
-            action cannot be undone.
+            Reducing the date range will permanently delete the following days and all the stops
+            within them. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="max-h-60 overflow-y-auto pr-2 -mr-2">
@@ -78,5 +78,5 @@ export function DeleteDaysConfirmationDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

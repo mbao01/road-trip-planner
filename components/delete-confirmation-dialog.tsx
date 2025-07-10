@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   AlertDialog,
@@ -9,23 +9,29 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 interface DeleteConfirmationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-  dayNumber: number
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  dayNumber: number;
 }
 
-export function DeleteConfirmationDialog({ open, onOpenChange, onConfirm, dayNumber }: DeleteConfirmationDialogProps) {
+export function DeleteConfirmationDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  dayNumber,
+}: DeleteConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure you want to delete Day {dayNumber}?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the day and all its stops from your trip.
+            This action cannot be undone. This will permanently delete the day and all its stops
+            from your trip.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -36,5 +42,5 @@ export function DeleteConfirmationDialog({ open, onOpenChange, onConfirm, dayNum
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

@@ -1,32 +1,37 @@
-"use client"
+"use client";
 
-import type { FC } from "react"
-import { useState } from "react"
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { TravelDetails } from "./travel-details";
-import {
-  ChevronDown,
-  GripVertical,
-  Trash2,
-  Moon,
-  TreePine,
-  CameraIcon,
-  Fuel,
-  Utensils,
-  Check,
-  ExternalLink,
-  ChevronUp,
-} from "lucide-react";
-import type { Day, Settings, Stop } from "@prisma/client";
-import { formatTravelDetails } from "@/helpers/formatTravelDetails";
 import type { StopWithTravel } from "@/types/trip";
+import type { Day, Settings, Stop } from "@prisma/client";
+import type { FC } from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { formatTravelDetails } from "@/helpers/formatTravelDetails";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  CameraIcon,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Fuel,
+  GripVertical,
+  Moon,
+  Trash2,
+  TreePine,
+  Utensils,
+} from "lucide-react";
+import { TravelDetails } from "./travel-details";
 
 interface StopCardProps {
   stop: StopWithTravel;
@@ -40,9 +45,7 @@ interface StopCardProps {
 const stopTypes = [
   {
     name: "Default",
-    icon: (
-      <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white" />
-    ),
+    icon: <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white" />,
   },
   { name: "Overnight", icon: <Moon className="w-4 h-4 text-blue-800" /> },
   {
@@ -60,10 +63,7 @@ const stopTypes = [
   },
 ];
 
-const StopTypeIcon: FC<{ name: string; className?: string }> = ({
-  name,
-  className,
-}) => {
+const StopTypeIcon: FC<{ name: string; className?: string }> = ({ name, className }) => {
   const type = stopTypes.find((t) => t.name === name);
   if (!type) return null;
   return <div className={className}>{type.icon}</div>;
@@ -80,14 +80,7 @@ export const StopCard: FC<StopCardProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedType, setSelectedType] = useState("Default");
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `stop-${stop.id}`,
     data: {
       type: "stop",
@@ -107,11 +100,7 @@ export const StopCard: FC<StopCardProps> = ({
   const travelDetails = formatTravelDetails(stop.travel, settings);
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={isDragging ? "opacity-50" : ""}
-    >
+    <div ref={setNodeRef} style={style} className={isDragging ? "opacity-50" : ""}>
       {showDrivingDetails && <TravelDetails details={travelDetails} />}
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="border rounded-lg bg-background">
@@ -131,11 +120,7 @@ export const StopCard: FC<StopCardProps> = ({
                   {stopNumber}
                 </div>
                 <span className="font-medium flex-1 truncate">{stop.name}</span>
-                {isOpen ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
+                {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
             </CollapsibleTrigger>
             <Button
@@ -177,26 +162,18 @@ export const StopCard: FC<StopCardProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
                   {stopTypes.map((type) => (
-                    <DropdownMenuItem
-                      key={type.name}
-                      onSelect={() => setSelectedType(type.name)}
-                    >
+                    <DropdownMenuItem key={type.name} onSelect={() => setSelectedType(type.name)}>
                       <div className="flex items-center gap-2">
                         <StopTypeIcon name={type.name} />
                         <span>{type.name}</span>
                       </div>
-                      {selectedType === type.name && (
-                        <Check className="w-4 h-4 ml-auto" />
-                      )}
+                      {selectedType === type.name && <Check className="w-4 h-4 ml-auto" />}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
               <div className="space-y-2">
-                <Label
-                  htmlFor={`custom-name-${stop.id}`}
-                  className="text-sm font-medium"
-                >
+                <Label htmlFor={`custom-name-${stop.id}`} className="text-sm font-medium">
                   Custom stop name
                 </Label>
                 <Input
@@ -206,10 +183,7 @@ export const StopCard: FC<StopCardProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <Label
-                  htmlFor={`notes-${stop.id}`}
-                  className="text-sm font-medium"
-                >
+                <Label htmlFor={`notes-${stop.id}`} className="text-sm font-medium">
                   Notes
                 </Label>
                 <Textarea
@@ -219,17 +193,11 @@ export const StopCard: FC<StopCardProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-transparent"
-                >
+                <Button variant="outline" className="w-full justify-start bg-transparent">
                   <CameraIcon className="w-4 h-4 mr-2" />
                   Upload photo
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-transparent"
-                >
+                <Button variant="outline" className="w-full justify-start bg-transparent">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open in Google Maps
                 </Button>

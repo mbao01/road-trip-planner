@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client"
-import fs from "fs/promises"
-import path from "path"
+import fs from "fs/promises";
+import path from "path";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // Hardcoded paths to mock data
-const usersFilePath = path.join(process.cwd(), "data/users.json")
+const usersFilePath = path.join(process.cwd(), "data/users.json");
 const providersFilePath = path.join(process.cwd(), "data/providers.json");
 const tripsFilePath = path.join(process.cwd(), "data/trips.json");
 const daysFilePath = path.join(process.cwd(), "data/days.json");
@@ -27,9 +27,7 @@ async function main() {
 
   // Seed Users
   const usersData = JSON.parse(await fs.readFile(usersFilePath, "utf-8"));
-  const providersData = JSON.parse(
-    await fs.readFile(providersFilePath, "utf-8")
-  );
+  const providersData = JSON.parse(await fs.readFile(providersFilePath, "utf-8"));
   await prisma.user.createMany({
     data: usersData,
   });
@@ -48,14 +46,11 @@ async function main() {
     where: { email: "owner@example.com" },
   });
   if (!owner) {
-    throw new Error(
-      "Owner user not found. Make sure users.json is seeded correctly."
-    );
+    throw new Error("Owner user not found. Make sure users.json is seeded correctly.");
   }
 
   for (const trip of tripsData) {
-    const { tripId, ...settings } =
-      settingsData.find((s: any) => s.tripId === trip.id) || {};
+    const { tripId, ...settings } = settingsData.find((s: any) => s.tripId === trip.id) || {};
     const createdTrip = await prisma.trip.create({
       data: {
         id: String(trip.id),
@@ -136,9 +131,9 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/trips/[tripId]/days - Assembles and returns all days in the trip
-export async function GET(
-  request: Request,
-  { params }: { params: { tripId: string } }
-) {
+export async function GET(request: Request, { params }: { params: { tripId: string } }) {
   const { tripId } = params;
   try {
     const days = await prisma.day.findMany({
@@ -27,9 +24,6 @@ export async function GET(
     return NextResponse.json({ days });
   } catch (error) {
     console.error(`Failed to retrieve days for trip ${tripId}:`, error);
-    return NextResponse.json(
-      { error: "Failed to retrieve days" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to retrieve days" }, { status: 500 });
   }
 }

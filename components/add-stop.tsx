@@ -1,13 +1,14 @@
-"use client"
+"use client";
 
-import type { FC } from "react"
-import { useState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { useDebounce } from "@/hooks/use-debounce"
-import { searchPlaces, getPlaceDetails, type PlaceSearchResult, type PlaceDetails } from "@/lib/google-maps-api"
-import { Loader2, Search, X } from "lucide-react"
+import type { PlaceDetails, PlaceSearchResult } from "@/lib/google-maps-api";
 import type { Day } from "@prisma/client";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { getPlaceDetails, searchPlaces } from "@/lib/google-maps-api";
+import { Loader2, Search, X } from "lucide-react";
 
 interface AddStopProps {
   dayId: Day["id"];
@@ -15,50 +16,50 @@ interface AddStopProps {
 }
 
 export const AddStop: FC<AddStopProps> = ({ dayId, onAddStop }) => {
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<PlaceSearchResult[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFetchingDetails, setIsFetchingDetails] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<PlaceSearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
-  const debouncedQuery = useDebounce(query, 300)
+  const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
     if (debouncedQuery) {
-      setIsLoading(true)
+      setIsLoading(true);
       searchPlaces(debouncedQuery)
         .then((res) => {
-          setResults(res)
+          setResults(res);
         })
         .catch((err) => {
-          console.error("Failed to search places:", err)
-          setResults([])
+          console.error("Failed to search places:", err);
+          setResults([]);
         })
         .finally(() => {
-          setIsLoading(false)
-        })
+          setIsLoading(false);
+        });
     } else {
-      setResults([])
+      setResults([]);
     }
-  }, [debouncedQuery])
+  }, [debouncedQuery]);
 
   const handleSelect = async (location: PlaceSearchResult) => {
-    setIsFetchingDetails(true)
-    setQuery(location.name) // Show full name in input
-    setResults([]) // Hide results list
+    setIsFetchingDetails(true);
+    setQuery(location.name); // Show full name in input
+    setResults([]); // Hide results list
     try {
-      const details = await getPlaceDetails(location.id)
-      onAddStop(dayId, details)
-      setQuery("") // Clear input after adding
+      const details = await getPlaceDetails(location.id);
+      onAddStop(dayId, details);
+      setQuery(""); // Clear input after adding
     } catch (err) {
-      console.error("Failed to get place details:", err)
+      console.error("Failed to get place details:", err);
       // Optionally show a toast error to the user
     } finally {
-      setIsFetchingDetails(false)
+      setIsFetchingDetails(false);
     }
-  }
+  };
 
-  const showResults = isFocused && (results.length > 0 || isLoading)
+  const showResults = isFocused && (results.length > 0 || isLoading);
 
   return (
     <div className="relative">
@@ -109,5 +110,5 @@ export const AddStop: FC<AddStopProps> = ({ dayId, onAddStop }) => {
         </Card>
       )}
     </div>
-  )
-}
+  );
+};

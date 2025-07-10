@@ -1,30 +1,52 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Facebook, MessageCircle, Mail, MessageSquare, Twitter, Code, Copy, LinkIcon, Trash2 } from "lucide-react"
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import {
+  Code,
+  Copy,
+  Facebook,
+  LinkIcon,
+  Mail,
+  MessageCircle,
+  MessageSquare,
+  Trash2,
+  Twitter,
+} from "lucide-react";
 
 interface ShareModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  tripName: string
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tripName: string;
 }
 
-type CollaboratorRole = "Editor" | "Viewer"
+type CollaboratorRole = "Editor" | "Viewer";
 
 interface Collaborator {
-  id: string
-  name: string
-  email: string
-  avatarUrl: string
-  role: CollaboratorRole
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  role: CollaboratorRole;
 }
 
 const initialCollaborators: Collaborator[] = [
@@ -49,20 +71,20 @@ const initialCollaborators: Collaborator[] = [
     avatarUrl: "/placeholder.svg?height=32&width=32",
     role: "Editor",
   },
-]
+];
 
 export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
-  const [shareEnabled, setShareEnabled] = useState(true)
-  const [inviteEmail, setInviteEmail] = useState("")
-  const [inviteRole, setInviteRole] = useState<CollaboratorRole>("Viewer")
-  const [collaborators, setCollaborators] = useState<Collaborator[]>(initialCollaborators)
+  const [shareEnabled, setShareEnabled] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<CollaboratorRole>("Viewer");
+  const [collaborators, setCollaborators] = useState<Collaborator[]>(initialCollaborators);
 
-  const shareUrl = `https://www.wildertrips.com/share/${tripName.toLowerCase().replace(/\s/g, "-")}`
+  const shareUrl = `https://www.wildertrips.com/share/${tripName.toLowerCase().replace(/\s/g, "-")}`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl)
+    navigator.clipboard.writeText(shareUrl);
     // Maybe add a toast notification here
-  }
+  };
 
   const handleInvite = () => {
     if (inviteEmail && !collaborators.some((c) => c.email === inviteEmail)) {
@@ -72,19 +94,19 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
         email: inviteEmail,
         avatarUrl: `/placeholder.svg?height=32&width=32&query=avatar`,
         role: inviteRole,
-      }
-      setCollaborators([...collaborators, newCollaborator])
-      setInviteEmail("")
+      };
+      setCollaborators([...collaborators, newCollaborator]);
+      setInviteEmail("");
     }
-  }
+  };
 
   const handleRoleChange = (id: string, newRole: CollaboratorRole) => {
-    setCollaborators(collaborators.map((c) => (c.id === id ? { ...c, role: newRole } : c)))
-  }
+    setCollaborators(collaborators.map((c) => (c.id === id ? { ...c, role: newRole } : c)));
+  };
 
   const handleRemoveCollaborator = (id: string) => {
-    setCollaborators(collaborators.filter((c) => c.id !== id))
-  }
+    setCollaborators(collaborators.filter((c) => c.id !== id));
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -109,7 +131,10 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
                 onChange={(e) => setInviteEmail(e.target.value)}
                 className="flex-1"
               />
-              <Select value={inviteRole} onValueChange={(value) => setInviteRole(value as CollaboratorRole)}>
+              <Select
+                value={inviteRole}
+                onValueChange={(value) => setInviteRole(value as CollaboratorRole)}
+              >
                 <SelectTrigger className="w-[100px]">
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
@@ -118,7 +143,11 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
                   <SelectItem value="Viewer">Viewer</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={handleInvite} disabled={!inviteEmail} className="bg-orange-500 hover:bg-orange-600">
+              <Button
+                onClick={handleInvite}
+                disabled={!inviteEmail}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
                 Invite
               </Button>
             </div>
@@ -132,7 +161,10 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
                 <div key={collaborator.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={collaborator.avatarUrl || "/placeholder.svg"} alt={collaborator.name} />
+                      <AvatarImage
+                        src={collaborator.avatarUrl || "/placeholder.svg"}
+                        alt={collaborator.name}
+                      />
                       <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -144,7 +176,9 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
                     <div className="flex items-center gap-2">
                       <Select
                         value={collaborator.role}
-                        onValueChange={(value) => handleRoleChange(collaborator.id, value as CollaboratorRole)}
+                        onValueChange={(value) =>
+                          handleRoleChange(collaborator.id, value as CollaboratorRole)
+                        }
                       >
                         <SelectTrigger className="w-[100px] text-xs h-8">
                           <SelectValue />
@@ -191,7 +225,11 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
                     className="flex-1 text-sm border-none focus-visible:ring-0 shadow-none h-auto p-2"
                   />
                 </div>
-                <Button size="sm" onClick={handleCopy} className="bg-gray-100 text-gray-800 hover:bg-gray-200">
+                <Button
+                  size="sm"
+                  onClick={handleCopy}
+                  className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+                >
                   <Copy className="w-4 h-4 mr-2" />
                   Copy link
                 </Button>
@@ -226,5 +264,5 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

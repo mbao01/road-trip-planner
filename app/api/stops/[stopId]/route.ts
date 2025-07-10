@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 // DELETE /api/stops/[stopId] - Deletes a single stop
 export async function DELETE(request: Request, { params }: { params: { stopId: string } }) {
@@ -10,9 +10,6 @@ export async function DELETE(request: Request, { params }: { params: { stopId: s
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete stop ${stopId}:`, error);
-    return NextResponse.json(
-      { error: "Failed to delete stop" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete stop" }, { status: 500 });
   }
 }

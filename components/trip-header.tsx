@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
-import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import type React from "react";
+import type { DateRange } from "react-day-picker";
+import { useState } from "react";
+import Link from "next/link";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-} from "@/components/ui/dropdown-menu"
-import { Download, Settings, Sun, Moon, Laptop, Home, User, Palette, LogOut } from "lucide-react"
-import { DateRangePicker } from "./date-range-picker"
-import { parse } from "date-fns"
-import type { DateRange } from "react-day-picker"
-import { cn } from "@/lib/utils"
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Role, Trip } from "@prisma/client";
+import { parse } from "date-fns";
+import { Download, Home, Laptop, LogOut, Moon, Palette, Settings, Sun, User } from "lucide-react";
+import { useTheme } from "next-themes";
+import { DateRangePicker } from "./date-range-picker";
 
 interface TripHeaderProps {
   trip: Trip;
@@ -37,11 +37,9 @@ interface TripHeaderProps {
 
 const accessBadgeColors: Record<TripHeaderProps["access"], string> = {
   [Role.OWNER]: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100",
-  [Role.EDITOR]:
-    "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
+  [Role.EDITOR]: "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
   [Role.VIEWER]: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100",
-  [Role.PUBLIC]:
-    "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100",
+  [Role.PUBLIC]: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100",
 };
 
 export function TripHeader({
@@ -84,19 +82,13 @@ export function TripHeader({
             <Settings className="w-4 h-4" />
             Settings
           </Button>
-          <Button
-            size="sm"
-            onClick={onShare}
-            className="bg-orange-500 hover:bg-orange-600"
-          >
+          <Button size="sm" onClick={onShare} className="bg-orange-500 hover:bg-orange-600">
             Share
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="w-8 h-8 cursor-pointer">
-                <AvatarFallback className="bg-orange-100 text-orange-600">
-                  A
-                </AvatarFallback>
+                <AvatarFallback className="bg-orange-100 text-orange-600">A</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -151,14 +143,8 @@ export function TripHeader({
           className="text-2xl font-bold mb-1 h-auto border-none focus-visible:ring-0 shadow-none p-0"
         />
         <div className="flex items-center gap-2">
-          <DateRangePicker
-            date={currentDateRange}
-            onDateChange={onDateRangeChange}
-          />
-          <Badge
-            variant="outline"
-            className={cn("font-medium", accessBadgeColors[access])}
-          >
+          <DateRangePicker date={currentDateRange} onDateChange={onDateRangeChange} />
+          <Badge variant="outline" className={cn("font-medium", accessBadgeColors[access])}>
             {access}
           </Badge>
         </div>
