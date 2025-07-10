@@ -2,17 +2,22 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/trips/[tripId]/stops - Assembles and returns all stops in the trip
-export async function GET(request: Request, { params }: { params: { tripId: string } }) {
-  const { tripId } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
   try {
-    const stops = await prisma.stop.findMany({
+    const days = await prisma.day.findMany({
       where: {
         tripId: tripId,
       },
+      orderBy: { date: "asc" },
       include: {
-        travel: true,
+        stops: {
+          orderBy: { order: "asc" },
+        },
       },
     });
+
+    const stops = days?.flatMap((day) => day.stops);
 
     if (!stops) {
       return NextResponse.json({ error: "Stops not found" }, { status: 404 });

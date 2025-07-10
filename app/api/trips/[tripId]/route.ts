@@ -1,12 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateTripSchema } from "@/lib/schemas";
 
 const MOCK_USER_ID = "1"; // Hardcoded user
 
 // GET /api/trips/[tripId] - Assembles and returns the full trip object
-export async function GET(request: Request, { params }: { params: { tripId: string } }) {
-  const { tripId } = params;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ tripId: string }> }
+) {
+  const { tripId } = await params;
   try {
     const trip = await prisma.trip.findFirst({
       where: {
@@ -15,11 +18,17 @@ export async function GET(request: Request, { params }: { params: { tripId: stri
       },
       include: {
         days: {
-          orderBy: { order: "asc" },
-          include: { stops: { orderBy: { order: "asc" } } },
+          orderBy: { date: "asc" },
+          include: {
+            stops: {
+              orderBy: { order: "asc" },
+            },
+          },
         },
+        travel: true,
         settings: true,
         collaborators: { where: { userId: MOCK_USER_ID } },
+        _count: { select: { stops: true } },
       },
     });
 
@@ -28,6 +37,20 @@ export async function GET(request: Request, { params }: { params: { tripId: stri
         { error: "Trip not found or you don't have access" },
         { status: 404 }
       );
+    }
+
+    if (!trip.travel && trip._count.stops > 1) {
+      try {
+        const url = new URL(`/api/trips/${tripId}/travel`, request.nextUrl.origin);
+        const res = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+        });
+        const { data: travel } = await res.json();
+        trip.travel = travel;
+      } catch (error) {
+        console.error(`Failed to retrieve travel for trip ${tripId}:`, error);
+      }
     }
 
     let access: "Owner" | "Editor" | "Viewer" = "Owner";
@@ -46,8 +69,8 @@ export async function GET(request: Request, { params }: { params: { tripId: stri
 }
 
 // PUT /api/trips/[tripId] - Updates only the top-level trip properties (name, dates)
-export async function PUT(request: Request, { params }: { params: { tripId: string } }) {
-  const { tripId } = params;
+export async function PUT(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
   try {
     const body = await request.json();
     const validation = updateTripSchema.safeParse(body);

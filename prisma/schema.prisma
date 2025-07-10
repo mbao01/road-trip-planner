@@ -50,6 +50,7 @@ model Trip {
   ownerId       String
   days          Day[]
   stops         Stop[]
+  travel        Travel?
   settings      Settings?
   collaborators Collaborator[]
 }
@@ -60,8 +61,8 @@ model Stop {
   customName  String?
   latitude    Float
   longitude   Float
+  placeId     String
   order       Int
-  travel      Travel?
   day         Day         @relation(fields: [dayId], references: [id], onDelete: Cascade)
   dayId       String
   trip        Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -75,17 +76,12 @@ model Stop {
 
 model Travel {
   id        String    @id @default(cuid(2))
-  distance  Float
-  duration  Float
-  cost      Float
-  mode      TravelMode
-  startId   String?
-  stop      Stop      @relation(fields: [stopId], references: [id], onDelete: Cascade)
-  stopId    String
+  travels   Json      // { stopId: { originId, duration, distance, cost, mode } }
+  originId  String?
+  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId    String    @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
-  @@unique([stopId])
 }
 
 model Day {
@@ -188,13 +184,6 @@ enum ItineraryAssetType {
 enum ProviderType {
   CREDENTIAL
   GOOGLE
-}
-
-enum TravelMode {
-  DRIVING
-  WALKING
-  BICYCLING
-  TRANSIT
 }
 
 enum MapStyle {

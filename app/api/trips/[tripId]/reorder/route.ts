@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { reorderSchema } from "@/lib/schemas";
 
 // PUT /api/trips/[tripId]/reorder - Handles reordering of days and stops
-export async function PUT(request: Request, { params }: { params: { tripId: string } }) {
-  const { tripId } = params;
+export async function PUT(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
   try {
     const body = await request.json();
     const validation = reorderSchema.safeParse(body);

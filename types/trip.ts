@@ -1,4 +1,5 @@
-import { Currency, Day, DistanceUnit, Role, Stop, Travel, TripStatus } from "@prisma/client";
+import { TravelMode } from "@/helpers/constants/travelMode";
+import { Day, Role, Stop, Travel, TripStatus } from "@prisma/client";
 
 // Type for the data displayed in the trips table
 export type TripTableRow = {
@@ -12,10 +13,37 @@ export type TripTableRow = {
   access: Role;
 };
 
-export type StopWithTravel = Stop & {
-  travel?: Travel;
+export type DayWithStops = Day & {
+  stops: Stop[];
 };
 
-export type DayWithStopsWithTravel = Day & {
-  stops: StopWithTravel[];
+type StopId = string;
+
+export type TravelDetails = Record<
+  StopId,
+  {
+    dayId?: string;
+    originId?: string;
+    duration: number;
+    distance: number;
+    cost: number;
+    mode: TravelMode;
+  }
+>;
+
+export type TravelWithDetails = Omit<Travel, "travels"> & {
+  travels: Record<
+    StopId,
+    {
+      details: {
+        dayId?: string;
+        originId?: string;
+        duration: number;
+        distance: number;
+        cost: number;
+        mode: TravelMode;
+      };
+      relationships: TravelDetails;
+    }
+  >;
 };

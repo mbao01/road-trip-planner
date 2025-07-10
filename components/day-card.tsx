@@ -1,7 +1,6 @@
 "use client";
 
 import type { PlaceDetails } from "@/lib/google-maps-api";
-import type { StopWithTravel } from "@/types/trip";
 import type { FC } from "react";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -12,11 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { CURRENCY_SYMBOLS } from "@/helpers/constants/currency";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Currency, Day, DistanceUnit, Settings, Stop } from "@prisma/client";
+import { Currency, Day, DistanceUnit, Settings, Stop, Travel } from "@prisma/client";
 import { format } from "date-fns";
 import { ArrowDown, ArrowUp, MoreVertical, Trash2 } from "lucide-react";
 import { AddStop } from "./add-stop";
@@ -24,7 +24,8 @@ import { StopCard } from "./stop-card";
 
 interface DayCardProps {
   day: Day;
-  stops: StopWithTravel[];
+  travel: Travel;
+  stops: Stop[];
   dayIndex: number;
   totalDays: number;
   stopNumberOffset: number;
@@ -37,6 +38,7 @@ interface DayCardProps {
 
 export const DayCard: FC<DayCardProps> = ({
   day,
+  travel,
   stops,
   dayIndex,
   totalDays,
@@ -52,48 +54,7 @@ export const DayCard: FC<DayCardProps> = ({
     data: { type: "day", day: day },
   });
 
-  const daySummary = React.useMemo(() => {
-    let totalDistance = 0;
-    let totalCost = 0;
-    let totalDurationMinutes = 0;
-
-    stops.forEach((stop) => {
-      if (stop.travel) {
-        // TODO: Parse driving details by getting live data from Google Maps API
-        totalDistance += stop.travel.distance;
-        totalCost += stop.travel.cost;
-        totalDurationMinutes += stop.travel.duration;
-      }
-    });
-
-    const currencySymbol = settings.currency ? CURRENCY_SYMBOLS[settings.currency] : Currency.GBP;
-
-    if (totalDistance === 0 && totalCost === 0 && totalDurationMinutes === 0) {
-      return `0 ${DISTANCE_UNITS[settings.distanceUnit ?? DistanceUnit.MI]}, (${currencySymbol}0.00), 0 hr`;
-    }
-
-    const hours = Math.floor(totalDurationMinutes / 60);
-    const minutes = totalDurationMinutes % 60;
-
-    const parts = [];
-    parts.push(
-      `${totalDistance.toFixed(1)} ${DISTANCE_UNITS[settings.distanceUnit ?? DistanceUnit.MI]}`
-    );
-    if (settings.calculateCosts) {
-      parts.push(`(${currencySymbol}${totalCost.toFixed(2)})`);
-    }
-
-    const timeParts = [];
-    if (hours > 0) timeParts.push(`${hours} hr`);
-    if (minutes > 0) timeParts.push(`${minutes} min`);
-    if (timeParts.length > 0) {
-      parts.push(timeParts.join(" "));
-    } else {
-      parts.push("0 min");
-    }
-
-    return parts.join(", ");
-  }, [stops, settings]);
+  const { display } = calculateTravelDetails("day", travel, settings, day.id);
 
   return (
     <Card ref={setNodeRef} className="p-4">
@@ -137,7 +98,7 @@ export const DayCard: FC<DayCardProps> = ({
 
       <div className="mb-4">
         <div className="inline-block max-w-full px-3 py-1 bg-gray-100 rounded-full text-xs text-muted-foreground truncate">
-          {daySummary}
+          {display}
         </div>
       </div>
 
@@ -151,6 +112,7 @@ export const DayCard: FC<DayCardProps> = ({
               key={stop.id}
               stop={stop}
               dayId={day.id}
+              travel={travel}
               settings={settings}
               stopNumber={stopNumberOffset + index + 1}
               onDeleteStop={onDeleteStop}

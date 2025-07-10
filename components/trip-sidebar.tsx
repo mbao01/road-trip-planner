@@ -10,8 +10,6 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { CURRENCY_SYMBOLS } from "@/helpers/constants/currency";
 import * as api from "@/lib/api";
-import { getDistanceMatrix } from "@/lib/google-maps-api";
-import { StopWithTravel } from "@/types/trip";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { Currency, DistanceUnit, Travel } from "@prisma/client";
 import { addDays, format, parse } from "date-fns";
@@ -54,28 +52,6 @@ function getMockDrivingDetails(
   return `Drive ${distance.toFixed(1)} ${settings.distanceUnit}${costString}, ${timeString.trim()}`;
 }
 
-function recalculateTravelDetails(trip: TripWithSettings): TripWithSettings {
-  const newTrip = structuredClone(trip);
-  let previousStop: Stop | null = null;
-  for (const day of newTrip.days) {
-    for (const stop of day.stops) {
-      if (previousStop === null) {
-        stop.travel = undefined;
-      } else {
-        getDistanceMatrix(stop, previousStop);
-        // TODO: Calculate travel details
-        // stop.travel = getMockDrivingDetails(
-        //   previousStop.name,
-        //   stop.name,
-        //   trip.settings
-        // );
-      }
-      previousStop = stop;
-    }
-  }
-  return newTrip;
-}
-
 // --------------- Component ---------------
 interface TripSidebarProps {
   trip: TripWithSettings;
@@ -83,7 +59,7 @@ interface TripSidebarProps {
 }
 
 export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
-  const [activeStop, setActiveStop] = useState<StopWithTravel | null>(null);
+  const [activeStop, setActiveStop] = useState<Stop | null>(null);
   const [dayToDelete, setDayToDelete] = useState<Day | null>(null);
   const { toast } = useToast();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
@@ -98,6 +74,8 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
     setTrip(optimisticState);
     try {
       await action();
+      const travel = await api.updateTripTravel(trip.id);
+      setTrip({ ...optimisticState, travel });
       toast({ title: successMessage });
     } catch (error) {
       setTrip(originalState);
@@ -135,10 +113,10 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
         dstDay.stops.push(moved);
       }
     }
-    const recalculatedTrip = recalculateTravelDetails(clone);
+
     handleAction(
-      () => api.reorderTrip(trip.id, recalculatedTrip),
-      recalculatedTrip,
+      () => api.reorderTrip(trip.id, clone),
+      clone,
       "Trip reordered",
       "Failed to reorder"
     );
@@ -149,6 +127,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
     const day = clone.days.find((d) => d.id === dayId)!;
     const newStopData = {
       name: loc.name,
+      placeId: loc.id,
       latitude: loc.latitude,
       longitude: loc.longitude,
       customName: null,
@@ -157,50 +136,33 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
       tripId: trip.id,
     };
     const tempId = Date.now().toString();
-    day.stops.push({ ...newStopData, id: tempId } as StopWithTravel);
-    const recalculatedTrip = recalculateTravelDetails(clone);
-    setTrip(recalculatedTrip); // Optimistic update with temp ID
+    day.stops.push({ ...newStopData, id: tempId } as Stop);
 
-    try {
-      const savedStop = await api.addStop(dayId, newStopData as Omit<Stop, "id">);
-      // Replace temp stop with real one from server
-      const finalTrip = structuredClone(recalculatedTrip);
-      const finalDay = finalTrip.days.find((d) => d.id === dayId)!;
-      const stopIndex = finalDay.stops.findIndex((s) => s.id === tempId);
-      if (stopIndex !== -1) finalDay.stops[stopIndex] = savedStop;
-      setTrip(recalculateTravelDetails(finalTrip));
-      toast({ title: "Stop added" });
-    } catch (error) {
-      setTrip(trip); // Revert
-      console.error(error);
-      toast({ variant: "destructive", title: "Failed to add stop" });
-    }
+    handleAction(
+      async () => {
+        const savedStop = await api.addStop(dayId, newStopData as Omit<Stop, "id">);
+        const finalDay = clone.days.find((d) => d.id === dayId)!;
+        const stopIndex = finalDay.stops.findIndex((s) => s.id === tempId);
+        if (stopIndex !== -1) finalDay.stops[stopIndex] = savedStop;
+      },
+      clone,
+      "Stop added",
+      "Failed to add stop"
+    );
   };
 
   const deleteStop = (dayId: Day["id"], stopId: Stop["id"]) => {
     const clone = structuredClone(trip);
     const day = clone.days.find((d) => d.id === dayId)!;
     day.stops = day.stops.filter((s) => s.id !== stopId);
-    const recalculatedTrip = recalculateTravelDetails(clone);
-    handleAction(
-      () => api.deleteStop(stopId),
-      recalculatedTrip,
-      "Stop deleted",
-      "Failed to delete stop"
-    );
+    handleAction(() => api.deleteStop(stopId), clone, "Stop deleted", "Failed to delete stop");
   };
 
   const confirmDeleteDay = () => {
     if (!dayToDelete) return;
     const clone = structuredClone(trip);
     clone.days = clone.days.filter((d) => d.id !== dayToDelete.id);
-    const recalculatedTrip = recalculateTravelDetails(clone);
-    handleAction(
-      () => api.deleteDay(dayToDelete.id),
-      recalculatedTrip,
-      "Day deleted",
-      "Failed to delete day"
-    );
+    handleAction(() => api.deleteDay(dayToDelete.id), clone, "Day deleted", "Failed to delete day");
     setDayToDelete(null);
   };
 
@@ -219,13 +181,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
       day.date = addDays(startDate, i);
     });
 
-    const recalculatedDays = recalculateTravelDetails(clone);
-    handleAction(
-      () => api.reorderTrip(trip.id, recalculatedDays),
-      recalculatedDays,
-      "Day moved",
-      "Failed to move day"
-    );
+    handleAction(() => api.reorderTrip(trip.id, clone), clone, "Day moved", "Failed to move day");
   };
 
   let stopCounter = 0;
@@ -248,6 +204,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
                 day={day}
                 stops={day.stops}
                 dayIndex={i}
+                travel={trip.travel}
                 totalDays={trip.days.length}
                 stopNumberOffset={offset}
                 onMoveDay={moveDay}
@@ -262,6 +219,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
         <DragOverlay>
           {activeStop && (
             <StopCard
+              travel={trip.travel}
               stop={activeStop}
               dayId="0"
               stopNumber={0}

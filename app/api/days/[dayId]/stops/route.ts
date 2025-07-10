@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { addStopSchema } from "@/lib/schemas";
 
 // POST /api/days/[dayId]/stops - Adds a new stop to a specific day
-export async function POST(request: Request, { params }: { params: { dayId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ dayId: string }> }) {
+  const { dayId } = await params;
   try {
-    const { dayId } = params;
     const body = await request.json();
     const validation = addStopSchema.safeParse(body);
     console.log("Validation: ", validation);

@@ -90,6 +90,7 @@ async function main() {
                 tripId: createdTrip.id,
                 latitude: stop.latitude,
                 longitude: stop.longitude,
+                placeId: stop.placeId,
                 order: stop.order,
               })),
           })

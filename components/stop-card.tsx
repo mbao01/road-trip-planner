@@ -1,7 +1,6 @@
 "use client";
 
-import type { StopWithTravel } from "@/types/trip";
-import type { Day, Settings, Stop } from "@prisma/client";
+import type { Day, Settings, Stop, Travel } from "@prisma/client";
 import type { FC } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { formatTravelDetails } from "@/helpers/formatTravelDetails";
+import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -34,7 +33,8 @@ import {
 import { TravelDetails } from "./travel-details";
 
 interface StopCardProps {
-  stop: StopWithTravel;
+  stop: Stop;
+  travel: Travel;
   dayId: Day["id"];
   settings: Settings;
   stopNumber: number;
@@ -71,6 +71,7 @@ const StopTypeIcon: FC<{ name: string; className?: string }> = ({ name, classNam
 
 export const StopCard: FC<StopCardProps> = ({
   stop,
+  travel,
   dayId,
   settings,
   stopNumber,
@@ -97,11 +98,11 @@ export const StopCard: FC<StopCardProps> = ({
 
   // The first stop of the entire trip has no driving details before it.
   const showDrivingDetails = !isFirstStopOfTrip;
-  const travelDetails = formatTravelDetails(stop.travel, settings);
+  const { display } = calculateTravelDetails("stop", travel, settings, stop.id);
 
   return (
     <div ref={setNodeRef} style={style} className={isDragging ? "opacity-50" : ""}>
-      {showDrivingDetails && <TravelDetails details={travelDetails} />}
+      {showDrivingDetails && <TravelDetails details={display} />}
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="border rounded-lg bg-background">
           <div className="flex items-center gap-1 p-2">

@@ -1,4 +1,9 @@
-import { TravelMode } from "@prisma/client";
+export enum TravelMode {
+  DRIVING = "DRIVING",
+  WALKING = "WALKING",
+  BICYCLING = "BICYCLING",
+  TRANSIT = "TRANSIT",
+}
 
 export const TRAVEL_MODE = {
   [TravelMode.DRIVING]: "Drive",

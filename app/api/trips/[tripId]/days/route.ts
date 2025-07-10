@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/trips/[tripId]/days - Assembles and returns all days in the trip
-export async function GET(request: Request, { params }: { params: { tripId: string } }) {
-  const { tripId } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
   try {
     const days = await prisma.day.findMany({
       where: {
         tripId: tripId,
       },
+      orderBy: { date: "asc" },
       include: {
         stops: {
           orderBy: { order: "asc" },
-          include: { travel: true },
         },
       },
     });

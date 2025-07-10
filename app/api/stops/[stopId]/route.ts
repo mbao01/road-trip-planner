@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // DELETE /api/stops/[stopId] - Deletes a single stop
-export async function DELETE(request: Request, { params }: { params: { stopId: string } }) {
-  const { stopId } = params;
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ stopId: string }> }
+) {
+  const { stopId } = await params;
 
   try {
     await prisma.stop.delete({ where: { id: stopId } }); // Add access control

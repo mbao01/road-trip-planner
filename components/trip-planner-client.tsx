@@ -1,26 +1,17 @@
 "use client";
 
 import type { TripWithSettings } from "@/lib/api";
-import type { Day, Settings, Stop, Travel } from "@prisma/client";
+import type { Settings } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
+import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
 import * as api from "@/lib/api";
 import { formatCurrency } from "@/utilities/numbers";
 import { Currency, DistanceUnit } from "@prisma/client";
-import { format } from "date-fns";
-import {
-  BanknoteIcon,
-  Calendar,
-  Clock,
-  DollarSign,
-  Globe,
-  Loader2,
-  MapPin,
-  Route,
-} from "lucide-react";
+import { BanknoteIcon, Calendar, Clock, Globe, Loader2, MapPin, Route } from "lucide-react";
 import { SettingsModal } from "./settings-modal";
 import { ShareModal } from "./share-modal";
 import { TripHeader } from "./trip-header";
@@ -106,7 +97,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
   };
 
   const stats = useMemo(() => {
-    if (!trip)
+    if (!trip) {
       return {
         days: 0,
         stops: 0,
@@ -115,40 +106,19 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
         countries: 1,
         cost: 0,
       };
-    let totalStops = 0,
-      totalDistance = 0,
-      totalHours = 0,
-      totalCost = 0;
-    console.log("trip", trip);
-    trip?.days?.forEach((day) => {
-      totalStops += day.stops.length;
-
-      day.stops.forEach((stop) => {
-        if (stop.travel) {
-          totalDistance += stop.travel.distance;
-          totalCost += stop.travel.cost;
-          totalHours += stop.travel.duration;
-          // const distanceMatch = stop.driving.match(/(\d+\.?\d*)\s*(mi|km)/);
-          // if (distanceMatch)
-          //   totalDistance += Number.parseFloat(distanceMatch[1]);
-          // const costMatch = stop.driving.match(/[£€$](\d+\.?\d*)/);
-          // if (costMatch) totalCost += Number.parseFloat(costMatch[1]);
-          // const hoursMatch = stop.driving.match(/(\d+)\s*hr/);
-          // if (hoursMatch) totalHours += Number.parseInt(hoursMatch[1], 10);
-          // const minutesMatch = stop.driving.match(/(\d+)\s*min/);
-          // if (minutesMatch)
-          //   totalHours += Number.parseInt(minutesMatch[1], 10) / 60;
-        }
-      });
-    });
+    }
+    const { computed } = calculateTravelDetails("trip", trip.travel, trip.settings);
+    const totalStops = trip?.days?.reduce((acc, day) => acc + day.stops.length, 0);
 
     return {
       days: trip.days.length,
       stops: totalStops,
-      distance: Number.parseFloat(totalDistance.toFixed(1)),
-      hours: Number.parseFloat(totalHours.toFixed(2)),
+      distance: Number.parseFloat(computed.distance.value.toFixed(1)),
+      hours: Number.parseFloat(
+        (computed.duration.hours + computed.duration.minutes / 60).toFixed(1)
+      ),
       countries: 1,
-      cost: Number.parseFloat(totalCost.toFixed(2)),
+      cost: Number.parseFloat(computed.cost.value.toFixed(2)),
     };
   }, [trip]);
 

@@ -32,6 +32,7 @@ export const updateSettingsSchema = z.object({
 
 export const addStopSchema = z.object({
   name: z.string(),
+  placeId: z.string(),
   latitude: z.number(),
   longitude: z.number(),
 });

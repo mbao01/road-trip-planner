@@ -4,8 +4,9 @@
     "name": "London",
     "dayId": "1",
     "order": 0,
-    "latitude": 51.5072,
-    "longitude": -0.1276
+    "latitude": 51.5072178,
+    "longitude": -0.1275862,
+    "placeId": "ChIJdd4hrwug2EcRmSrV3Vo6llI"
   },
   {
     "id": "2",
@@ -13,31 +14,35 @@
     "customName": "My Milton Keynes",
     "dayId": "1",
     "order": 1,
-    "latitude": 52.0406,
-    "longitude": -0.7594
+    "latitude": 52.0406224,
+    "longitude": -0.7594171,
+    "placeId": "ChIJhYYjgvhMdkgRFH65TPedGhY"
   },
   {
     "id": "3",
     "name": "Leicester",
     "dayId": "2",
     "order": 0,
-    "latitude": 52.6369,
-    "longitude": -1.1398
+    "latitude": 52.6368778,
+    "longitude": -1.1397592,
+    "placeId": "ChIJc2y3SatCd0gRuJy0byodFZo"
   },
   {
     "id": "4",
     "name": "Chesterfield",
     "dayId": "3",
     "order": 0,
-    "latitude": 53.2353,
-    "longitude": -1.4286
+    "latitude": 53.2334883,
+    "longitude": -1.4238013,
+    "placeId": "ChIJF0Z3ByyEeUgR5bhvmzSOPGA"
   },
   {
     "id": "5",
     "name": "Manchester",
     "dayId": "3",
     "order": 1,
-    "latitude": 53.4808,
-    "longitude": -2.2426
+    "latitude": 53.4807593,
+    "longitude": -2.2426305,
+    "placeId": "ChIJ2_UmUkxNekgRqmv-BDgUvtk"
   }
 ]

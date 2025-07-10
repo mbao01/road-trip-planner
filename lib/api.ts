@@ -1,12 +1,13 @@
 import type { DateRange } from "react-day-picker";
-import { DayWithStopsWithTravel, StopWithTravel } from "@/types/trip";
+import { DayWithStops } from "@/types/trip";
 import { Day, Role, Settings, Stop, Travel, Trip } from "@prisma/client";
 import type { PlaceDetails } from "./google-maps-api";
 
 export type TripWithSettings = Trip & {
+  travel: Travel;
   access: Role;
   settings: Settings;
-  days: DayWithStopsWithTravel[];
+  days: DayWithStops[];
 };
 
 export async function fetchTrip(tripId: string): Promise<TripWithSettings> {
@@ -15,13 +16,13 @@ export async function fetchTrip(tripId: string): Promise<TripWithSettings> {
   return res.json();
 }
 
-export async function fetchDays(tripId: string): Promise<DayWithStopsWithTravel[]> {
+export async function fetchDays(tripId: string): Promise<DayWithStops[]> {
   const res = await fetch(`/api/trips/${tripId}/days`);
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-export async function fetchStops(tripId: string): Promise<StopWithTravel[]> {
+export async function fetchStops(tripId: string): Promise<Stop[]> {
   const res = await fetch(`/api/trips/${tripId}/stops`);
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -97,4 +98,24 @@ export async function createTrip(data: {
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+export async function getTripTravel(tripId: string): Promise<Trip> {
+  const res = await fetch(`/api/trips/${tripId}/travel`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const result = await res.json();
+  return result.data;
+}
+
+export async function updateTripTravel(tripId: string): Promise<Travel> {
+  const res = await fetch(`/api/trips/${tripId}/travel`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const result = await res.json();
+  return result.data;
 }

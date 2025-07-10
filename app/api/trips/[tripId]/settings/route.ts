@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { updateSettingsSchema } from "@/lib/schemas";
 
 // PUT /api/trips/[tripId]/settings
-export async function PUT(request: Request, { params }: { params: { tripId: string } }) {
-  const { tripId } = params;
+export async function PUT(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
   try {
     const body = await request.json();
     const validation = updateSettingsSchema.safeParse(body);
