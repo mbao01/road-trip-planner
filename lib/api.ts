@@ -55,7 +55,6 @@ export async function updateSettings(
 }
 
 export async function addStop(dayId: Day["id"], stopData: Omit<Stop, "id">): Promise<Stop> {
-  console.log("Adding stop:", stopData);
   const res = await fetch(`/api/days/${dayId}/stops`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

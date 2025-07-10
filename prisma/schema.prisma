@@ -70,8 +70,6 @@ model Stop {
   itinerary   Itinerary[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-
-  @@unique([tripId, dayId, order])
 }
 
 model Travel {
@@ -93,8 +91,6 @@ model Day {
   stops     Stop[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
-  @@unique([tripId, order])
 }
 
 model Itinerary {

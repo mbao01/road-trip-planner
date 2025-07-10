@@ -141,9 +141,8 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
     handleAction(
       async () => {
         const savedStop = await api.addStop(dayId, newStopData as Omit<Stop, "id">);
-        const finalDay = clone.days.find((d) => d.id === dayId)!;
-        const stopIndex = finalDay.stops.findIndex((s) => s.id === tempId);
-        if (stopIndex !== -1) finalDay.stops[stopIndex] = savedStop;
+        const stopIndex = day.stops.findIndex((s) => s.id === tempId);
+        if (stopIndex !== -1) day.stops[stopIndex] = savedStop;
       },
       clone,
       "Stop added",
@@ -155,7 +154,15 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
     const clone = structuredClone(trip);
     const day = clone.days.find((d) => d.id === dayId)!;
     day.stops = day.stops.filter((s) => s.id !== stopId);
-    handleAction(() => api.deleteStop(stopId), clone, "Stop deleted", "Failed to delete stop");
+    handleAction(
+      async () => {
+        await api.deleteStop(stopId);
+        await api.reorderTrip(trip.id, clone);
+      },
+      clone,
+      "Stop deleted",
+      "Failed to delete stop"
+    );
   };
 
   const confirmDeleteDay = () => {

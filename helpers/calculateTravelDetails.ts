@@ -14,7 +14,7 @@ export const calculateTravelDetails = (
 ) => {
   const { travels = {} } = (travel ?? {}) as TravelWithDetails;
 
-  let stop = id ? travels[id].details : undefined;
+  const stop = id ? travels[id]?.details : undefined;
   let duration = 0,
     distance = 0,
     cost = 0;
@@ -27,10 +27,10 @@ export const calculateTravelDetails = (
     });
   } else if (type === "day") {
     Object.values(travels).forEach((value) => {
-      if (value.details?.dayId === id) {
-        duration += value.details?.duration ?? 0;
-        distance += value.details?.distance ?? 0;
-        cost += value.details?.cost ?? 0;
+      if (value?.details?.dayId === id) {
+        duration += value?.details?.duration ?? 0;
+        distance += value?.details?.distance ?? 0;
+        cost += value?.details?.cost ?? 0;
       }
     });
   } else if (type === "stop") {

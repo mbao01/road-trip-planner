@@ -79,8 +79,6 @@ export async function PUT(
         return acc;
       }, {});
 
-      console.log("Stops: ", stops);
-
       stops.forEach((stop, index) => {
         const { id: stopId } = stop;
         const prevStopId = stops[index - 1]?.id;
@@ -92,7 +90,6 @@ export async function PUT(
           };
         }
       });
-      console.log("Travels: ", travels);
 
       const travel = await prisma.travel.upsert({
         where: {

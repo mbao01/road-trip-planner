@@ -8,7 +8,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ day
   try {
     const body = await request.json();
     const validation = addStopSchema.safeParse(body);
-    console.log("Validation: ", validation);
     if (!validation.success) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
@@ -17,7 +16,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ day
       where: { id: dayId },
       include: { _count: { select: { stops: true } } },
     });
-    console.log("Day: ", day);
     if (!day) return NextResponse.json({ error: "Day not found" }, { status: 404 });
 
     const newStop = await prisma.stop.create({
@@ -28,8 +26,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ day
         order: day._count.stops,
       },
     });
-
-    console.log("New Stop: ", newStop);
 
     return NextResponse.json({ success: true, data: newStop }, { status: 201 });
   } catch (error) {
