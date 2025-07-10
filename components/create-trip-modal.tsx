@@ -124,7 +124,7 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
           </div>
           <div className="space-y-2">
             <Label>Trip dates</Label>
-            <DateRangePicker date={dates} onDateChange={setDates} disablePastDates={true} />
+            <DateRangePicker date={dates} onDateChange={setDates} maxDays={10} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="start-stop">Trip start stop</Label>
