@@ -107,6 +107,6 @@
     ]
   },
   "prisma": {
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx prisma/seeds"
   }
 }

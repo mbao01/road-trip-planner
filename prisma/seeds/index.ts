@@ -5,12 +5,12 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Hardcoded paths to mock data
-const usersFilePath = path.join(process.cwd(), "data/users.json");
-const providersFilePath = path.join(process.cwd(), "data/providers.json");
-const tripsFilePath = path.join(process.cwd(), "data/trips.json");
-const daysFilePath = path.join(process.cwd(), "data/days.json");
-const stopsFilePath = path.join(process.cwd(), "data/stops.json");
-const settingsFilePath = path.join(process.cwd(), "data/settings.json");
+const usersFilePath = path.join(process.cwd(), "prisma/seeds/data/users.json");
+const providersFilePath = path.join(process.cwd(), "prisma/seeds/data/providers.json");
+const tripsFilePath = path.join(process.cwd(), "prisma/seeds/data/trips.json");
+const daysFilePath = path.join(process.cwd(), "prisma/seeds/data/days.json");
+const stopsFilePath = path.join(process.cwd(), "prisma/seeds/data/stops.json");
+const settingsFilePath = path.join(process.cwd(), "prisma/seeds/data/settings.json");
 
 async function main() {
   console.log("Start seeding ...");
