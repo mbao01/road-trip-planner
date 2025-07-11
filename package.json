@@ -7,6 +7,9 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "postinstall": "pnpm run prisma:generate",
     "prettier": "prettier --check \"**/*.{js,ts,tsx}\"",
     "prettier:write": "prettier --write \"**/*.{js,ts,tsx}\""
   },
