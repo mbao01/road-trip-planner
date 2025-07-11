@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validator } from "@/app/api/utilities/validation";
 import { updateTripSchema } from "@/app/api/utilities/validation/schemas";
-import { prisma } from "@/lib/prisma";
+import { getTripWithDetails, updateTrip, deleteTrip, updateTripWithDays } from "@/services/trip";
 import { isTempId } from "@/utilities/identity";
 
 const MOCK_USER_ID = "1"; // Hardcoded user
@@ -13,26 +13,7 @@ export async function GET(
 ) {
   const { tripId } = await params;
   try {
-    const trip = await prisma.trip.findFirst({
-      where: {
-        id: tripId,
-        OR: [{ ownerId: MOCK_USER_ID }, { collaborators: { some: { userId: MOCK_USER_ID } } }],
-      },
-      include: {
-        days: {
-          orderBy: { date: "asc" },
-          include: {
-            stops: {
-              orderBy: { order: "asc" },
-            },
-          },
-        },
-        travel: true,
-        settings: true,
-        collaborators: { where: { userId: MOCK_USER_ID } },
-        _count: { select: { stops: true } },
-      },
-    });
+    const trip = await getTripWithDetails(tripId, MOCK_USER_ID);
 
     if (!trip) {
       return NextResponse.json(
@@ -82,45 +63,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ trip
 
     const { days = [], startDate, endDate } = result.data;
 
-    const existingDays = await prisma.day.findMany({
-      where: { tripId },
-    });
-
-    const daysToDelete = existingDays.filter((day) => !days.some((d) => d.id === day.id));
-
-    await Promise.allSettled(
-      days
-        .filter((day) => !isTempId(day.id))
-        .map((day) =>
-          prisma.day.update({
-            where: { id: day.id, tripId: tripId },
-            data: { order: day.order, date: day.date },
-          })
-        )
-    );
-
-    await prisma.day.deleteMany({
-      where: { id: { in: daysToDelete.map((day) => day.id) } },
-    });
-
-    const updatedTrip = await prisma.trip.update({
-      where: { id: tripId }, // In a real app, add access control check here
-      data: {
-        startDate,
-        endDate,
-        days: {
-          createMany: {
-            data: days
-              .filter((d) => isTempId(d.id))
-              .map((day) => ({
-                date: day.date,
-                order: day.order,
-              })),
-          },
-        },
-      },
-    });
-
+    const updatedTrip = await updateTripWithDays(tripId, result.data);
     return NextResponse.json(updatedTrip);
   } catch (error) {
     console.error(`Failed to update trip ${tripId}:`, error);
@@ -134,7 +77,7 @@ export async function DELETE(
 ) {
   const { tripId } = await params;
   try {
-    await prisma.trip.delete({ where: { id: tripId } });
+    await deleteTrip(tripId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete trip ${tripId}:`, error);

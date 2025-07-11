@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { deleteStopById } from "@/services/stop";
 
 // DELETE /api/stops/[stopId] - Deletes a single stop
 export async function DELETE(
@@ -9,7 +9,7 @@ export async function DELETE(
   const { stopId } = await params;
 
   try {
-    await prisma.stop.delete({ where: { id: stopId } }); // Add access control
+    await deleteStopById(stopId); // Add access control
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete stop ${stopId}:`, error);

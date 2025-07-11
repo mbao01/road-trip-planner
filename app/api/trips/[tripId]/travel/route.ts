@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { findFirstTravel, getDaysWithStopsForTrip, updateTravel } from "@/services/travel";
 
 // PUT /api/trips/[tripId]/travel - Updates trip travel
 export async function PUT(
@@ -8,19 +8,7 @@ export async function PUT(
 ) {
   const { tripId } = await params;
   try {
-    const days = await prisma.day.findMany({
-      where: {
-        tripId: tripId,
-      },
-      include: {
-        stops: {
-          orderBy: { order: "asc" },
-        },
-      },
-      orderBy: {
-        date: "asc",
-      },
-    });
+    const days = await getDaysWithStopsForTrip(tripId);
 
     if (!days) {
       return NextResponse.json(
@@ -57,69 +45,7 @@ export async function PUT(
     const matrix = await response.json();
 
     if (matrix && matrix.length > 0) {
-      const travels = matrix.reduce(
-        (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          acc: any,
-          datum: {
-            originIndex: number;
-            destinationIndex: number;
-            distanceMeters: number;
-            duration: string;
-            staticDuration: string;
-            condition: string;
-          }
-        ) => {
-          if (datum.originIndex !== datum.destinationIndex) {
-            const { id: destinationId } = stops[datum.destinationIndex];
-            const { id: originId } = stops[datum.originIndex];
-
-            // stopId: { originId, distance, duration, etc}
-            acc[destinationId] = acc[destinationId] || { relationships: {} };
-            acc[destinationId] = {
-              relationships: {
-                ...acc[destinationId].relationships,
-                [originId]: {
-                  originId,
-                  dayId: stops[datum.destinationIndex].dayId,
-                  distance: datum.distanceMeters,
-                  duration: Number(datum.duration.replace("s", "")),
-                  staticDuration: Number(datum.staticDuration.replace("s", "")),
-                  condition: datum.condition,
-                },
-              },
-            };
-          }
-
-          return acc;
-        },
-        {}
-      );
-
-      stops.forEach((stop, index) => {
-        const { id: stopId } = stop;
-        const prevStopId = stops[index - 1]?.id;
-
-        if (prevStopId) {
-          travels[stopId] = {
-            ...travels[stopId],
-            details: travels[stopId]?.relationships?.[prevStopId],
-          };
-        }
-      });
-
-      const travel = await prisma.travel.upsert({
-        where: {
-          tripId,
-        },
-        create: {
-          tripId,
-          travels,
-        },
-        update: {
-          travels,
-        },
-      });
+      const travel = await updateTravel(tripId, matrix, stops);
 
       return NextResponse.json({ data: travel });
     }
@@ -135,7 +61,7 @@ export async function PUT(
 export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   try {
-    const travel = await prisma.travel.findFirst({
+    const travel = await findFirstTravel({
       where: { tripId },
     });
 

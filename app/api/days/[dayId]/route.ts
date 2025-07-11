@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { deleteDayById } from "@/services/day";
 
 // DELETE /api/days/[dayId] - Deletes a day and all its associated stops
 export async function DELETE(request: Request, { params }: { params: Promise<{ dayId: string }> }) {
@@ -7,7 +7,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ d
 
   try {
     // Prisma's cascading delete on the schema will handle deleting the stops
-    await prisma.day.delete({ where: { id: dayId } }); // Add access control
+    await deleteDayById(dayId); // Add access control
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete day ${dayId}:`, error);
