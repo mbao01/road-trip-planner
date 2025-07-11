@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const results = data.predictions.map((p: any) => ({
+    const results = data.predictions.map((p: { place_id: string; description: string }) => ({
       id: p.place_id,
       name: p.description,
     }));

@@ -3,7 +3,6 @@
 import type { TripTableRow } from "@/types/trip";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +46,6 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
   const [trips, setTrips] = useState(initialTrips);
   const [tripToDelete, setTripToDelete] = useState<TripTableRow | null>(null);
   const [tripToShare, setTripToShare] = useState<TripTableRow | null>(null);
-  const router = useRouter();
   const { toast } = useToast();
 
   const handleArchive = async (tripId: string) => {

@@ -61,8 +61,7 @@ export async function GET(
       if (role === "VIEWER") access = "Viewer";
     }
 
-    const { collaborators, ...tripData } = trip;
-    return NextResponse.json({ ...tripData, access });
+    return NextResponse.json({ ...trip, access });
   } catch (error) {
     console.error(`Failed to retrieve trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to retrieve trip data" }, { status: 500 });

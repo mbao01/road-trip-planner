@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Role, Trip } from "@prisma/client";
-import { isSameDay, parse } from "date-fns";
+import { isSameDay } from "date-fns";
 import {
   CheckIcon,
   Download,

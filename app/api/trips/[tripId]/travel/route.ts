@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRouteMatrix } from "@/lib/google-maps-api";
 import { prisma } from "@/lib/prisma";
 
 // PUT /api/trips/[tripId]/travel - Updates trip travel
@@ -58,30 +57,44 @@ export async function PUT(
     const matrix = await response.json();
 
     if (matrix && matrix.length > 0) {
-      const travels = matrix.reduce((acc: any, datum: any) => {
-        if (datum.originIndex !== datum.destinationIndex) {
-          const { id: destinationId } = stops[datum.destinationIndex];
-          const { id: originId } = stops[datum.originIndex];
+      const travels = matrix.reduce(
+        (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          acc: any,
+          datum: {
+            originIndex: number;
+            destinationIndex: number;
+            distanceMeters: number;
+            duration: string;
+            staticDuration: string;
+            condition: string;
+          }
+        ) => {
+          if (datum.originIndex !== datum.destinationIndex) {
+            const { id: destinationId } = stops[datum.destinationIndex];
+            const { id: originId } = stops[datum.originIndex];
 
-          // stopId: { originId, distance, duration, etc}
-          acc[destinationId] = acc[destinationId] || { relationships: {} };
-          acc[destinationId] = {
-            relationships: {
-              ...acc[destinationId].relationships,
-              [originId]: {
-                originId,
-                dayId: stops[datum.destinationIndex].dayId,
-                distance: datum.distanceMeters,
-                duration: Number(datum.duration.replace("s", "")),
-                staticDuration: Number(datum.staticDuration.replace("s", "")),
-                condition: datum.condition,
+            // stopId: { originId, distance, duration, etc}
+            acc[destinationId] = acc[destinationId] || { relationships: {} };
+            acc[destinationId] = {
+              relationships: {
+                ...acc[destinationId].relationships,
+                [originId]: {
+                  originId,
+                  dayId: stops[datum.destinationIndex].dayId,
+                  distance: datum.distanceMeters,
+                  duration: Number(datum.duration.replace("s", "")),
+                  staticDuration: Number(datum.staticDuration.replace("s", "")),
+                  condition: datum.condition,
+                },
               },
-            },
-          };
-        }
+            };
+          }
 
-        return acc;
-      }, {});
+          return acc;
+        },
+        {}
+      );
 
       stops.forEach((stop, index) => {
         const { id: stopId } = stop;

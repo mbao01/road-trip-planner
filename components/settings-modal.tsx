@@ -74,14 +74,16 @@ export function SettingsModal({
         <div className="space-y-6">
           <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
             <InfoIcon className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-blue-700">These settings only apply to '{tripName}'.</p>
+            <p className="text-sm text-blue-700">
+              These settings only apply to &apos;{tripName}&apos;.
+            </p>
           </div>
 
           <div className="space-y-3">
             <Label className="text-sm font-medium">Map style</Label>
             <RadioGroup
               value={mapStyle}
-              onValueChange={(v) => setMapStyle(v as any)}
+              onValueChange={(v) => setMapStyle(v as MapStyle)}
               className="flex gap-2"
             >
               <div className="flex items-center space-x-2">
@@ -109,7 +111,7 @@ export function SettingsModal({
             <Label className="text-sm font-medium">Distance unit</Label>
             <RadioGroup
               value={distanceUnit}
-              onValueChange={(v) => setDistanceUnit(v as any)}
+              onValueChange={(v) => setDistanceUnit(v as DistanceUnit)}
               className="flex gap-4"
             >
               <div className="flex items-center space-x-2">
@@ -142,7 +144,7 @@ export function SettingsModal({
             <Label className="text-sm font-medium">Currency</Label>
             <RadioGroup
               value={currency}
-              onValueChange={(v) => setCurrency(v as any)}
+              onValueChange={(v) => setCurrency(v as Currency)}
               className="flex gap-4"
             >
               <div className="flex items-center space-x-2">

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createTripSchema } from "@/lib/schemas";
 import { Role, TripStatus } from "@prisma/client";
-import { addDays, differenceInDays, format, isAfter, isBefore, parse } from "date-fns";
+import { addDays, differenceInDays, isAfter, isBefore } from "date-fns";
 
 // A hardcoded user for demonstration purposes.
 // In a real app, this would come from an authentication session.

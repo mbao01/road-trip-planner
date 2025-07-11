@@ -1,10 +1,9 @@
 "use client";
 
 import type { TripWithSettings } from "@/lib/api";
-import type { Day, Settings, Travel, Trip } from "@prisma/client";
+import type { Settings, Travel, Trip } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useMemo, useState } from "react";
-import { format } from "path";
 import { Toaster } from "@/components/ui/toaster";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
@@ -63,7 +62,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
 
   // TODO:: use this method for all actions and pass it to children components
   const handleAction = async (
-    action: () => Promise<any>,
+    action: () => Promise<unknown>,
     optimisticState: TripWithSettings,
     successMessage: string,
     failureMessage: string
@@ -79,7 +78,9 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
         api.fetchTrip(tripId),
       ]);
       const travel =
-        travelPromise.status === "fulfilled" ? travelPromise.value : originalState?.travel!;
+        travelPromise.status === "fulfilled"
+          ? travelPromise.value
+          : (originalState?.travel ?? ({} as Travel));
       const trip = tripPromise.status === "fulfilled" ? tripPromise.value : undefined;
 
       setTrip({ ...optimisticState, ...trip, travel });
@@ -103,6 +104,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
       await api.updateSettings(tripId, newSettings);
       toast({ title: "Settings updated" });
     } catch (e) {
+      console.error(e);
       setTrip(previousTripData);
       toast({ variant: "destructive", title: "Failed to update settings" });
     }
@@ -120,6 +122,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
       toast({ title: "Trip updated" });
     } catch (e) {
       setTrip(previousTripData);
+      console.error(e);
       toast({ variant: "destructive", title: "Failed to update trip details" });
     }
   };

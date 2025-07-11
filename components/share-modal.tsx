@@ -112,7 +112,7 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Share "{tripName}"</DialogTitle>
+          <DialogTitle>Share &quot;{tripName}&quot;</DialogTitle>
           <DialogDescription>Invite collaborators or share a public link.</DialogDescription>
         </DialogHeader>
 

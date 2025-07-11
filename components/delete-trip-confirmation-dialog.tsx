@@ -28,7 +28,9 @@ export function DeleteTripConfirmationDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure you want to delete '{tripName}'?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Are you sure you want to delete &apos;{tripName}&apos;?
+          </AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the trip, including all its
             days and stops.

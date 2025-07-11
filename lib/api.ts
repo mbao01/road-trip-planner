@@ -1,7 +1,5 @@
-import type { DateRange } from "react-day-picker";
 import { DayWithStops } from "@/types/trip";
 import { Day, Role, Settings, Stop, Travel, Trip } from "@prisma/client";
-import type { PlaceDetails } from "./google-maps-api";
 
 export type TripWithSettings = Trip & {
   travel: Travel;
