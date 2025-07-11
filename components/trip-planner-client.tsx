@@ -1,7 +1,7 @@
 "use client";
 
 import type { TripWithSettings } from "@/lib/api";
-import type { Day, Settings, Trip } from "@prisma/client";
+import type { Day, Settings, Travel, Trip } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useMemo, useState } from "react";
 import { format } from "path";
@@ -72,8 +72,17 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
     setTrip(optimisticState);
     try {
       await action();
-      const travel = await api.updateTripTravel(tripId);
-      setTrip({ ...optimisticState, travel });
+      // const travel = await api.updateTripTravel(tripId);
+      // const trip = await api.fetchTrip(tripId);
+      const [travelPromise, tripPromise] = await Promise.allSettled([
+        api.updateTripTravel(tripId),
+        api.fetchTrip(tripId),
+      ]);
+      const travel =
+        travelPromise.status === "fulfilled" ? travelPromise.value : originalState?.travel!;
+      const trip = tripPromise.status === "fulfilled" ? tripPromise.value : undefined;
+
+      setTrip({ ...optimisticState, ...trip, travel });
       toast({ title: successMessage });
     } catch (error) {
       setTrip(originalState);
@@ -178,8 +187,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
 
     handleAction(
       async () => {
-        const data = await api.updateTrip(trip.id, clone);
-        if (!data) return;
+        await api.updateTrip(trip.id, clone);
       },
       clone,
       "Date range updated",

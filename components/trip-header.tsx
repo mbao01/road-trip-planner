@@ -103,9 +103,11 @@ export function TripHeader({
     <div className="p-4 border-b">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-            <div className="w-4 h-4 bg-white rounded-sm transform rotate-45"></div>
-          </div>
+          <Link href="/trips">
+            <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
+              <div className="w-4 h-4 bg-white rounded-sm transform rotate-45"></div>
+            </div>
+          </Link>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">

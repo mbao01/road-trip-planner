@@ -36,6 +36,10 @@ export async function PUT(
     const stops = days.flatMap((day) => day.stops);
     const places = stops.map((stop) => stop.placeId);
 
+    if (places.length === 0) {
+      return NextResponse.json({ data: {} });
+    }
+
     const url = new URL(`/api/routes/matrix`, request.nextUrl.origin);
     const response = await fetch(url, {
       method: "POST",
@@ -106,6 +110,8 @@ export async function PUT(
 
       return NextResponse.json({ data: travel });
     }
+
+    return NextResponse.json({ data: {} });
   } catch (error) {
     console.error(`Failed to retrieve trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to retrieve trip data" }, { status: 500 });

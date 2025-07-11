@@ -122,6 +122,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ trip
       },
     });
 
+    console.log("Updated trip:", updatedTrip);
+
     return NextResponse.json(updatedTrip);
   } catch (error) {
     console.error(`Failed to update trip ${tripId}:`, error);
