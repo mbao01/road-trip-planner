@@ -1,17 +1,22 @@
 "use client";
 
 import type { TripWithSettings } from "@/lib/api";
-import type { Settings } from "@prisma/client";
+import type { Day, Settings, Trip } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useMemo, useState } from "react";
+import { format } from "path";
 import { Toaster } from "@/components/ui/toaster";
-import { useToast } from "@/components/ui/use-toast";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
+import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
+import { DayWithStops } from "@/types/trip";
+import { createTempId } from "@/utilities/identity";
 import { formatCurrency } from "@/utilities/numbers";
 import { Currency, DistanceUnit } from "@prisma/client";
+import { addDays, differenceInDays } from "date-fns";
 import { BanknoteIcon, Calendar, Clock, Globe, Loader2, MapPin, Route } from "lucide-react";
+import { DeleteDaysConfirmationDialog } from "./delete-days-confirmation-dialog";
 import { SettingsModal } from "./settings-modal";
 import { ShareModal } from "./share-modal";
 import { TripHeader } from "./trip-header";
@@ -28,6 +33,10 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
   const [isLoading, setIsLoading] = useState(!initialTripData);
   const [error, setError] = useState<string | null>(null);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState<string | null>(null);
+  const [daysToDeleteInfo, setDaysToDeleteInfo] = useState<{
+    days: DayWithStops[];
+    newDateRange: DateRange;
+  } | null>(null);
 
   const [showSettings, setShowSettings] = useState(false);
   const [showShare, setShowShare] = useState(false);
@@ -38,11 +47,10 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
 
     if (!initialTripData) {
       setIsLoading(true);
-      Promise.allSettled([api.fetchTrip(tripId), api.fetchDays(tripId)])
-        .then(([_trip, _days]) => {
-          if (_trip.status === "fulfilled" && _days.status === "fulfilled") {
-            setTrip({ ..._trip.value, ..._days.value });
-          }
+      api
+        .fetchTrip(tripId)
+        .then((trip) => {
+          setTrip(trip);
           setError(null);
         })
         .catch((e) => {
@@ -52,6 +60,27 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
         .finally(() => setIsLoading(false));
     }
   }, [initialTripData, tripId]);
+
+  // TODO:: use this method for all actions and pass it to children components
+  const handleAction = async (
+    action: () => Promise<any>,
+    optimisticState: TripWithSettings,
+    successMessage: string,
+    failureMessage: string
+  ) => {
+    const originalState = trip;
+    setTrip(optimisticState);
+    try {
+      await action();
+      const travel = await api.updateTripTravel(tripId);
+      setTrip({ ...optimisticState, travel });
+      toast({ title: successMessage });
+    } catch (error) {
+      setTrip(originalState);
+      console.error(error);
+      toast({ variant: "destructive", title: failureMessage });
+    }
+  };
 
   const handleUpdateSettings = async (
     newSettings: Omit<Settings, "id" | "tripId" | "createdAt" | "updatedAt">
@@ -70,17 +99,16 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
     }
   };
 
-  const handleTripDetailsChange = async (data: {
-    name?: string;
-    startDate?: Date;
-    endDate?: Date;
-  }) => {
+  const handleTripDetailsChange = async (
+    data: Partial<Omit<Trip, "id" | "createdAt" | "updatedAt">>
+  ) => {
     if (!trip) return;
     const previousTripData = trip;
     setTrip({ ...trip, ...data });
 
     try {
-      await api.updateTripDetails(tripId, data);
+      const res = await api.updateTripDetails(tripId, data);
+      console.log("Trip updated successfully", res);
       toast({ title: "Trip updated" });
     } catch (e) {
       setTrip(previousTripData);
@@ -88,12 +116,108 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
     }
   };
 
+  // const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+  //   console.log("newDateRange", newDateRange);
+  // if (!trip || !newDateRange?.from || !newDateRange?.to) return;
+  // handleTripDetailsChange({
+  //   startDate: newDateRange.from,
+  //   endDate: newDateRange.to,
+  // });
+  // };
+
   const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
     if (!trip || !newDateRange?.from || !newDateRange?.to) return;
-    handleTripDetailsChange({
-      startDate: newDateRange.from,
-      endDate: newDateRange.to,
-    });
+
+    const clone = structuredClone(trip);
+
+    const oldDays = clone.days;
+    const { from: startDate, to: endDate } = newDateRange;
+    const newDayCount = differenceInDays(endDate, startDate) + 1;
+
+    const updatedDays = oldDays
+      .slice(0, Math.min(oldDays.length, newDayCount))
+      .map((day, index) => ({
+        ...day,
+        date: addDays(startDate, index),
+      }));
+
+    let finalDays: DayWithStops[];
+
+    if (newDayCount < oldDays.length) {
+      const daysToRemove = oldDays.slice(newDayCount);
+      const hasStopsInDaysToRemove = daysToRemove.some((d) => d.stops.length > 0);
+
+      if (hasStopsInDaysToRemove) {
+        setDaysToDeleteInfo({ days: daysToRemove, newDateRange });
+        return; // skip because we require confirmation
+      } else {
+        finalDays = updatedDays.slice(0, newDayCount);
+      }
+    } else if (newDayCount > oldDays.length) {
+      const additionalDays = Array.from({ length: newDayCount - oldDays.length }, (_, i) => {
+        const dayIndex = oldDays.length + i;
+        const tempId = createTempId(Date.now() + i);
+        return {
+          id: tempId,
+          date: addDays(startDate, dayIndex),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          tripId: clone.id,
+          order: dayIndex,
+          stops: [],
+        };
+      });
+      finalDays = [...updatedDays, ...additionalDays];
+    } else {
+      finalDays = updatedDays;
+    }
+
+    clone.startDate = startDate;
+    clone.endDate = endDate;
+    clone.days = finalDays;
+
+    handleAction(
+      async () => {
+        const data = await api.updateTrip(trip.id, clone);
+        if (!data) return;
+      },
+      clone,
+      "Date range updated",
+      "Failed to update date range"
+    );
+
+    // handleUpdateTrip({ ...trip, days: finalDays, ...newDates }, "Date range updated");
+  };
+
+  const confirmDeleteExcessDays = () => {
+    if (!trip || !daysToDeleteInfo?.newDateRange?.from || !daysToDeleteInfo?.newDateRange?.to)
+      return;
+
+    const clone = structuredClone(trip);
+
+    const { from: startDate, to: endDate } = daysToDeleteInfo.newDateRange;
+    const newDayCount = differenceInDays(endDate, startDate) + 1;
+    const finalDays = clone.days.slice(0, newDayCount).map((day, index) => ({
+      ...day,
+      date: addDays(startDate, index),
+    }));
+
+    clone.startDate = startDate;
+    clone.endDate = endDate;
+    clone.days = finalDays;
+
+    handleAction(
+      () => api.updateTrip(trip.id, clone),
+      clone,
+      "Days deleted and date range updated",
+      "Failed to update date range"
+    );
+
+    // handleUpdateTrip(
+    //   { ...trip, days: finalDays, ...newDates },
+    //   "Days deleted and date range updated"
+    // );
+    setDaysToDeleteInfo(null);
   };
 
   const stats = useMemo(() => {
@@ -153,7 +277,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
           <TripHeader
             trip={trip}
             access={trip.access}
-            onTripDataChange={(d) => handleTripDetailsChange(d)}
+            onTripNameChange={({ name }) => handleTripDetailsChange({ name })}
             onDateRangeChange={handleDateRangeChange}
             onSettings={() => setShowSettings(true)}
             onShare={() => setShowShare(true)}
@@ -215,6 +339,14 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
         <ShareModal open={showShare} onOpenChange={setShowShare} tripName={trip.name} />
       </div>
       <Toaster />
+      {daysToDeleteInfo && (
+        <DeleteDaysConfirmationDialog
+          open={!!daysToDeleteInfo}
+          onOpenChange={() => setDaysToDeleteInfo(null)}
+          onConfirm={confirmDeleteExcessDays}
+          daysToDelete={daysToDeleteInfo.days}
+        />
+      )}
     </>
   );
 }

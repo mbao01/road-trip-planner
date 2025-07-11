@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateTripSchema } from "@/lib/schemas";
+import { isTempId } from "@/utilities/identity";
 
 const MOCK_USER_ID = "1"; // Hardcoded user
 
@@ -68,22 +69,60 @@ export async function GET(
   }
 }
 
-// PUT /api/trips/[tripId] - Updates only the top-level trip properties (name, dates)
+// PUT /api/trips/[tripId] - Updates trip days and stops, including start date and end date
 export async function PUT(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   try {
     const body = await request.json();
+    console.log("Body:", body);
     const validation = updateTripSchema.safeParse(body);
+    console.log("Validation result:", validation);
     if (!validation.success) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
-    const updatedTrip = await prisma.trip.update({
-      where: { id: tripId }, // In a real app, add access control check here
-      data: validation.data,
+    const { days = [], startDate, endDate } = validation.data;
+
+    const existingDays = await prisma.day.findMany({
+      where: { tripId },
     });
 
-    return NextResponse.json({ success: true, data: updatedTrip });
+    const daysToDelete = existingDays.filter((day) => !days.some((d) => d.id === day.id));
+
+    await Promise.allSettled(
+      days
+        .filter((day) => !isTempId(day.id))
+        .map((day) =>
+          prisma.day.update({
+            where: { id: day.id, tripId: tripId },
+            data: { order: day.order, date: day.date },
+          })
+        )
+    );
+
+    await prisma.day.deleteMany({
+      where: { id: { in: daysToDelete.map((day) => day.id) } },
+    });
+
+    const updatedTrip = await prisma.trip.update({
+      where: { id: tripId }, // In a real app, add access control check here
+      data: {
+        startDate,
+        endDate,
+        days: {
+          createMany: {
+            data: days
+              .filter((d) => isTempId(d.id))
+              .map((day) => ({
+                date: day.date,
+                order: day.order,
+              })),
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(updatedTrip);
   } catch (error) {
     console.error(`Failed to update trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to update trip" }, { status: 500 });

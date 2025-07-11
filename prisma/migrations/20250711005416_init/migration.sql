@@ -166,13 +166,7 @@ CREATE UNIQUE INDEX "Provider_providerId_key" ON "Provider"("providerId");
 CREATE UNIQUE INDEX "Provider_type_providerId_key" ON "Provider"("type", "providerId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Stop_tripId_dayId_order_key" ON "Stop"("tripId", "dayId", "order");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Travel_tripId_key" ON "Travel"("tripId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Day_tripId_order_key" ON "Day"("tripId", "order");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Settings_tripId_key" ON "Settings"("tripId");

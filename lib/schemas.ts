@@ -14,9 +14,33 @@ export const createTripSchema = z.object({
 });
 
 export const updateTripSchema = z.object({
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+  days: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        order: z.number(),
+        date: z.coerce.date(),
+        // stops: z.array(
+        //   z.object({
+        //     id: z.string(),
+        //     name: z.string(),
+        //     placeId: z.string(),
+        //     latitude: z.number(),
+        //     longitude: z.number(),
+        //     order: z.number(),
+        //     customName: z.string().optional(),
+        //     dayId: z.string(),
+        //   })
+        // ),
+      })
+    )
+    .optional(),
+});
+
+export const updateTripDetailsSchema = z.object({
   name: z.string().min(1).optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
 });
 
 export const updateSettingsSchema = z.object({

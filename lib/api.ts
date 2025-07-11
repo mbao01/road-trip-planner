@@ -28,11 +28,21 @@ export async function fetchStops(tripId: string): Promise<Stop[]> {
   return res.json();
 }
 
-export async function updateTripDetails(
+export async function updateTrip(
   tripId: string,
-  data: { name?: string; startDate?: Date; endDate?: Date }
-): Promise<Trip> {
+  data: Partial<{ startDate: Date; endDate: Date; days: DayWithStops[] }>
+): Promise<Trip & { days: DayWithStops[] }> {
   const res = await fetch(`/api/trips/${tripId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function updateTripDetails(tripId: string, data: { name?: string }): Promise<Trip> {
+  const res = await fetch(`/api/trips/${tripId}/details`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

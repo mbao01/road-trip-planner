@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useToast } from "@/hooks/use-toast";
 import { createTrip } from "@/lib/api";
 import { getPlaceDetails, searchPlaces } from "@/lib/google-maps-api";
 import { Loader2, Search, X } from "lucide-react";

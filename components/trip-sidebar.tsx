@@ -7,12 +7,13 @@ import type { Day, Settings, Stop } from "@prisma/client";
 import type React from "react";
 import type { FC } from "react";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { CURRENCY_SYMBOLS } from "@/helpers/constants/currency";
+import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
+import { createTempId } from "@/utilities/identity";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Currency, DistanceUnit, Travel } from "@prisma/client";
-import { addDays, format, parse } from "date-fns";
+import { Currency, DistanceUnit } from "@prisma/client";
+import { addDays } from "date-fns";
 import { DayCard } from "./day-card";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { StopCard } from "./stop-card";
@@ -135,7 +136,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
       dayId: dayId,
       tripId: trip.id,
     };
-    const tempId = Date.now().toString();
+    const tempId = createTempId();
     day.stops.push({ ...newStopData, id: tempId } as Stop);
 
     handleAction(

@@ -2,7 +2,7 @@
 
 import type React from "react";
 import type { DateRange } from "react-day-picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -21,15 +21,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Role, Trip } from "@prisma/client";
-import { parse } from "date-fns";
-import { Download, Home, Laptop, LogOut, Moon, Palette, Settings, Sun, User } from "lucide-react";
+import { isSameDay, parse } from "date-fns";
+import {
+  CheckIcon,
+  Download,
+  Home,
+  Laptop,
+  LogOut,
+  Moon,
+  Palette,
+  Settings,
+  Sun,
+  User,
+  XIcon,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { DateRangePicker } from "./date-range-picker";
 
 interface TripHeaderProps {
   trip: Trip;
   access: Role;
-  onTripDataChange: (data: { name?: string }) => void;
+  onTripNameChange: (data: { name?: string }) => void;
   onDateRangeChange: (dateRange: DateRange | undefined) => void;
   onSettings: () => void;
   onShare: () => void;
@@ -45,26 +57,47 @@ const accessBadgeColors: Record<TripHeaderProps["access"], string> = {
 export function TripHeader({
   trip,
   access,
-  onTripDataChange,
+  onTripNameChange,
   onDateRangeChange,
   onSettings,
   onShare,
 }: TripHeaderProps) {
   const [name, setName] = useState(trip.name);
   const { setTheme } = useTheme();
+  const currentDateRange = {
+    from: trip.startDate,
+    to: trip.endDate,
+  };
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(
+    currentDateRange
+  );
+
+  // Sync local state if props change from parent (e.g., after a successful save)
+  useEffect(() => {
+    setSelectedDateRange({ from: trip.startDate, to: trip.endDate });
+  }, [trip.startDate, trip.endDate]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
 
   const handleNameBlur = () => {
-    onTripDataChange({ name });
+    if (name !== trip.name) {
+      onTripNameChange({ name });
+    }
   };
 
-  const currentDateRange: DateRange = {
-    from: trip.startDate,
-    to: trip.endDate,
+  const handleSaveDates = () => {
+    onDateRangeChange(selectedDateRange);
   };
+
+  const handleCancelDates = () => {
+    setSelectedDateRange(currentDateRange);
+  };
+
+  const isDateRangeChanged =
+    !isSameDay(currentDateRange.from, selectedDateRange?.from || currentDateRange.from) ||
+    !isSameDay(currentDateRange.to, selectedDateRange?.to || currentDateRange.to);
 
   return (
     <div className="p-4 border-b">
@@ -140,11 +173,41 @@ export function TripHeader({
           value={name}
           onChange={handleNameChange}
           onBlur={handleNameBlur}
-          className="text-2xl font-bold mb-1 h-auto border-none focus-visible:ring-0 shadow-none p-0"
+          className="!text-2xl font-bold mb-2 h-auto border-none focus-visible:ring-0 shadow-none p-1"
         />
         <div className="flex items-center gap-2">
-          <DateRangePicker date={currentDateRange} onDateChange={onDateRangeChange} />
-          <Badge variant="outline" className={cn("font-medium", accessBadgeColors[access])}>
+          <DateRangePicker
+            maxDays={10}
+            date={selectedDateRange}
+            onDateChange={setSelectedDateRange}
+            triggerClassName="px-1 py-0"
+          />
+          {isDateRangeChanged && (
+            <>
+              <Button
+                onClick={handleSaveDates}
+                size="icon"
+                variant="outline"
+                aria-label="Save date changes"
+                className="h-auto p-0.5 w-auto"
+              >
+                <CheckIcon className="h-4 w-4" />
+                <span className="sr-only">Save</span>
+              </Button>
+              <Button
+                onClick={handleCancelDates}
+                size="icon"
+                variant="outline"
+                aria-label="Cancel date changes"
+                className="h-auto p-0.5 w-auto"
+              >
+                <XIcon className="h-4 w-4" />
+                <span className="sr-only">Cancel</span>
+              </Button>
+            </>
+          )}
+
+          <Badge variant="outline" className={cn("font-medium ml-auto", accessBadgeColors[access])}>
             {access}
           </Badge>
         </div>

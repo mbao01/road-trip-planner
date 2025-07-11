@@ -12,12 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
-import { CURRENCY_SYMBOLS } from "@/helpers/constants/currency";
-import { DISTANCE_UNITS } from "@/helpers/constants/distance";
+import { formatDate } from "@/utilities/dates";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Currency, Day, DistanceUnit, Settings, Stop, Travel } from "@prisma/client";
-import { format } from "date-fns";
+import { Day, Settings, Stop, Travel } from "@prisma/client";
 import { ArrowDown, ArrowUp, MoreVertical, Trash2 } from "lucide-react";
 import { AddStop } from "./add-stop";
 import { StopCard } from "./stop-card";
@@ -62,7 +60,7 @@ export const DayCard: FC<DayCardProps> = ({
         <div className="flex items-center gap-2 min-w-0">
           <h3 className="font-semibold">Day {dayIndex + 1}</h3>
           <span className="text-sm text-muted-foreground truncate">
-            {format(day.date, "EEE, dd MMM")}
+            {formatDate(day.date, "EEE, dd MMM")}
           </span>
         </div>
         <DropdownMenu>

@@ -20,9 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useToast } from "@/components/ui/use-toast";
 import { TRIP_ACCESS } from "@/helpers/constants/tripAccess";
 import { TRIP_STATUS } from "@/helpers/constants/tripStatus";
+import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/utilities/dates";
 import { TripStatus } from "@prisma/client";
 import { Archive, Edit, MoreHorizontal, Share2, Trash2 } from "lucide-react";

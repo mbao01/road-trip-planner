@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { addDays, format } from "date-fns";
+import { addDays, endOfDay, format } from "date-fns";
 
 interface SeparateDateRangePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   date: DateRange | undefined;
@@ -28,11 +28,17 @@ export function DateRangePicker({
   today.setHours(0, 0, 0, 0);
 
   const handleFromDateChange = (newFromDate: Date | undefined) => {
-    onDateChange({ from: newFromDate, to: date?.to });
+    onDateChange({
+      from: newFromDate,
+      to: date?.to ? endOfDay(date.to) : undefined,
+    });
   };
 
   const handleToDateChange = (newToDate: Date | undefined) => {
-    onDateChange({ from: date?.from, to: newToDate });
+    onDateChange({
+      from: date?.from,
+      to: newToDate ? endOfDay(newToDate) : undefined,
+    });
   };
 
   // For Start Date Picker
@@ -74,11 +80,12 @@ export function DateRangePicker({
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
+            autoFocus
             mode="single"
             selected={date?.from}
             onSelect={handleFromDateChange}
             disabled={fromDateDisabledDays}
-            initialFocus
+            defaultMonth={date?.from}
           />
         </PopoverContent>
       </Popover>
@@ -98,11 +105,12 @@ export function DateRangePicker({
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
+            autoFocus
             mode="single"
             selected={date?.to}
             onSelect={handleToDateChange}
             disabled={toDateDisabledDays}
-            initialFocus
+            defaultMonth={date?.to}
           />
         </PopoverContent>
       </Popover>

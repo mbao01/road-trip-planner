@@ -11,23 +11,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-type Stop = {
-  id: number;
-  name: string;
-};
-
-type Day = {
-  id: number;
-  date: string;
-  stops: Stop[];
-};
+import { DayWithStops } from "@/types/trip";
+import { formatDate } from "@/utilities/dates";
 
 interface DeleteDaysConfirmationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-  daysToDelete: Day[];
+  daysToDelete: DayWithStops[];
 }
 
 export function DeleteDaysConfirmationDialog({
@@ -52,19 +43,23 @@ export function DeleteDaysConfirmationDialog({
         </AlertDialogHeader>
         <div className="max-h-60 overflow-y-auto pr-2 -mr-2">
           <div className="space-y-4">
-            {daysToDelete.map((day, index) => (
+            {daysToDelete.map((day) => (
               <Card key={day.id} className="bg-muted/50">
                 <CardHeader className="p-4">
                   <CardTitle className="text-sm font-semibold">
-                    Day {index + 1} ({day.date})
+                    Day {day.order + 1} ({formatDate(day.date, "EEE, dd MMM")})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0 text-sm">
-                  <ul className="list-disc pl-5 space-y-1">
-                    {day.stops.map((stop) => (
-                      <li key={stop.id}>{stop.name}</li>
-                    ))}
-                  </ul>
+                  {day.stops && day.stops.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-1">
+                      {day.stops.map((stop) => (
+                        <li key={stop.id}>{stop.name}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-muted-foreground italic">No stops on this day</span>
+                  )}
                 </CardContent>
               </Card>
             ))}
