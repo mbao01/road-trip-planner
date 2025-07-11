@@ -23,6 +23,7 @@ import {
 import { TRIP_ACCESS } from "@/helpers/constants/tripAccess";
 import { TRIP_STATUS } from "@/helpers/constants/tripStatus";
 import { useToast } from "@/hooks/use-toast";
+import { deleteTrip } from "@/lib/api";
 import { formatDate } from "@/utilities/dates";
 import { TripStatus } from "@prisma/client";
 import { Archive, Edit, MoreHorizontal, Share2, Trash2 } from "lucide-react";
@@ -61,7 +62,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
     setTrips(trips.filter((t) => t.id !== tripToDelete.id));
     setTripToDelete(null);
     toast({ title: "Trip deleted" });
-    // Add API call here in a real app: await api.deleteTrip(tripToDelete.id)
+    await deleteTrip(tripToDelete.id);
   };
 
   return (

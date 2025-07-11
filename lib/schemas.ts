@@ -3,11 +3,11 @@ import { z } from "zod";
 
 export const createTripSchema = z.object({
   name: z.string().min(1, "Trip name is required"),
-  startDate: z.date(),
-  endDate: z.date(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
   startStop: z.object({
-    id: z.string(),
     name: z.string(),
+    placeId: z.string(),
     latitude: z.number(),
     longitude: z.number(),
   }),
@@ -22,18 +22,6 @@ export const updateTripSchema = z.object({
         id: z.string().optional(),
         order: z.number(),
         date: z.coerce.date(),
-        // stops: z.array(
-        //   z.object({
-        //     id: z.string(),
-        //     name: z.string(),
-        //     placeId: z.string(),
-        //     latitude: z.number(),
-        //     longitude: z.number(),
-        //     order: z.number(),
-        //     customName: z.string().optional(),
-        //     dayId: z.string(),
-        //   })
-        // ),
       })
     )
     .optional(),

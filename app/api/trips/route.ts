@@ -84,25 +84,32 @@ export async function POST(request: Request) {
 
     await prisma.day.createMany({
       data: Array.from({ length: dayCount }, (_, i) => ({
-        date: startDate,
+        date: addDays(startDate, i),
         tripId: newTrip.id,
         order: i,
-        stops:
-          i === 0
-            ? {
-                create: [
-                  {
-                    name: startStop.name,
-                    tripId: newTrip.id,
-                    latitude: startStop.latitude,
-                    longitude: startStop.longitude,
-                    order: 0,
-                  },
-                ],
-              }
-            : undefined,
       })),
     });
+
+    const day = await prisma.day.findFirst({
+      where: {
+        tripId: newTrip.id,
+        order: 0,
+      },
+    });
+
+    if (day) {
+      await prisma.stop.create({
+        data: {
+          order: 0,
+          name: startStop.name,
+          tripId: newTrip.id,
+          placeId: startStop.placeId,
+          latitude: startStop.latitude,
+          longitude: startStop.longitude,
+          dayId: day.id,
+        },
+      });
+    }
 
     return NextResponse.json({ success: true, tripId: newTrip.id }, { status: 201 });
   } catch (error) {

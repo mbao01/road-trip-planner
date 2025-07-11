@@ -1,7 +1,7 @@
 "use client";
 
-import type { PlaceDetails, PlaceSearchResult } from "@/lib/google-maps-api";
-import type { Trip } from "@prisma/client";
+import type { PlaceSearchResult } from "@/lib/google-maps-api";
+import type { Stop, Trip } from "@prisma/client";
 import type React from "react";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useState } from "react";
@@ -33,7 +33,10 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
   const [dates, setDates] = useState<DateRange | undefined>();
   const [startStopQuery, setStartStopQuery] = useState("");
   const [startStopResults, setStartStopResults] = useState<PlaceSearchResult[]>([]);
-  const [selectedStartStop, setSelectedStartStop] = useState<PlaceDetails | null>(null);
+  const [selectedStartStop, setSelectedStartStop] = useState<Omit<
+    Stop,
+    "id" | "createdAt" | "updatedAt" | "tripId" | "dayId" | "customName" | "order"
+  > | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
@@ -61,7 +64,12 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
     setIsSearching(true);
     try {
       const details = await getPlaceDetails(location.id);
-      setSelectedStartStop(details);
+      setSelectedStartStop({
+        name: details.name,
+        placeId: details.id,
+        latitude: details.latitude,
+        longitude: details.longitude,
+      });
     } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "Could not fetch location details." });

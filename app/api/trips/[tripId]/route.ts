@@ -74,9 +74,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ trip
   const { tripId } = await params;
   try {
     const body = await request.json();
-    console.log("Body:", body);
     const validation = updateTripSchema.safeParse(body);
-    console.log("Validation result:", validation);
     if (!validation.success) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
@@ -122,11 +120,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ trip
       },
     });
 
-    console.log("Updated trip:", updatedTrip);
-
     return NextResponse.json(updatedTrip);
   } catch (error) {
     console.error(`Failed to update trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to update trip" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ tripId: string }> }
+) {
+  const { tripId } = await params;
+  try {
+    await prisma.trip.delete({ where: { id: tripId } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(`Failed to delete trip ${tripId}:`, error);
+    return NextResponse.json({ error: "Failed to delete trip" }, { status: 500 });
   }
 }

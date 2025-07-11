@@ -85,6 +85,11 @@ export async function deleteDay(dayId: Day["id"]): Promise<void> {
   if (!res.ok) throw new Error(await res.text());
 }
 
+export async function deleteTrip(tripId: Trip["id"]): Promise<void> {
+  const res = await fetch(`/api/trips/${tripId}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(await res.text());
+}
+
 export async function reorderTrip(tripId: string, trip: TripWithSettings): Promise<void> {
   const res = await fetch(`/api/trips/${tripId}/reorder`, {
     method: "PUT",
@@ -98,7 +103,7 @@ export async function createTrip(data: {
   name: string;
   startDate: Date;
   endDate: Date;
-  startStop: PlaceDetails;
+  startStop: Partial<Stop>;
 }): Promise<{ tripId: string }> {
   const res = await fetch("/api/trips", {
     method: "POST",

@@ -116,23 +116,13 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
     setTrip({ ...trip, ...data });
 
     try {
-      const res = await api.updateTripDetails(tripId, data);
-      console.log("Trip updated successfully", res);
+      await api.updateTripDetails(tripId, data);
       toast({ title: "Trip updated" });
     } catch (e) {
       setTrip(previousTripData);
       toast({ variant: "destructive", title: "Failed to update trip details" });
     }
   };
-
-  // const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
-  //   console.log("newDateRange", newDateRange);
-  // if (!trip || !newDateRange?.from || !newDateRange?.to) return;
-  // handleTripDetailsChange({
-  //   startDate: newDateRange.from,
-  //   endDate: newDateRange.to,
-  // });
-  // };
 
   const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
     if (!trip || !newDateRange?.from || !newDateRange?.to) return;
