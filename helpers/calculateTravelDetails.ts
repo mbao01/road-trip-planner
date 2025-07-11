@@ -1,10 +1,11 @@
+import { TravelMode } from "@/app/api/utilities/validation/enums";
 import { TravelWithDetails } from "@/types/trip";
 import { formatCurrency } from "@/utilities/numbers";
 import { convertCurrency } from "@/utilities/units/currency";
 import { convertDistance } from "@/utilities/units/distance";
 import { convertDuration } from "@/utilities/units/duration";
 import { Settings, Travel } from "@prisma/client";
-import { TRAVEL_MODE, TravelMode } from "./constants/travelMode";
+import { TRAVEL_MODE } from "./constants/travelMode";
 
 export const calculateTravelDetails = (
   type: "stop" | "day" | "trip",

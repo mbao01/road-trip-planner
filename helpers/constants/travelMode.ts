@@ -1,9 +1,4 @@
-export enum TravelMode {
-  DRIVING = "DRIVING",
-  WALKING = "WALKING",
-  BICYCLING = "BICYCLING",
-  TRANSIT = "TRANSIT",
-}
+import { TravelMode } from "@/app/api/utilities/validation/enums";
 
 export const TRAVEL_MODE = {
   [TravelMode.DRIVING]: "Drive",

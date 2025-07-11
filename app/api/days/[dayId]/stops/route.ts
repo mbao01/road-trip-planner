@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
+import { validator } from "@/app/api/utilities/validation";
+import { addStopSchema } from "@/app/api/utilities/validation/schemas";
 import { prisma } from "@/lib/prisma";
-import { addStopSchema } from "@/lib/schemas";
 
 // POST /api/days/[dayId]/stops - Adds a new stop to a specific day
 export async function POST(request: Request, { params }: { params: Promise<{ dayId: string }> }) {
   const { dayId } = await params;
   try {
     const body = await request.json();
-    const validation = addStopSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+    const result = validator(body, addStopSchema);
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
     const day = await prisma.day.findUnique({
@@ -20,7 +22,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ day
 
     const newStop = await prisma.stop.create({
       data: {
-        ...validation.data,
+        ...result.data,
         dayId: dayId,
         tripId: day.tripId,
         order: day._count.stops,

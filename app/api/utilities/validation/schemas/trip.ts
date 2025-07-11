@@ -31,7 +31,7 @@ export const updateTripDetailsSchema = z.object({
   name: z.string().min(1).optional(),
 });
 
-export const updateSettingsSchema = z.object({
+export const updateTripSettingsSchema = z.object({
   mapStyle: z.enum(MapStyle).optional(),
   calculateCosts: z.boolean().optional(),
   currency: z.enum(Currency).optional(),
@@ -41,25 +41,3 @@ export const updateSettingsSchema = z.object({
   avoidMotorways: z.boolean().optional(),
   distanceUnit: z.enum(DistanceUnit).optional(),
 });
-
-export const addStopSchema = z.object({
-  name: z.string(),
-  placeId: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
-});
-
-export const reorderSchema = z.array(
-  z.object({
-    id: z.string(),
-    date: z.string(),
-    stops: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        latitude: z.number(),
-        longitude: z.number(),
-      })
-    ),
-  })
-);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { validator } from "@/app/api/utilities/validation";
+import { updateTripSchema } from "@/app/api/utilities/validation/schemas";
 import { prisma } from "@/lib/prisma";
-import { updateTripSchema } from "@/lib/schemas";
 import { isTempId } from "@/utilities/identity";
 
 const MOCK_USER_ID = "1"; // Hardcoded user
@@ -73,12 +74,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ trip
   const { tripId } = await params;
   try {
     const body = await request.json();
-    const validation = updateTripSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+    const result = validator(body, updateTripSchema);
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const { days = [], startDate, endDate } = validation.data;
+    const { days = [], startDate, endDate } = result.data;
 
     const existingDays = await prisma.day.findMany({
       where: { tripId },

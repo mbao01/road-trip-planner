@@ -1,4 +1,4 @@
-import { TravelMode } from "@/helpers/constants/travelMode";
+import { TravelMode } from "@/app/api/utilities/validation/enums";
 import { Day, Role, Stop, Travel, TripStatus } from "@prisma/client";
 
 // Type for the data displayed in the trips table

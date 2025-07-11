@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { validator } from "@/app/api/utilities/validation";
+import { createTripSchema } from "@/app/api/utilities/validation/schemas";
 import { prisma } from "@/lib/prisma";
-import { createTripSchema } from "@/lib/schemas";
 import { Role, TripStatus } from "@prisma/client";
 import { addDays, differenceInDays, isAfter, isBefore } from "date-fns";
 
@@ -65,11 +66,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const validation = createTripSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+    const result = validator(body, createTripSchema);
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.message }, { status: 400 });
     }
-    const { name, startDate, endDate, startStop } = validation.data;
+    const { name, startDate, endDate, startStop } = result.data;
     const dayCount = differenceInDays(endDate, startDate) + 1;
 
     const newTrip = await prisma.trip.create({

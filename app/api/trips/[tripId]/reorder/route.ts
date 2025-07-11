@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
+import { validator } from "@/app/api/utilities/validation";
+import { reorderDaysSchema } from "@/app/api/utilities/validation/schemas";
 import { prisma } from "@/lib/prisma";
-import { reorderSchema } from "@/lib/schemas";
 
 // PUT /api/trips/[tripId]/reorder - Handles reordering of days and stops
 export async function PUT(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   try {
     const body = await request.json();
-    const validation = reorderSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+    const result = validator(body, reorderDaysSchema);
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.message }, { status: 400 });
     }
-    const updatedDays = validation.data;
+    const updatedDays = result.data;
 
     const transaction = updatedDays.flatMap((day, dayIndex) => {
       const dayUpdate = prisma.day.update({
