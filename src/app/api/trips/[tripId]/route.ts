@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validator } from "@/app/api/utilities/validation";
 import { updateTripSchema } from "@/app/api/utilities/validation/schemas";
-import { getTripWithDetails, updateTrip, deleteTrip, updateTripWithDays } from "@/services/trip";
-import { isTempId } from "@/utilities/identity";
+import { deleteTrip, getTripWithDetails, updateTripWithDays } from "@/services/trip";
 
 const MOCK_USER_ID = "1"; // Hardcoded user
 
@@ -60,8 +59,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ trip
     if (!result.success) {
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
-
-    const { days = [], startDate, endDate } = result.data;
 
     const updatedTrip = await updateTripWithDays(tripId, result.data);
     return NextResponse.json(updatedTrip);

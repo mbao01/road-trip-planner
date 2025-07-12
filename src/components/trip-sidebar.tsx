@@ -90,9 +90,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
     const { clone, newStopData } = stopHelpers.addStop(trip, dayId, loc);
 
     handleAction(
-      async () => {
-        api.addStop(dayId, newStopData as Omit<Stop, "id">);
-      },
+      () => api.addStop(dayId, newStopData as Omit<Stop, "id">),
       clone,
       "Stop added",
       "Failed to add stop"
@@ -117,7 +115,15 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
     if (!dayToDelete) return;
     const { clone } = dayHelpers.deleteDay(trip, dayToDelete.id);
 
-    handleAction(() => api.deleteDay(dayToDelete.id), clone, "Day deleted", "Failed to delete day");
+    handleAction(
+      async () => {
+        await api.deleteDay(dayToDelete.id);
+        await api.updateTrip(clone.id, clone);
+      },
+      clone,
+      "Day deleted",
+      "Failed to delete day"
+    );
     setDayToDelete(null);
   };
 

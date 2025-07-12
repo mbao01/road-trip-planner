@@ -1,6 +1,6 @@
-import type { DateRange } from "react-day-picker";
 import type { TripWithSettings } from "@/lib/api";
 import type { DayWithStops } from "@/types/trip";
+import type { DateRange } from "react-day-picker";
 import { addDays, differenceInDays } from "date-fns";
 import { dayHelpers } from "../day";
 

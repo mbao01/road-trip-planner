@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/prisma";
+import { isTempId } from "@/utilities/identity";
+import { Role, TripStatus } from "@prisma/client";
+import { addDays, differenceInDays, isAfter, isBefore } from "date-fns";
 
 export async function getTripWithDetails(tripId: string, userId: string) {
   return prisma.trip.findFirst({
     where: {
       id: tripId,
-      OR: [
-        { ownerId: userId },
-        { collaborators: { some: { userId } } },
-      ],
+      OR: [{ ownerId: userId }, { collaborators: { some: { userId } } }],
     },
     include: {
       days: {
@@ -37,12 +37,14 @@ export async function updateTripWithDays(tripId: string, data: any) {
 
   // Update existing days
   await Promise.allSettled(
-    days.filter((day: any) => day.id && !day.id.startsWith('temp_')).map((day: any) =>
-      prisma.day.update({
-        where: { id: day.id, tripId },
-        data: { order: day.order, date: day.date },
-      })
-    )
+    days
+      .filter((day: any) => !isTempId(day.id))
+      .map((day: any) =>
+        prisma.day.update({
+          where: { id: day.id, tripId },
+          data: { order: day.order, date: day.date },
+        })
+      )
   );
 
   // Delete removed days
@@ -59,7 +61,7 @@ export async function updateTripWithDays(tripId: string, data: any) {
       days: {
         createMany: {
           data: days
-            .filter((d: any) => d.id && d.id.startsWith('temp_'))
+            .filter((d: any) => isTempId(d.id))
             .map((day: any) => ({ date: day.date, order: day.order })),
         },
       },
@@ -69,7 +71,6 @@ export async function updateTripWithDays(tripId: string, data: any) {
   return updatedTrip;
 }
 
-
 export async function deleteTrip(tripId: string) {
   return prisma.trip.delete({ where: { id: tripId } });
 }
@@ -77,16 +78,11 @@ export async function deleteTrip(tripId: string) {
 export async function updateTripDetails(tripId: string, data: any) {
   return prisma.trip.update({ where: { id: tripId }, data });
 }
-import { addDays, differenceInDays, isAfter, isBefore } from "date-fns";
-import { Role, TripStatus } from "@prisma/client";
 
 export async function getUserTrips(userId: string) {
   const userTrips = await prisma.trip.findMany({
     where: {
-      OR: [
-        { ownerId: userId },
-        { collaborators: { some: { userId: userId } } },
-      ],
+      OR: [{ ownerId: userId }, { collaborators: { some: { userId: userId } } }],
     },
     include: {
       days: { include: { stops: true } },

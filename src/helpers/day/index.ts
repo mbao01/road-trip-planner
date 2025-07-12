@@ -34,23 +34,18 @@ const createTripDays = ({
 
 const deleteDay = (trip: TripWithSettings, dayId: Day["id"]) => {
   const clone = structuredClone(trip);
-  const dayIndex = clone.days.findIndex((d) => d.id === dayId);
 
   if (clone.days.length <= 1) {
     return { clone };
   }
 
-  clone.days = clone.days.filter((d) => d.id !== dayId);
-
-  if (dayIndex === 0) {
-    clone.startDate = clone.days[0].date;
-  } else if (dayIndex === clone.days.length) {
-  } else {
-    clone.days = clone.days.map((day, index) => {
+  clone.days = clone.days
+    .filter((d) => d.id !== dayId)
+    .map((day, index) => {
       day.date = addDays(clone.startDate, index);
       return day;
     });
-  }
+  clone.startDate = clone.days[0].date;
   clone.endDate = clone.days[clone.days.length - 1].date;
 
   return { clone };
