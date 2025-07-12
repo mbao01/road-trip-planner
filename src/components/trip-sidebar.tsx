@@ -7,7 +7,8 @@ import type { Day, Stop } from "@prisma/client";
 import type React from "react";
 import type { FC } from "react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { dayHelpers } from "@/helpers/day";
+import { stopHelpers } from "@/helpers/stop";
 import * as api from "@/lib/api";
 import { createTempId } from "@/utilities/identity";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
@@ -54,34 +55,18 @@ import { StopCard } from "./stop-card";
 // --------------- Component ---------------
 interface TripSidebarProps {
   trip: TripWithSettings;
-  setTrip: React.Dispatch<React.SetStateAction<TripWithSettings | null>>;
-}
-
-export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
-  const [activeStop, setActiveStop] = useState<Stop | null>(null);
-  const [dayToDelete, setDayToDelete] = useState<Day | null>(null);
-  const { toast } = useToast();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
-
-  const handleAction = async (
+  handleAction: (
     action: () => Promise<unknown>,
     optimisticState: TripWithSettings,
     successMessage: string,
     failureMessage: string
-  ) => {
-    const originalState = trip;
-    setTrip(optimisticState);
-    try {
-      await action();
-      const travel = await api.updateTripTravel(trip.id);
-      setTrip({ ...optimisticState, travel });
-      toast({ title: successMessage });
-    } catch (error) {
-      setTrip(originalState);
-      console.error(error);
-      toast({ variant: "destructive", title: failureMessage });
-    }
-  };
+  ) => Promise<void>;
+}
+
+export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
+  const [activeStop, setActiveStop] = useState<Stop | null>(null);
+  const [dayToDelete, setDayToDelete] = useState<Day | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveStop(null);
@@ -91,27 +76,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
     const dstDayId = over.data.current?.day?.id || over.data.current?.dayId;
     if (!srcDayId || !dstDayId) return;
 
-    const clone = structuredClone(trip);
-    const srcDay = clone.days.find((d) => d.id === srcDayId)!;
-    const dstDay = clone.days.find((d) => d.id === dstDayId)!;
-
-    if (srcDayId === dstDayId) {
-      const oldIndex = srcDay.stops.findIndex((s) => `stop-${s.id}` === active.id);
-      const newIndex = String(over.id).startsWith("stop-")
-        ? dstDay.stops.findIndex((s) => `stop-${s.id}` === over.id)
-        : dstDay.stops.length - 1;
-      const [item] = srcDay.stops.splice(oldIndex, 1);
-      srcDay.stops.splice(newIndex, 0, item);
-    } else {
-      const oldIndex = srcDay.stops.findIndex((s) => `stop-${s.id}` === active.id);
-      const [moved] = srcDay.stops.splice(oldIndex, 1);
-      if (String(over.id).startsWith("stop-")) {
-        const newIndex = dstDay.stops.findIndex((s) => `stop-${s.id}` === over.id);
-        dstDay.stops.splice(newIndex, 0, moved);
-      } else {
-        dstDay.stops.push(moved);
-      }
-    }
+    const { clone } = stopHelpers.reorderStop(trip, srcDayId, dstDayId, active.id, over.id);
 
     handleAction(
       () => api.reorderTrip(trip.id, clone),
@@ -122,26 +87,11 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
   };
 
   const addStop = async (dayId: Day["id"], loc: PlaceDetails) => {
-    const clone = structuredClone(trip);
-    const day = clone.days.find((d) => d.id === dayId)!;
-    const newStopData = {
-      name: loc.name,
-      placeId: loc.id,
-      latitude: loc.latitude,
-      longitude: loc.longitude,
-      customName: null,
-      order: day.stops.length,
-      dayId: dayId,
-      tripId: trip.id,
-    };
-    const tempId = createTempId();
-    day.stops.push({ ...newStopData, id: tempId } as Stop);
+    const { clone, newStopData } = stopHelpers.addStop(trip, dayId, loc);
 
     handleAction(
       async () => {
-        const savedStop = await api.addStop(dayId, newStopData as Omit<Stop, "id">);
-        const stopIndex = day.stops.findIndex((s) => s.id === tempId);
-        if (stopIndex !== -1) day.stops[stopIndex] = savedStop;
+        api.addStop(dayId, newStopData as Omit<Stop, "id">);
       },
       clone,
       "Stop added",
@@ -150,13 +100,12 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
   };
 
   const deleteStop = (dayId: Day["id"], stopId: Stop["id"]) => {
-    const clone = structuredClone(trip);
-    const day = clone.days.find((d) => d.id === dayId)!;
-    day.stops = day.stops.filter((s) => s.id !== stopId);
+    const { clone } = stopHelpers.deleteStop(trip, dayId, stopId);
+
     handleAction(
       async () => {
         await api.deleteStop(stopId);
-        await api.reorderTrip(trip.id, clone);
+        await api.reorderTrip(clone.id, clone);
       },
       clone,
       "Stop deleted",
@@ -166,26 +115,14 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, setTrip }) => {
 
   const confirmDeleteDay = () => {
     if (!dayToDelete) return;
-    const clone = structuredClone(trip);
-    clone.days = clone.days.filter((d) => d.id !== dayToDelete.id);
+    const { clone } = dayHelpers.deleteDay(trip, dayToDelete.id);
+
     handleAction(() => api.deleteDay(dayToDelete.id), clone, "Day deleted", "Failed to delete day");
     setDayToDelete(null);
   };
 
   const moveDay = (dayId: Day["id"], direction: "up" | "down") => {
-    const clone = structuredClone(trip);
-    const index = clone.days.findIndex((d) => d.id === dayId);
-    if (index === -1) return;
-
-    const swapIndex = direction === "up" ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= clone.days.length) return; // Swap the days in the array
-    [clone.days[index], clone.days[swapIndex]] = [clone.days[swapIndex], clone.days[index]];
-
-    // Recalculate dates for all days based on the new order
-    const { startDate } = trip;
-    clone.days.forEach((day, i) => {
-      day.date = addDays(startDate, i);
-    });
+    const { clone } = dayHelpers.moveDay(trip, dayId, direction);
 
     handleAction(() => api.reorderTrip(trip.id, clone), clone, "Day moved", "Failed to move day");
   };

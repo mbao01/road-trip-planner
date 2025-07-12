@@ -7,6 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
+import { dayHelpers } from "@/helpers/day";
+import { tripHelpers } from "@/helpers/trip";
 import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
 import { DayWithStops } from "@/types/trip";
@@ -60,30 +62,38 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
     }
   }, [initialTripData, tripId]);
 
-  // TODO:: use this method for all actions and pass it to children components
+  /**
+   * Handles an action that updates the trip and trip travel.
+   * @param action The action to perform.
+   * @param optimisticState The optimistic state to set.
+   * @param successMessage The success message to display.
+   * @param failureMessage The failure message to display.
+   */
   const handleAction = async (
     action: () => Promise<unknown>,
     optimisticState: TripWithSettings,
     successMessage: string,
-    failureMessage: string
+    failureMessage: string,
+    options: { refetchTripTravel?: boolean } = {}
   ) => {
+    const { refetchTripTravel = true } = options;
     const originalState = trip;
     setTrip(optimisticState);
     try {
       await action();
-      // const travel = await api.updateTripTravel(tripId);
-      // const trip = await api.fetchTrip(tripId);
-      const [travelPromise, tripPromise] = await Promise.allSettled([
-        api.updateTripTravel(tripId),
-        api.fetchTrip(tripId),
-      ]);
-      const travel =
-        travelPromise.status === "fulfilled"
-          ? travelPromise.value
-          : (originalState?.travel ?? ({} as Travel));
-      const trip = tripPromise.status === "fulfilled" ? tripPromise.value : undefined;
+      if (refetchTripTravel) {
+        const [travelPromise, tripPromise] = await Promise.allSettled([
+          api.updateTripTravel(tripId),
+          api.fetchTrip(tripId),
+        ]);
+        const travel =
+          travelPromise.status === "fulfilled"
+            ? travelPromise.value
+            : (originalState?.travel ?? ({} as Travel));
+        const trip = tripPromise.status === "fulfilled" ? tripPromise.value : undefined;
 
-      setTrip({ ...optimisticState, ...trip, travel });
+        setTrip({ ...optimisticState, ...trip, travel });
+      }
       toast({ title: successMessage });
     } catch (error) {
       setTrip(originalState);
@@ -92,120 +102,73 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
     }
   };
 
+  /**
+   * Handles an update to the trip's settings.
+   * @param newSettings The new settings.
+   */
   const handleUpdateSettings = async (
     newSettings: Omit<Settings, "id" | "tripId" | "createdAt" | "updatedAt">
   ) => {
     if (!trip) return;
-    const previousTripData = trip;
-    const updatedSettings = { ...trip.settings, ...newSettings };
-    setTrip({ ...trip, settings: updatedSettings });
+    const clone = structuredClone(trip);
+    clone.settings = { ...clone.settings, ...newSettings };
 
-    try {
-      await api.updateSettings(tripId, newSettings);
-      toast({ title: "Settings updated" });
-    } catch (e) {
-      console.error(e);
-      setTrip(previousTripData);
-      toast({ variant: "destructive", title: "Failed to update settings" });
-    }
+    handleAction(
+      () => api.updateSettings(tripId, newSettings),
+      clone,
+      "Settings updated",
+      "Failed to update settings",
+      { refetchTripTravel: false }
+    );
   };
 
+  /**
+   * Handles a change in the trip's details.
+   * @param data The new trip details.
+   */
   const handleTripDetailsChange = async (
     data: Partial<Omit<Trip, "id" | "createdAt" | "updatedAt">>
   ) => {
     if (!trip) return;
-    const previousTripData = trip;
-    setTrip({ ...trip, ...data });
-
-    try {
-      await api.updateTripDetails(tripId, data);
-      toast({ title: "Trip updated" });
-    } catch (e) {
-      setTrip(previousTripData);
-      console.error(e);
-      toast({ variant: "destructive", title: "Failed to update trip details" });
-    }
-  };
-
-  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
-    if (!trip || !newDateRange?.from || !newDateRange?.to) return;
-
-    const clone = structuredClone(trip);
-
-    const oldDays = clone.days;
-    const { from: startDate, to: endDate } = newDateRange;
-    const newDayCount = differenceInDays(endDate, startDate) + 1;
-
-    const updatedDays = oldDays
-      .slice(0, Math.min(oldDays.length, newDayCount))
-      .map((day, index) => ({
-        ...day,
-        date: addDays(startDate, index),
-      }));
-
-    let finalDays: DayWithStops[];
-
-    if (newDayCount < oldDays.length) {
-      const daysToRemove = oldDays.slice(newDayCount);
-      const hasStopsInDaysToRemove = daysToRemove.some((d) => d.stops.length > 0);
-
-      if (hasStopsInDaysToRemove) {
-        setDaysToDeleteInfo({ days: daysToRemove, newDateRange });
-        return; // skip because we require confirmation
-      } else {
-        finalDays = updatedDays.slice(0, newDayCount);
-      }
-    } else if (newDayCount > oldDays.length) {
-      const additionalDays = Array.from({ length: newDayCount - oldDays.length }, (_, i) => {
-        const dayIndex = oldDays.length + i;
-        const tempId = createTempId(Date.now() + i);
-        return {
-          id: tempId,
-          date: addDays(startDate, dayIndex),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          tripId: clone.id,
-          order: dayIndex,
-          stops: [],
-        };
-      });
-      finalDays = [...updatedDays, ...additionalDays];
-    } else {
-      finalDays = updatedDays;
-    }
-
-    clone.startDate = startDate;
-    clone.endDate = endDate;
-    clone.days = finalDays;
+    const clone = { ...structuredClone(trip), ...data };
 
     handleAction(
-      async () => {
-        await api.updateTrip(trip.id, clone);
-      },
+      () => api.updateTripDetails(tripId, data),
       clone,
+      "Trip updated",
+      "Failed to update trip details",
+      { refetchTripTravel: false }
+    );
+  };
+
+  /**
+   * Handles a change in the trip's date range in other to update the trip days.
+   * @param newDateRange The new date range.
+   */
+  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+    if (!trip || !newDateRange?.from || !newDateRange?.to) return;
+    const { from, to } = newDateRange;
+    const result = tripHelpers.changeTripRange(trip, { from, to }, setDaysToDeleteInfo);
+
+    if (!result?.clone) return;
+
+    handleAction(
+      () => api.updateTrip(trip.id, result.clone),
+      result.clone,
       "Date range updated",
       "Failed to update date range"
     );
-
-    // handleUpdateTrip({ ...trip, days: finalDays, ...newDates }, "Date range updated");
   };
 
+  /**
+   * Handles the confirmation of deleting excess days with at least one of them having stop(s) in them.
+   */
   const confirmDeleteExcessDays = () => {
     if (!trip || !daysToDeleteInfo?.newDateRange?.from || !daysToDeleteInfo?.newDateRange?.to)
       return;
 
-    const clone = structuredClone(trip);
-
-    const { from: startDate, to: endDate } = daysToDeleteInfo.newDateRange;
-    const newDayCount = differenceInDays(endDate, startDate) + 1;
-    const finalDays = clone.days.slice(0, newDayCount).map((day, index) => ({
-      ...day,
-      date: addDays(startDate, index),
-    }));
-
-    clone.startDate = startDate;
-    clone.endDate = endDate;
-    clone.days = finalDays;
+    const { from, to } = daysToDeleteInfo.newDateRange;
+    const { clone } = dayHelpers.pruneDays(trip, { from, to });
 
     handleAction(
       () => api.updateTrip(trip.id, clone),
@@ -214,10 +177,6 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
       "Failed to update date range"
     );
 
-    // handleUpdateTrip(
-    //   { ...trip, days: finalDays, ...newDates },
-    //   "Days deleted and date range updated"
-    // );
     setDaysToDeleteInfo(null);
   };
 
@@ -321,7 +280,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
               </div>
             </div>
           </div>
-          <TripSidebar trip={trip} setTrip={setTrip} />
+          <TripSidebar trip={trip} handleAction={handleAction} />
         </div>
         <div className="flex-1 relative">
           <TripMap

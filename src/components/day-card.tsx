@@ -2,7 +2,7 @@
 
 import type { PlaceDetails } from "@/lib/google-maps-api";
 import type { FC } from "react";
-import React from "react";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -52,7 +52,10 @@ export const DayCard: FC<DayCardProps> = ({
     data: { type: "day", day: day },
   });
 
-  const { display } = calculateTravelDetails("day", travel, settings, day.id);
+  const details = useMemo(() => {
+    const { display } = calculateTravelDetails("day", travel, settings, day.id);
+    return display;
+  }, [travel, settings, day]);
 
   return (
     <Card ref={setNodeRef} className="p-4">
@@ -96,7 +99,7 @@ export const DayCard: FC<DayCardProps> = ({
 
       <div className="mb-4">
         <div className="inline-block max-w-full px-3 py-1 bg-gray-100 rounded-full text-xs text-muted-foreground truncate">
-          {display}
+          {details}
         </div>
       </div>
 

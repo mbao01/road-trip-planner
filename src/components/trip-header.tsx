@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date";
 import { Role, Trip } from "@prisma/client";
 import { isSameDay } from "date-fns";
 import {
@@ -179,7 +180,7 @@ export function TripHeader({
         />
         <div className="flex items-center gap-2">
           <DateRangePicker
-            maxDays={10}
+            maxDays={MAX__NO_OF_TRIP_DAYS}
             date={selectedDateRange}
             onDateChange={setSelectedDateRange}
             triggerClassName="px-1 py-0"

@@ -93,6 +93,7 @@ export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
       origin,
       destination,
       waypoints,
+      // TODO:: use stop travel mode here
       travelMode: "DRIVING" as google.maps.TravelMode.DRIVING,
     };
   }, [stops]);

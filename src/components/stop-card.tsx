@@ -2,7 +2,7 @@
 
 import type { Day, Settings, Stop, Travel } from "@prisma/client";
 import type { FC } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -90,6 +90,11 @@ export const StopCard: FC<StopCardProps> = ({
     },
   });
 
+  const details = useMemo(() => {
+    const { display } = calculateTravelDetails("stop", travel, settings, stop.id);
+    return display;
+  }, [travel, settings, stop]);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -98,11 +103,10 @@ export const StopCard: FC<StopCardProps> = ({
 
   // The first stop of the entire trip has no driving details before it.
   const showDrivingDetails = !isFirstStopOfTrip;
-  const { display } = calculateTravelDetails("stop", travel, settings, stop.id);
 
   return (
     <div ref={setNodeRef} style={style} className={isDragging ? "opacity-50" : ""}>
-      {showDrivingDetails && <TravelDetails details={display} />}
+      {showDrivingDetails && <TravelDetails details={details} />}
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="border rounded-lg bg-background">
           <div className="flex items-center gap-1 p-2">

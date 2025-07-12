@@ -19,6 +19,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useToast } from "@/hooks/use-toast";
 import { createTrip } from "@/lib/api";
 import { getPlaceDetails, searchPlaces } from "@/lib/google-maps-api";
+import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date";
 import { Loader2, Search, X } from "lucide-react";
 import { DateRangePicker } from "./date-range-picker";
 
@@ -132,10 +133,10 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
           </div>
           <div className="space-y-2">
             <Label>Trip dates</Label>
-            <DateRangePicker date={dates} onDateChange={setDates} maxDays={10} />
+            <DateRangePicker date={dates} onDateChange={setDates} maxDays={MAX__NO_OF_TRIP_DAYS} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="start-stop">Trip start stop</Label>
+            <Label htmlFor="start-stop">Trip start point</Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
