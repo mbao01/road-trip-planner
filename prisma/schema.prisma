@@ -1,191 +1,125 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 model User {
-  id             String          @id @default(cuid(2))
-  email          String          @unique
-  firstName       String?
-  lastName       String?
-  avatarUrl      String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  ownedTrips     Trip[]
-  collaborations Collaborator[]
-  providers      Provider[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  trips        Trip[]
+  collaborator Collaborator[]
 }
 
-model Provider {
-  id            String       @id @default(cuid(2))
-  type          ProviderType
-  providerId    String       @unique
-  providerData  Json?
-  emailVerified  Boolean      @default(false)
-  expiresAt     DateTime?
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
-  @@unique([type, providerId])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Trip {
-  id            String          @id @default(cuid(2))
-  name          String
-  startDate     DateTime
-  endDate       DateTime
-  status        TripStatus      @default(ACTIVE)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  owner         User            @relation(fields: [ownerId], references: [id])
-  ownerId       String
-  days          Day[]
-  stops         Stop[]
-  travel        Travel?
-  settings      Settings?
+  id          String    @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  ownerId     String
+  status      String    @default("upcoming")
+  access      String    @default("private")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  days        Day[]
+  settings    Settings?
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   collaborators Collaborator[]
 }
 
-model Stop {
-  id          String      @id @default(cuid(2))
-  name        String
-  customName  String?
-  latitude    Float
-  longitude   Float
-  placeId     String
-  order       Int
-  day         Day         @relation(fields: [dayId], references: [id], onDelete: Cascade)
-  dayId       String
-  trip        Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId      String
-  itinerary   Itinerary[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
+model Collaborator {
+  id     String @id @default(cuid())
+  tripId String
+  userId String
+  role   String // e.g., "editor", "viewer"
 
-model Travel {
-  id        String    @id @default(cuid(2))
-  travels   Json      // { stopId: { originId, duration, distance, cost, mode } }
-  originId  String?
-  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId    String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, userId])
 }
 
 model Day {
-  id        String    @id @default(cuid(2))
+  id        String   @id @default(cuid())
   date      DateTime
-  order     Int
-  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
   tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   stops     Stop[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Itinerary {
-  id        String             @id @default(cuid(2))
-  name      String?
-  notes     String?
-  assets    ItineraryAsset[]
-  stop      Stop               @relation(fields: [stopId], references: [id], onDelete: Cascade)
-  stopId    String
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-}
-
-model ItineraryAsset {
-  id          String             @id @default(cuid(2))
-  url         String
-  type        ItineraryAssetType @default(PHOTO)
-  itinerary   Itinerary          @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
-  itineraryId String
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+model Stop {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  latitude    Float
+  longitude   Float
+  dayId       String
+  day         Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  order       Int
+  notes       String?
+  travelMode  String?
+  travelTime  Int?
+  travelDistance Int?
+  cost        Float?
+  currency    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Settings {
-  id               String        @id @default(cuid(2))
-  mapStyle         MapStyle?     @default(DEFAULT)
-  calculateCosts   Boolean?      @default(true)
-  currency         Currency?     @default(GBP)
-  fuelCostPerLitre Float?        @default(1.5)
-  mpg              Float?        @default(30)
-  avoidTolls       Boolean?      @default(false)
-  avoidMotorways   Boolean?      @default(false)
-  distanceUnit     DistanceUnit? @default(MI)
-  trip             Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId           String        @unique
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-}
-
-model Collaborator {
-  id        String   @id @default(cuid(2))
-  role      Role
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, tripId])
-}
-
-enum Role {
-  OWNER
-  EDITOR
-  VIEWER
-  PUBLIC
-}
-
-enum TripStatus {
-  ACTIVE
-  ARCHIVED
-  DELETED
-  COMPLETED
-  IN_PROGRESS
-  NOT_STARTED
-}
-
-enum Currency {
-  GBP
-  EUR
-  USD
-}
-
-enum DistanceUnit {
-  MI
-  KM
-}
-
-enum ItineraryAssetType {
-  PDF
-  PHOTO
-  VIDEO
-  AUDIO
-}
-
-enum ProviderType {
-  CREDENTIAL
-  GOOGLE
-}
-
-enum MapStyle {
-  DEFAULT
-  ROADMAP
-  SATELLITE
-  HYBRID
-  TERRAIN
+  id           String @id @default(cuid())
+  tripId       String @unique
+  trip         Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  distanceUnit String @default("miles")
 }

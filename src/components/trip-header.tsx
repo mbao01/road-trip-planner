@@ -1,220 +1,141 @@
-"use client";
+"use client"
 
-import type React from "react";
-import type { DateRange } from "react-day-picker";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState, useTransition } from "react"
+import { useSession, signOut } from "next-auth/react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { Check, Loader2, LogOut, Settings, Share2, User, Users } from "lucide-react"
+
+import type { TripDetails } from "@/types/trip"
+import { updateTripDetails } from "@/lib/api"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { DateRangePicker } from "@/components/date-range-picker"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuPortal,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date";
-import { Role, Trip } from "@prisma/client";
-import { isSameDay } from "date-fns";
-import {
-  CheckIcon,
-  Download,
-  Home,
-  Laptop,
-  LogOut,
-  Moon,
-  Palette,
-  Settings,
-  Sun,
-  User,
-  XIcon,
-} from "lucide-react";
-import { useTheme } from "next-themes";
-import { DateRangePicker } from "./date-range-picker";
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getAbbreviation } from "@/utilities/helpers/getAbbreviation"
+import { ThemeToggle } from "./theme-toggle"
+import { ShareModal } from "./share-modal"
+import SettingsModal from "./settings-modal"
 
 interface TripHeaderProps {
-  trip: Trip;
-  access: Role;
-  onTripNameChange: (data: { name?: string }) => void;
-  onDateRangeChange: (dateRange: DateRange | undefined) => void;
-  onSettings: () => void;
-  onShare: () => void;
+  trip: TripDetails
 }
 
-const accessBadgeColors: Record<TripHeaderProps["access"], string> = {
-  [Role.OWNER]: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100",
-  [Role.EDITOR]: "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
-  [Role.VIEWER]: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100",
-  [Role.PUBLIC]: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100",
-};
+export function TripHeader({ trip }: TripHeaderProps) {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [isSaving, setIsSaving] = useState(false)
+  const [isShareModalOpen, setShareModalOpen] = useState(false)
+  const [isSettingsModalOpen, setSettingsModalOpen] = useState(false)
 
-export function TripHeader({
-  trip,
-  access,
-  onTripNameChange,
-  onDateRangeChange,
-  onSettings,
-  onShare,
-}: TripHeaderProps) {
-  const [name, setName] = useState(trip.name);
-  const { setTheme } = useTheme();
-  const currentDateRange = {
-    from: trip.startDate,
-    to: trip.endDate,
-  };
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(
-    currentDateRange
-  );
+  const [date, setDate] = useState<{ from: Date; to: Date }>({
+    from: new Date(trip.startDate),
+    to: new Date(trip.endDate),
+  })
 
-  // Sync local state if props change from parent (e.g., after a successful save)
-  useEffect(() => {
-    setSelectedDateRange({ from: trip.startDate, to: trip.endDate });
-  }, [trip.startDate, trip.endDate]);
+  const hasDateChanged = date.from.toISOString() !== trip.startDate || date.to.toISOString() !== trip.endDate
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-  };
-
-  const handleNameBlur = () => {
-    if (name !== trip.name) {
-      onTripNameChange({ name });
+  const handleSaveDates = async () => {
+    setIsSaving(true)
+    try {
+      await updateTripDetails(trip.id, {
+        startDate: date.from.toISOString(),
+        endDate: date.to.toISOString(),
+      })
+      toast.success("Trip dates updated successfully!")
+      startTransition(() => {
+        router.refresh()
+      })
+    } catch (error) {
+      toast.error("Failed to update trip dates.")
+    } finally {
+      setIsSaving(false)
     }
-  };
-
-  const handleSaveDates = () => {
-    onDateRangeChange(selectedDateRange);
-  };
-
-  const handleCancelDates = () => {
-    setSelectedDateRange(currentDateRange);
-  };
-
-  const isDateRangeChanged =
-    !isSameDay(currentDateRange.from, selectedDateRange?.from || currentDateRange.from) ||
-    !isSameDay(currentDateRange.to, selectedDateRange?.to || currentDateRange.to);
+  }
 
   return (
-    <div className="p-4 border-b">
-      <div className="flex items-center justify-between mb-4">
+    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
+      <div className="flex items-center gap-4">
+        <h1 className="text-xl font-semibold">{trip.name}</h1>
         <div className="flex items-center gap-2">
-          <Link href="/trips">
-            <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-              <div className="w-4 h-4 bg-white rounded-sm transform rotate-45"></div>
-            </div>
-          </Link>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
-            <Download className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onSettings}>
-            <Settings className="w-4 h-4" />
-            Settings
-          </Button>
-          <Button size="sm" onClick={onShare} className="bg-orange-500 hover:bg-orange-600">
-            Share
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="w-8 h-8 cursor-pointer">
-                <AvatarFallback className="bg-orange-100 text-orange-600">A</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem asChild>
-                <Link href="/trips">
-                  <Home className="mr-2 h-4 w-4" />
-                  <span>Trips</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Palette className="mr-2 h-4 w-4" />
-                  <span>Theme</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
-                      <Sun className="mr-2 h-4 w-4" />
-                      <span>Light</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
-                      <Moon className="mr-2 h-4 w-4" />
-                      <span>Dark</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("system")}>
-                      <Laptop className="mr-2 h-4 w-4" />
-                      <span>System</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      <div>
-        <Input
-          value={name}
-          onChange={handleNameChange}
-          onBlur={handleNameBlur}
-          className="!text-2xl font-bold mb-2 h-auto border-none focus-visible:ring-0 shadow-none p-1"
-        />
-        <div className="flex items-center gap-2">
-          <DateRangePicker
-            maxDays={MAX__NO_OF_TRIP_DAYS}
-            date={selectedDateRange}
-            onDateChange={setSelectedDateRange}
-            triggerClassName="px-1 py-0"
-          />
-          {isDateRangeChanged && (
-            <>
-              <Button
-                onClick={handleSaveDates}
-                size="icon"
-                variant="outline"
-                aria-label="Save date changes"
-                className="h-auto p-0.5 w-auto"
-              >
-                <CheckIcon className="h-4 w-4" />
-                <span className="sr-only">Save</span>
-              </Button>
-              <Button
-                onClick={handleCancelDates}
-                size="icon"
-                variant="outline"
-                aria-label="Cancel date changes"
-                className="h-auto p-0.5 w-auto"
-              >
-                <XIcon className="h-4 w-4" />
-                <span className="sr-only">Cancel</span>
-              </Button>
-            </>
+          <DateRangePicker date={date} onDateChange={setDate} maxDays={30} disabled={isPending} />
+          {hasDateChanged && (
+            <Button size="sm" onClick={handleSaveDates} disabled={isSaving}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              <span className="sr-only">Save Dates</span>
+            </Button>
           )}
-
-          <Badge variant="outline" className={cn("font-medium ml-auto", accessBadgeColors[access])}>
-            {access}
-          </Badge>
         </div>
+        <Badge variant="outline">{trip.access}</Badge>
       </div>
-    </div>
-  );
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="sm" onClick={() => setShareModalOpen(true)}>
+          <Share2 className="mr-2 h-4 w-4" />
+          Share
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setSettingsModalOpen(true)}>
+          <Settings className="mr-2 h-4 w-4" />
+          Settings
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
+                <AvatarFallback>{getAbbreviation(session?.user?.name ?? "")}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{session?.user?.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">{session?.user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/trips">
+                <Users className="mr-2 h-4 w-4" />
+                <span>Trips</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              <span className="mr-2">Theme</span>
+              <ThemeToggle />
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <ShareModal isOpen={isShareModalOpen} onClose={() => setShareModalOpen(false)} />
+      {trip.settings && (
+        <SettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={() => setSettingsModalOpen(false)}
+          settings={trip.settings}
+          tripId={trip.id}
+        />
+      )}
+    </header>
+  )
 }
