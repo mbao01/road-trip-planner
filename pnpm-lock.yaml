@@ -141,7 +141,7 @@ importers:
         specifier: latest
         version: 1.1.1(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       crypto-js:
-        specifier: latest
+        specifier: ^4.2.0
         version: 4.2.0
       daisyui:
         specifier: latest
@@ -252,6 +252,9 @@ importers:
       '@types/bcrypt':
         specifier: ^5.0.2
         version: 5.0.2
+      '@types/crypto-js':
+        specifier: ^4.2.2
+        version: 4.2.2
       '@types/google-libphonenumber':
         specifier: ^7.4.30
         version: 7.4.30
@@ -2335,6 +2338,9 @@ packages:
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
+
+  '@types/crypto-js@4.2.2':
+    resolution: {integrity: sha512-sDOLlVbHhXpAUAL0YHDUUwDZf3iN4Bwi4W6a0W0b+QcAezUbRtH4FVb+9J4h+XFPW7l/gQ9F8qC7P+Ec4k8QVQ==}
 
   '@types/d3-array@3.2.1':
     resolution: {integrity: sha512-Y2Jn2idRrLzUfAKV2LyRImR+y4oa2AntrgID95SHJxuMUrkNXmanDSed71sRNZysveJVt1hLLemQZIady0FpEg==}
@@ -7483,6 +7489,8 @@ snapshots:
       '@types/node': 22.16.3
 
   '@types/cookie@0.6.0': {}
+
+  '@types/crypto-js@4.2.2': {}
 
   '@types/d3-array@3.2.1': {}
 

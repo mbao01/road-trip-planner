@@ -5,9 +5,9 @@ export const validator = <T>(data: unknown, schema: z.Schema<T>) => {
   const result = schema.safeParse(data);
 
   if (!result.success) {
-    const fieldErrors = result.error.formErrors.fieldErrors;
+    const errors = z.treeifyError(result.error);
     const message = result.error.format();
-    return { success: false, fieldErrors, message } as const;
+    return { success: false, errors, message } as const;
   }
 
   return result;
@@ -18,7 +18,7 @@ const invariantValidator = <T>(data: unknown, schema: z.Schema<T>, message?: str
   let messages = message ? [message] : [];
 
   if (messages.length === 0 && !result.success) {
-    Object.entries(result.error.formErrors.fieldErrors).forEach(([key, value]) => {
+    Object.entries(z.treeifyError(result.error)).forEach(([key, value]) => {
       messages = [...messages, ...(value as string[]).map((error) => `[${key}] - ${error}\n`)];
     });
   }
