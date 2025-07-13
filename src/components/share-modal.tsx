@@ -105,7 +105,7 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
 
       handleAction(
         async () => {
-          // TODO: call endpoint to invite user
+          await api.addCollaborator(clone.id, newCollaborator);
           setInviteEmail("");
         },
         clone,
@@ -115,30 +115,26 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
     }
   };
 
-  const handleRoleChange = (id: string, newTripRole: TripRole) => {
+  const handleRoleChange = (collaboratorId: string, newTripRole: TripRole) => {
     const clone = structuredClone(trip);
     clone.collaborators = clone.collaborators.map((c) =>
-      c.id === id ? { ...c, tripRole: newTripRole } : c
+      c.id === collaboratorId ? { ...c, tripRole: newTripRole } : c
     );
 
     handleAction(
-      async () => {
-        // TODO: call endpoint to invite user
-      },
+      () => api.updateCollaborator(clone.id, collaboratorId, { tripRole: newTripRole }),
       clone,
       "User role updated successfully",
       "Failed to update user role"
     );
   };
 
-  const handleRemoveCollaborator = (id: string) => {
+  const handleRemoveCollaborator = (collaboratorId: string) => {
     const clone = structuredClone(trip);
-    clone.collaborators = clone.collaborators.filter((c) => c.id !== id);
+    clone.collaborators = clone.collaborators.filter((c) => c.id !== collaboratorId);
 
     handleAction(
-      async () => {
-        // TODO: call endpoint to invite user
-      },
+      () => api.removeCollaborator(clone.id, collaboratorId),
       clone,
       "User removed successfully",
       "Failed to remove user"
