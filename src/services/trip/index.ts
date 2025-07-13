@@ -1,6 +1,11 @@
+import {
+  CreateTripArg,
+  UpdateTripArg,
+  UpdateTripDetailsArg,
+} from "@/app/api/utilities/validation/schemas/trip";
 import { prisma } from "@/lib/prisma";
 import { isTempId } from "@/utilities/identity";
-import { Trip, TripAccess, TripRole, TripStatus } from "@prisma/client";
+import { TripAccess, TripRole, TripStatus } from "@prisma/client";
 import { addDays, differenceInDays } from "date-fns";
 
 /**
@@ -89,20 +94,20 @@ export async function getUserTrip(userId: string, tripId: string) {
  * @param data - The data to update the trip with
  * @returns The updated trip
  */
-export async function updateTripWithDays(tripId: string, data: any) {
+export async function updateTripWithDays(tripId: string, data: UpdateTripArg) {
   const trip = await prisma.$transaction(async (tx) => {
     // Expects data to have: days, startDate, endDate
     const { days = [], startDate, endDate } = data;
     // Find existing days
     const existingDays = await tx.day.findMany({ where: { tripId } });
-    const daysToDelete = existingDays.filter((day) => !days.some((d: any) => d.id === day.id));
+    const daysToDelete = existingDays.filter((day) => !days.some((d) => d.id === day.id));
 
     // Update existing days
     // TODO:: in order to avoid a connection/pool timeout, confirm that this query is batched
     await Promise.allSettled(
       days
-        .filter((day: any) => !isTempId(day.id))
-        .map((day: any) =>
+        .filter((day) => !isTempId(day.id))
+        .map((day) =>
           tx.day.update({
             where: { id: day.id, tripId },
             data: { order: day.order, date: day.date },
@@ -113,7 +118,7 @@ export async function updateTripWithDays(tripId: string, data: any) {
     // Delete removed days
     if (daysToDelete.length > 0) {
       await tx.day.deleteMany({
-        where: { id: { in: daysToDelete.map((day: any) => day.id) } },
+        where: { id: { in: daysToDelete.map((day) => day.id) } },
       });
     }
 
@@ -126,8 +131,8 @@ export async function updateTripWithDays(tripId: string, data: any) {
         days: {
           createMany: {
             data: days
-              .filter((d: any) => isTempId(d.id))
-              .map((day: any) => ({ date: day.date, order: day.order })),
+              .filter((d) => isTempId(d.id))
+              .map((day) => ({ date: day.date, order: day.order })),
           },
         },
       },
@@ -148,7 +153,7 @@ export async function updateTripWithDays(tripId: string, data: any) {
 export async function updateTripDetails(
   userId: string,
   tripId: string,
-  data: Partial<Pick<Trip, "name" | "status" | "access">>
+  data: UpdateTripDetailsArg
 ) {
   return prisma.trip.update({
     where: {
@@ -173,17 +178,8 @@ export async function createTrip({
   endDate,
   ownerId,
   startStop,
-}: {
-  name: string;
-  startDate: Date;
-  endDate: Date;
+}: CreateTripArg & {
   ownerId: string;
-  startStop: {
-    name: string;
-    placeId: string;
-    latitude: number;
-    longitude: number;
-  };
 }) {
   const trip = await prisma.$transaction(async (tx) => {
     const dayCount = differenceInDays(endDate, startDate) + 1;

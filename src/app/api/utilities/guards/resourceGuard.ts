@@ -15,6 +15,7 @@ export async function resourceGuard(
   m: Record<
     Resource,
     {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [x: string]: any;
       roles: string[];
     } & {}

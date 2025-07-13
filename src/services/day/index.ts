@@ -1,3 +1,4 @@
+import { AddStopArg } from "@/app/api/utilities/validation/schemas/stop";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -35,7 +36,7 @@ export async function getStopsFromDays(tripId: string) {
  * @param stopData - The data for the stop
  * @returns The new stop
  */
-export async function addStopToDay(dayId: string, stopData: any) {
+export async function addStopToDay(dayId: string, stopData: AddStopArg) {
   // Get the day and count stops
   const day = await prisma.day.findUnique({
     where: { id: dayId },

@@ -1,6 +1,5 @@
 "use client";
 
-import type { TripWithSettings } from "@/lib/api";
 import type { PlaceDetails } from "@/lib/google-maps-api";
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { Day, Stop } from "@prisma/client";
@@ -10,9 +9,8 @@ import { useState } from "react";
 import { dayHelpers } from "@/helpers/day";
 import { stopHelpers } from "@/helpers/stop";
 import * as api from "@/lib/api";
-import { createTempId } from "@/utilities/identity";
+import { TripFull } from "@/types/trip";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { addDays } from "date-fns";
 import { DayCard } from "./day-card";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { StopCard } from "./stop-card";
@@ -54,10 +52,10 @@ import { StopCard } from "./stop-card";
 
 // --------------- Component ---------------
 interface TripSidebarProps {
-  trip: TripWithSettings;
+  trip: TripFull;
   handleAction: (
     action: () => Promise<unknown>,
-    optimisticState: TripWithSettings,
+    optimisticState: TripFull,
     successMessage: string,
     failureMessage: string
   ) => Promise<void>;

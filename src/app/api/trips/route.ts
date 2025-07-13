@@ -8,7 +8,7 @@ import { authGuard } from "../utilities/guards";
  * GET /api/trips
  * @returns An array of trips owned by the current user
  */
-export const GET = async function GET(req: NextRequest) {
+export const GET = async function GET() {
   const session = await authGuard();
 
   try {

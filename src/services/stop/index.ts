@@ -1,3 +1,4 @@
+import { ReorderDaysArg } from "@/app/api/utilities/validation/schemas/day";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -16,18 +17,7 @@ export async function getStopsByTripId(tripId: string) {
  * @param updatedDays - The updated days with their stops
  * @returns The updated stops
  */
-export async function bulkUpdateStopsOrder(
-  updatedDays: {
-    id: string;
-    date: string;
-    stops: {
-      id: string;
-      name: string;
-      latitude: number;
-      longitude: number;
-    }[];
-  }[]
-) {
+export async function bulkUpdateStopsOrder(updatedDays: ReorderDaysArg) {
   const transaction = updatedDays.flatMap((day, dayIndex) => {
     const dayUpdate = prisma.day.update({
       where: { id: day.id },

@@ -14,3 +14,5 @@ export const reorderDaysSchema = z.array(
     ),
   })
 );
+
+export type ReorderDaysArg = z.infer<typeof reorderDaysSchema>;
