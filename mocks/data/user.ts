@@ -5,8 +5,7 @@ export const createMockUser = (email?: string) => {
   return {
     email: (email || faker.internet.email()) as `${string}@${string}`,
     user_id: faker.string.uuid(),
-    firstname: faker.person.firstName(),
-    lastname: faker.person.lastName(),
+    name: `${faker.person.firstName()} ${faker.person.lastName()}`,
     phone_number: faker.phone.number(),
     token: createMockJwt(),
     picture: faker.image.avatar() as `https://${string}`,

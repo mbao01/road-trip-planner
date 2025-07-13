@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 // Hardcoded paths to mock data
 const usersFilePath = path.join(process.cwd(), "prisma/seeds/data/users.json");
-const providersFilePath = path.join(process.cwd(), "prisma/seeds/data/providers.json");
+const accountsFilePath = path.join(process.cwd(), "prisma/seeds/data/accounts.json");
 const tripsFilePath = path.join(process.cwd(), "prisma/seeds/data/trips.json");
 const daysFilePath = path.join(process.cwd(), "prisma/seeds/data/days.json");
 const stopsFilePath = path.join(process.cwd(), "prisma/seeds/data/stops.json");
@@ -18,7 +18,9 @@ async function main() {
   // Clean up existing data
   await prisma.collaborator.deleteMany();
   await prisma.settings.deleteMany();
-  await prisma.provider.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.verificationToken.deleteMany();
   await prisma.stop.deleteMany();
   await prisma.day.deleteMany();
   await prisma.trip.deleteMany();
@@ -27,12 +29,12 @@ async function main() {
 
   // Seed Users
   const usersData = JSON.parse(await fs.readFile(usersFilePath, "utf-8"));
-  const providersData = JSON.parse(await fs.readFile(providersFilePath, "utf-8"));
+  const accountsData = JSON.parse(await fs.readFile(accountsFilePath, "utf-8"));
   await prisma.user.createMany({
     data: usersData,
   });
-  await prisma.provider.createMany({
-    data: providersData,
+  await prisma.account.createMany({
+    data: accountsData,
   });
   console.log(`Seeded ${usersData.length} users.`);
 

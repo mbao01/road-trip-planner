@@ -1,7 +1,5 @@
-import { auth } from "@/lib/auth"
-
-export default auth
+export { auth as middleware } from "@/lib/auth";
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth/signin|auth/signup).*)"],
-}
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|auth/signin|auth/signup).*)"],
+};

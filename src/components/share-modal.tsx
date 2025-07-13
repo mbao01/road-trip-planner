@@ -45,7 +45,7 @@ interface Collaborator {
   id: string;
   name: string;
   email: string;
-  avatarUrl: string;
+  image: string;
   role: CollaboratorRole;
 }
 
@@ -54,21 +54,21 @@ const initialCollaborators: Collaborator[] = [
     id: "1",
     name: "Olivia Martin",
     email: "olivia.martin@example.com",
-    avatarUrl: "/placeholder.svg?height=32&width=32",
+    image: "/placeholder.svg?height=32&width=32",
     role: "Editor",
   },
   {
     id: "2",
     name: "Liam Johnson",
     email: "liam.johnson@example.com",
-    avatarUrl: "/placeholder.svg?height=32&width=32",
+    image: "/placeholder.svg?height=32&width=32",
     role: "Viewer",
   },
   {
     id: "3",
     name: "You",
     email: "your.email@example.com",
-    avatarUrl: "/placeholder.svg?height=32&width=32",
+    image: "/placeholder.svg?height=32&width=32",
     role: "Editor",
   },
 ];
@@ -92,7 +92,7 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
         id: String(Date.now()),
         name: inviteEmail.split("@")[0],
         email: inviteEmail,
-        avatarUrl: `/placeholder.svg?height=32&width=32&query=avatar`,
+        image: `/placeholder.svg?height=32&width=32&query=avatar`,
         role: inviteRole,
       };
       setCollaborators([...collaborators, newCollaborator]);
@@ -162,7 +162,7 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={collaborator.avatarUrl || "/placeholder.svg"}
+                        src={collaborator.image || "/placeholder.svg"}
                         alt={collaborator.name}
                       />
                       <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>

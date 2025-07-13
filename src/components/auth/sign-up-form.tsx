@@ -1,22 +1,28 @@
-"use client"
+"use client";
 
-import { useTransition } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
-import type { z } from "zod"
+import type { z } from "zod";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { signUpAction } from "@/lib/actions/auth";
+import { SignUpSchema } from "@/lib/schemas/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-import { SignUpSchema } from "@/lib/schemas/auth"
-import { signUpAction } from "@/lib/actions/auth"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
-
-type SignUpFormValues = z.infer<typeof SignUpSchema>
+type SignUpFormValues = z.infer<typeof SignUpSchema>;
 
 export function SignUpForm() {
-  const [isPending, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(SignUpSchema),
@@ -25,18 +31,18 @@ export function SignUpForm() {
       email: "",
       password: "",
     },
-  })
+  });
 
   const onSubmit = (values: SignUpFormValues) => {
     startTransition(async () => {
-      const result = await signUpAction(values)
+      const result = await signUpAction(values);
       if (result?.error) {
-        toast.error(result.error)
+        toast.error(result.error);
       } else {
-        toast.success("Account created! Please sign in.")
+        toast.success("Account created! Please sign in.");
       }
-    })
-  }
+    });
+  };
 
   return (
     <Form {...form}>
@@ -46,9 +52,9 @@ export function SignUpForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Your name</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Your Name" />
+                <Input {...field} placeholder="Jake Clarke" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,5 +92,5 @@ export function SignUpForm() {
         </Button>
       </form>
     </Form>
-  )
+  );
 }

@@ -14,7 +14,7 @@ CREATE TYPE "DistanceUnit" AS ENUM ('MI', 'KM');
 CREATE TYPE "ItineraryAssetType" AS ENUM ('PDF', 'PHOTO', 'VIDEO', 'AUDIO');
 
 -- CreateEnum
-CREATE TYPE "ProviderType" AS ENUM ('CREDENTIAL', 'GOOGLE');
+CREATE TYPE "Provider" AS ENUM ('CREDENTIAL', 'GOOGLE');
 
 -- CreateEnum
 CREATE TYPE "MapStyle" AS ENUM ('DEFAULT', 'ROADMAP', 'SATELLITE', 'HYBRID', 'TERRAIN');
@@ -22,10 +22,11 @@ CREATE TYPE "MapStyle" AS ENUM ('DEFAULT', 'ROADMAP', 'SATELLITE', 'HYBRID', 'TE
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "firstName" TEXT,
-    "lastName" TEXT,
-    "avatarUrl" TEXT,
+    "name" TEXT,
+    "email" TEXT,
+    "emailVerified" TIMESTAMP(3),
+    "image" TEXT,
+    "password" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -33,18 +34,41 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "Provider" (
+CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
-    "type" "ProviderType" NOT NULL,
-    "providerId" TEXT NOT NULL,
-    "providerData" JSONB,
-    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
-    "expiresAt" TIMESTAMP(3),
     "userId" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "providerAccountId" TEXT NOT NULL,
+    "scope" TEXT,
+    "refreshToken" TEXT,
+    "accessToken" TEXT,
+    "expiresAt" INTEGER,
+    "tokenType" TEXT,
+    "idToken" TEXT,
+    "sessionState" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Provider_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Account_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Session" (
+    "sessionToken" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "VerificationToken" (
+    "identifier" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "VerificationToken_pkey" PRIMARY KEY ("identifier","token")
 );
 
 -- CreateTable
@@ -160,10 +184,10 @@ CREATE TABLE "Collaborator" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Provider_providerId_key" ON "Provider"("providerId");
+CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Provider_type_providerId_key" ON "Provider"("type", "providerId");
+CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Travel_tripId_key" ON "Travel"("tripId");
@@ -175,10 +199,13 @@ CREATE UNIQUE INDEX "Settings_tripId_key" ON "Settings"("tripId");
 CREATE UNIQUE INDEX "Collaborator_userId_tripId_key" ON "Collaborator"("userId", "tripId");
 
 -- AddForeignKey
-ALTER TABLE "Provider" ADD CONSTRAINT "Provider_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Trip" ADD CONSTRAINT "Trip_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Trip" ADD CONSTRAINT "Trip_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Stop" ADD CONSTRAINT "Stop_dayId_fkey" FOREIGN KEY ("dayId") REFERENCES "Day"("id") ON DELETE CASCADE ON UPDATE CASCADE;
