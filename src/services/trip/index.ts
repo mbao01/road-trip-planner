@@ -84,16 +84,6 @@ export async function getUserTrip(userId: string, tripId: string) {
   });
 }
 
-export async function getTripDays(tripId: string) {
-  return prisma.day.findMany({
-    where: { tripId },
-    orderBy: { date: "asc" },
-    include: {
-      stops: { orderBy: { order: "asc" } },
-    },
-  });
-}
-
 /**
  * @param tripId - The ID of the trip to update
  * @param data - The data to update the trip with

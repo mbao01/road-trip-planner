@@ -1,19 +1,21 @@
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/prisma";
 
+/**
+ * Gets a user by email
+ * @param email - The email of the user
+ * @returns The user with the specified email
+ */
 export const getUserByEmail = async (email: string) => {
-  try {
-    const user = await prisma.user.findUnique({ where: { email } })
-    return user
-  } catch {
-    return null
-  }
-}
+  return prisma.user.findUnique({
+    where: { email },
+  });
+};
 
-export const getUserById = async (id: string) => {
-  try {
-    const user = await prisma.user.findUnique({ where: { id } })
-    return user
-  } catch {
-    return null
-  }
-}
+/**
+ * Gets a user by ID
+ * @param userId - The ID of the user
+ * @returns The user with the specified ID
+ */
+export const getUserById = (userId: string) => {
+  return prisma.user.findUnique({ where: { id: userId } });
+};

@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 export async function getDaysStops(tripId: string) {
   return prisma.day.findMany({
     where: { tripId },
+    orderBy: { date: "asc" },
     include: {
       stops: { orderBy: { order: "asc" } },
     },
-    orderBy: { date: "asc" },
   });
 }
 
