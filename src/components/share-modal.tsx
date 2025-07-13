@@ -176,8 +176,8 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Editor">Editor</SelectItem>
-                  <SelectItem value="Viewer">Viewer</SelectItem>
+                  <SelectItem value={TripRole.EDITOR}>{TRIP_ROLE[TripRole.EDITOR]}</SelectItem>
+                  <SelectItem value={TripRole.VIEWER}>{TRIP_ROLE[TripRole.VIEWER]}</SelectItem>
                 </SelectContent>
               </Select>
               <Button
