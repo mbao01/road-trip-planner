@@ -187,9 +187,9 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
           </div>
 
           {/* Collaborators list */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <h4 className="text-sm font-medium">Shared with</h4>
-            <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-48 overflow-y-auto py-1 pr-2">
               {trip.collaborators.map((collaborator) => {
                 const collaboratorId = collaborator.id;
                 const name = collaborator.user.name ?? "-";

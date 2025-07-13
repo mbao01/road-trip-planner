@@ -39,6 +39,7 @@ const TRIP_QUERY_BASE_INCLUDE = {
   },
   collaborators: {
     include: { user: { select: { id: true, name: true, email: true, image: true } } },
+    orderBy: { createdAt: "desc" },
   },
   _count: { select: { stops: true } },
 } as const;
