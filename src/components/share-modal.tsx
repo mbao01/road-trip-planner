@@ -52,11 +52,12 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TripRole>(TripRole.VIEWER);
 
-  const shareUrl = `https://www.wildertrips.com/share/${trip.id.toLowerCase().replace(/\s/g, "-")}`;
+  const shareUrl = `${window.location.origin}/share/${trip.id.toLowerCase().replace(/\s/g, "-")}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
     // Maybe add a toast notification here
+    toast({ title: "Link copied to clipboard" });
   };
 
   const handleAction = async (
@@ -262,16 +263,17 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
             </div>
             {shareEnabled && (
               <div className="flex items-center gap-2">
-                <div className="flex items-center flex-1 border rounded-md pl-3">
+                <div className="flex items-center flex-1 border rounded-md pl-3 h-10">
                   <LinkIcon className="w-4 h-4 text-muted-foreground" />
                   <Input
-                    value={shareUrl}
+                    disabled
                     readOnly
-                    className="flex-1 text-sm border-none focus-visible:ring-0 shadow-none h-auto p-2"
+                    id="share-url"
+                    value={shareUrl}
+                    className="flex-1 text-sm border-none focus-visible:ring-0 shadow-none h-auto p-2 bg-transparent"
                   />
                 </div>
                 <Button
-                  size="sm"
                   onClick={handleCopy}
                   className="bg-gray-100 text-gray-800 hover:bg-gray-200"
                 >
