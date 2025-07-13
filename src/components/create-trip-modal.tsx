@@ -93,14 +93,14 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
     }
     setIsCreating(true);
     try {
-      const result = await createTrip({
+      const trip = await createTrip({
         name,
         startDate: dates.from,
         endDate: dates.to,
         startStop: selectedStartStop,
       });
       toast({ title: "Trip created successfully!" });
-      onTripCreated(result.tripId);
+      onTripCreated(trip.id);
       // Reset form
       setName("");
       setDates(undefined);
@@ -133,7 +133,12 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
           </div>
           <div className="space-y-2">
             <Label>Trip dates</Label>
-            <DateRangePicker date={dates} onDateChange={setDates} maxDays={MAX__NO_OF_TRIP_DAYS} />
+            <DateRangePicker
+              date={dates}
+              onDateChange={setDates}
+              maxDays={MAX__NO_OF_TRIP_DAYS}
+              triggerClassName="h-10"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="start-stop">Trip start point</Label>

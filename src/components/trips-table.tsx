@@ -1,6 +1,6 @@
 "use client";
 
-import type { TripTableRow } from "@/types/trip";
+import type { UserTrip } from "@/types/trip";
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -19,18 +19,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TRIP_ACCESS } from "@/helpers/constants/tripAccess";
+import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
 import { TRIP_STATUS } from "@/helpers/constants/tripStatus";
 import { useToast } from "@/hooks/use-toast";
 import { deleteTrip } from "@/lib/api";
 import { formatDate } from "@/utilities/dates";
-import { TripStatus } from "@prisma/client";
-import { Archive, Edit, MoreHorizontal, Share2, Trash2 } from "lucide-react";
+import { TripRole, TripStatus } from "@prisma/client";
+import {
+  ArchiveIcon,
+  EarthIcon,
+  MapIcon,
+  MoreHorizontalIcon,
+  RouteIcon,
+  Share2Icon,
+  Trash2Icon,
+} from "lucide-react";
 import { DeleteTripConfirmationDialog } from "./delete-trip-confirmation-dialog";
 import { ShareModal } from "./share-modal";
 
 interface TripsTableProps {
-  initialTrips: TripTableRow[];
+  initialTrips: UserTrip[];
 }
 
 const statusColors: Record<TripStatus, string> = {
@@ -38,14 +46,13 @@ const statusColors: Record<TripStatus, string> = {
   [TripStatus.NOT_STARTED]: "bg-gray-100 text-gray-800",
   [TripStatus.COMPLETED]: "bg-green-100 text-green-800",
   [TripStatus.ARCHIVED]: "bg-yellow-100 text-yellow-800",
-  [TripStatus.ACTIVE]: "bg-blue-100 text-blue-800",
-  [TripStatus.DELETED]: "bg-gray-100 text-gray-800",
+  [TripStatus.DELETED]: "bg-red-100 text-red-800",
 };
 
 export function TripsTable({ initialTrips }: TripsTableProps) {
   const [trips, setTrips] = useState(initialTrips);
-  const [tripToDelete, setTripToDelete] = useState<TripTableRow | null>(null);
-  const [tripToShare, setTripToShare] = useState<TripTableRow | null>(null);
+  const [tripToDelete, setTripToDelete] = useState<UserTrip | null>(null);
+  const [tripToShare, setTripToShare] = useState<UserTrip | null>(null);
   const { toast } = useToast();
 
   const handleArchive = async (tripId: string) => {
@@ -81,56 +88,71 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {trips.map((trip) => (
-              <TableRow key={trip.id}>
-                <TableCell className="font-medium">{trip.name}</TableCell>
-                <TableCell>
-                  {formatDate(trip.startDate, "dd/MM/yyyy")} -{" "}
-                  {formatDate(trip.endDate, "dd/MM/yyyy")}
-                </TableCell>
-                <TableCell className="text-center">{trip.dayCount}</TableCell>
-                <TableCell className="text-center">{trip.stopCount}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={statusColors[trip.status]}>
-                    {TRIP_STATUS[trip.status]}
-                  </Badge>
-                </TableCell>
-                <TableCell>{TRIP_ACCESS[trip.access]}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/trips/${trip.id}`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          <span>Edit trip</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTripToShare(trip)}>
-                        <Share2 className="mr-2 h-4 w-4" />
-                        <span>Share trip</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleArchive(trip.id)}>
-                        <Archive className="mr-2 h-4 w-4" />
-                        <span>Archive trip</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setTripToDelete(trip)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Delete trip</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+            {trips.map((trip) => {
+              const { tripRole } = trip.collaborators[0];
+              return (
+                <TableRow key={trip.id}>
+                  <TableCell className="font-medium">{trip.name}</TableCell>
+                  <TableCell>
+                    {formatDate(trip.startDate, "dd/MM/yyyy")} -{" "}
+                    {formatDate(trip.endDate, "dd/MM/yyyy")}
+                  </TableCell>
+                  <TableCell className="text-center">{trip.dayCount}</TableCell>
+                  <TableCell className="text-center">{trip.stopCount}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={statusColors[trip.status]}>
+                      {TRIP_STATUS[trip.status]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{TRIP_ROLE[tripRole]}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          {tripRole === TripRole.OWNER || tripRole === TripRole.EDITOR ? (
+                            <Link href={`/trips/${trip.id}`}>
+                              <RouteIcon className="mr-2 h-4 w-4" />
+                              <span>Edit trip</span>
+                            </Link>
+                          ) : tripRole === TripRole.VIEWER ? (
+                            <Link href={`/trips/${trip.id}`}>
+                              <MapIcon className="mr-2 h-4 w-4" />
+                              <span>View trip</span>
+                            </Link>
+                          ) : (
+                            <Link href={`/trips/share/${trip.id}`}>
+                              <EarthIcon className="mr-2 h-4 w-4" />
+                              <span>View trip</span>
+                            </Link>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTripToShare(trip)}>
+                          <Share2Icon className="mr-2 h-4 w-4" />
+                          <span>Share trip</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleArchive(trip.id)}>
+                          <ArchiveIcon className="mr-2 h-4 w-4" />
+                          <span>Archive trip</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setTripToDelete(trip)}
+                          className="text-red-600"
+                        >
+                          <Trash2Icon className="mr-2 h-4 w-4" />
+                          <span>Delete trip</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

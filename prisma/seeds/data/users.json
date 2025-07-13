@@ -2,22 +2,29 @@
   {
     "id": "1",
     "email": "owner@example.com",
-    "firstName": "Alex",
-    "lastName": "Doe",
-    "avatarUrl": "https://example.com/alex.jpg"
+    "name": "Alex Doe",
+    "password": "12345678",
+    "image": "https://example.com/alex.jpg"
   },
   {
     "id": "2",
     "email": "editor@example.com",
-    "firstName": "Sam",
-    "lastName": "Smith",
-    "avatarUrl": "https://example.com/sam.jpg"
+    "name": "Sam Smith",
+    "password": "12345678",
+    "image": "https://example.com/sam.jpg"
   },
   {
     "id": "3",
     "email": "viewer@example.com",
-    "firstName": "Taylor",
-    "lastName": "Jones",
-    "avatarUrl": null
+    "name": "Taylor Jones",
+    "password": "12345678",
+    "image": null
+  },
+  {
+    "id": "4",
+    "email": "johndoe@example.com",
+    "name": "John Doe",
+    "password": null,
+    "image": null
   }
 ]

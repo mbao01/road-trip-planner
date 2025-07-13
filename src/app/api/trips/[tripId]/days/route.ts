@@ -1,11 +1,20 @@
-import { NextResponse } from "next/server";
-import { getDaysForTrip } from "@/services/day";
+import { NextRequest, NextResponse } from "next/server";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { getDaysByTripId } from "@/services/day";
+import { TripRole } from "@prisma/client";
 
-// GET /api/trips/[tripId]/days - Assembles and returns all days in the trip
-export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+/**
+ * GET /api/trips/[tripId]/days
+ * @returns All days in the trip
+ */
+export async function GET(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
+  });
+
   try {
-    const days = await getDaysForTrip(tripId);
+    const days = await getDaysByTripId(tripId);
     if (!days) {
       return NextResponse.json({ error: "Days not found" }, { status: 404 });
     }

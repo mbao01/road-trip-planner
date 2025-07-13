@@ -1,5 +1,14 @@
 import { TravelMode } from "@/app/api/utilities/validation/enums";
-import { Day, Role, Stop, Travel, TripStatus } from "@prisma/client";
+import {
+  Collaborator,
+  Day,
+  Settings,
+  Stop,
+  Travel,
+  Trip,
+  TripAccess,
+  TripStatus,
+} from "@prisma/client";
 
 // Type for the data displayed in the trips table
 export type TripTableRow = {
@@ -10,7 +19,21 @@ export type TripTableRow = {
   dayCount: number;
   stopCount: number;
   status: TripStatus;
-  access: Role;
+  access: TripAccess;
+};
+
+export type UserTrip = Omit<Trip, "ownerId"> & {
+  collaborators: [Collaborator];
+  collaboratorsCount: number;
+  dayCount: number;
+  stopCount: number;
+};
+
+export type TripFull = Omit<Trip, "ownerId"> & {
+  travel: Travel;
+  settings: Settings;
+  collaborators: Collaborator[];
+  days: DayWithStops[];
 };
 
 export type DayWithStops = Day & {

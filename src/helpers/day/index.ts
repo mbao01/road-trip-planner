@@ -1,5 +1,4 @@
-import { TripWithSettings } from "@/lib/api";
-import { DayWithStops } from "@/types/trip";
+import { TripFull } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
 import { Day } from "@prisma/client";
 import { addDays, differenceInDays } from "date-fns";
@@ -32,7 +31,7 @@ const createTripDays = ({
   return days;
 };
 
-const deleteDay = (trip: TripWithSettings, dayId: Day["id"]) => {
+const deleteDay = (trip: TripFull, dayId: Day["id"]) => {
   const clone = structuredClone(trip);
 
   if (clone.days.length <= 1) {
@@ -51,19 +50,19 @@ const deleteDay = (trip: TripWithSettings, dayId: Day["id"]) => {
   return { clone };
 };
 
-const deleteDays = (trip: TripWithSettings, dayId: Day["id"]) => {
-  //   const clone = structuredClone(trip);
-  //   const { from: startDate, to: endDate } = daysToDeleteInfo.newDateRange;
-  //   const newDayCount = differenceInDays(endDate, startDate) + 1;
-  //   const finalDays = clone.days.slice(0, newDayCount).map((day, index) => ({
-  //     ...day,
-  //     date: addDays(startDate, index),
-  //   }));
-  //   clone.startDate = startDate;
-  //   clone.endDate = endDate;
-  //   clone.days = finalDays;
-  //   return { clone };
-};
+// const deleteDays = (trip: TripFull, dayId: Day["id"]) => {
+//   const clone = structuredClone(trip);
+//   const { from: startDate, to: endDate } = daysToDeleteInfo.newDateRange;
+//   const newDayCount = differenceInDays(endDate, startDate) + 1;
+//   const finalDays = clone.days.slice(0, newDayCount).map((day, index) => ({
+//     ...day,
+//     date: addDays(startDate, index),
+//   }));
+//   clone.startDate = startDate;
+//   clone.endDate = endDate;
+//   clone.days = finalDays;
+//   return { clone };
+// };
 
 /**
  * Deletes days outside the given range
@@ -71,7 +70,7 @@ const deleteDays = (trip: TripWithSettings, dayId: Day["id"]) => {
  * @param dayId
  * @returns
  */
-const pruneDays = (trip: TripWithSettings, dateRange: { from: Date; to: Date }) => {
+const pruneDays = (trip: TripFull, dateRange: { from: Date; to: Date }) => {
   const clone = structuredClone(trip);
 
   const { from: startDate, to: endDate } = dateRange;
@@ -88,7 +87,7 @@ const pruneDays = (trip: TripWithSettings, dateRange: { from: Date; to: Date }) 
   return { clone };
 };
 
-const moveDay = (trip: TripWithSettings, dayId: Day["id"], direction: "up" | "down") => {
+const moveDay = (trip: TripFull, dayId: Day["id"], direction: "up" | "down") => {
   const clone = structuredClone(trip);
   const index = clone.days.findIndex((d) => d.id === dayId);
 
@@ -114,7 +113,6 @@ const moveDay = (trip: TripWithSettings, dayId: Day["id"], direction: "up" | "do
 export const dayHelpers = {
   createTripDays,
   deleteDay,
-  deleteDays,
   moveDay,
   pruneDays,
 };

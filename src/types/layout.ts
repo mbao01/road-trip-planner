@@ -6,4 +6,5 @@ export type LayoutProps<RouteParams = never, ParallelRoutes extends string = str
     [K in ParallelRoutes]: React.ReactNode;
   }>
 > &
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any;

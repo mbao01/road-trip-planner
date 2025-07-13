@@ -5,4 +5,7 @@ export const addStopSchema = z.object({
   placeId: z.string(),
   latitude: z.number(),
   longitude: z.number(),
+  customName: z.string().optional(),
 });
+
+export type AddStopArg = z.infer<typeof addStopSchema>;

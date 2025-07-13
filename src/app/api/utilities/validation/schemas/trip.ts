@@ -1,4 +1,4 @@
-import { Currency, DistanceUnit, MapStyle } from "@prisma/client";
+import { Currency, DistanceUnit, MapStyle, TripAccess, TripStatus } from "@prisma/client";
 import { z } from "zod";
 
 export const createTripSchema = z.object({
@@ -12,6 +12,8 @@ export const createTripSchema = z.object({
     longitude: z.number(),
   }),
 });
+
+export type CreateTripArg = z.infer<typeof createTripSchema>;
 
 export const updateTripSchema = z.object({
   startDate: z.coerce.date().optional(),
@@ -27,9 +29,15 @@ export const updateTripSchema = z.object({
     .optional(),
 });
 
+export type UpdateTripArg = z.infer<typeof updateTripSchema>;
+
 export const updateTripDetailsSchema = z.object({
   name: z.string().min(1).optional(),
+  status: z.enum(TripStatus).optional(),
+  access: z.enum(TripAccess).optional(),
 });
+
+export type UpdateTripDetailsArg = z.infer<typeof updateTripDetailsSchema>;
 
 export const updateTripSettingsSchema = z.object({
   mapStyle: z.enum(MapStyle).optional(),
@@ -41,3 +49,5 @@ export const updateTripSettingsSchema = z.object({
   avoidMotorways: z.boolean().optional(),
   distanceUnit: z.enum(DistanceUnit).optional(),
 });
+
+export type UpdateTripSettingsArg = z.infer<typeof updateTripSettingsSchema>;

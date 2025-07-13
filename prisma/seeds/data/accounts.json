@@ -1,0 +1,9 @@
+[
+  {
+    "type": "CREDENTIAL",
+    "provider": "credential",
+    "providerAccountId": "user-1-credential",
+    "expires_at": null,
+    "userId": "1"
+  }
+]

@@ -1,11 +1,16 @@
-import type { TripWithSettings } from "@/lib/api";
-import type { DayWithStops } from "@/types/trip";
+import type { DayWithStops, TripFull } from "@/types/trip";
 import type { DateRange } from "react-day-picker";
 import { addDays, differenceInDays } from "date-fns";
 import { dayHelpers } from "../day";
 
+/**
+ * @param trip - The trip to update
+ * @param dateRange - The new date range
+ * @param setDaysToDeleteInfo - A callback function to set the days to delete and the new date range
+ * @returns The updated trip
+ */
 const changeTripRange = (
-  trip: TripWithSettings,
+  trip: TripFull,
   dateRange: { from: Date; to: Date },
   setDaysToDeleteInfo?: (info: { days: DayWithStops[]; newDateRange: DateRange }) => void
 ) => {

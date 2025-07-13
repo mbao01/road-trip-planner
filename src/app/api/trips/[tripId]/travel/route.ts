@@ -1,14 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findFirstTravel, getDaysWithStopsForTrip, updateTravel } from "@/services/travel";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { getDaysByTripId } from "@/services/day";
+import { getTravel, updateTravel } from "@/services/travel";
+import { TripRole } from "@prisma/client";
 
-// PUT /api/trips/[tripId]/travel - Updates trip travel
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ tripId: string }> }
-) {
+/**
+ * GET /api/trips/[tripId]/travel
+ * @returns The trip travel
+ */
+export async function GET(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
+  });
+
   try {
-    const days = await getDaysWithStopsForTrip(tripId);
+    const travel = await getTravel(tripId);
+
+    if (!travel) {
+      return NextResponse.json(
+        { error: "Trip not found or you don't have access" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ travel });
+  } catch (error) {
+    console.error(`Failed to retrieve travel for trip ${tripId}:`, error);
+    return NextResponse.json({ error: "Failed to retrieve travel data" }, { status: 500 });
+  }
+}
+
+/**
+ * PUT /api/trips/[tripId]/travel
+ * @returns The updated trip travel
+ */
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
+  try {
+    const days = await getDaysByTripId(tripId);
 
     if (!days) {
       return NextResponse.json(
@@ -17,8 +51,7 @@ export async function PUT(
       );
     }
 
-    // TODO::
-    // - Add support for caching such that only places without a route matrix are fetched
+    // TODO:: Add support for caching such that only places without a route matrix are fetched
 
     const stops = days.flatMap((day) => day.stops);
     const places = stops.map((stop) => stop.placeId);
@@ -27,7 +60,7 @@ export async function PUT(
       return NextResponse.json({ data: {} });
     }
 
-    const url = new URL(`/api/routes/matrix`, request.nextUrl.origin);
+    const url = new URL(`/api/routes/matrix`, req.nextUrl.origin);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -54,27 +87,5 @@ export async function PUT(
   } catch (error) {
     console.error(`Failed to retrieve trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to retrieve trip data" }, { status: 500 });
-  }
-}
-
-// GET /api/trips/[tripId]/travel - Gets trip travel
-export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
-  const { tripId } = await params;
-  try {
-    const travel = await findFirstTravel({
-      where: { tripId },
-    });
-
-    if (!travel) {
-      return NextResponse.json(
-        { error: "Trip not found or you don't have access" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ travel });
-  } catch (error) {
-    console.error(`Failed to retrieve travel for trip ${tripId}:`, error);
-    return NextResponse.json({ error: "Failed to retrieve travel data" }, { status: 500 });
   }
 }

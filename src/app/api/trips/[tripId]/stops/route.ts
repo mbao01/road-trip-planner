@@ -1,11 +1,20 @@
-import { NextResponse } from "next/server";
-import { getStopsForTrip } from "@/services/stop";
+import { NextRequest, NextResponse } from "next/server";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { getStopsFromDays } from "@/services/day";
+import { TripRole } from "@prisma/client";
 
-// GET /api/trips/[tripId]/stops - Assembles and returns all stops in the trip
-export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+/**
+ * GET /api/trips/[tripId]/stops
+ * @returns All stops in the trip
+ */
+export async function GET(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
+  });
+
   try {
-    const stops = await getStopsForTrip(tripId);
+    const stops = await getStopsFromDays(tripId);
     if (!stops) {
       return NextResponse.json({ error: "Stops not found" }, { status: 404 });
     }

@@ -1,53 +1,80 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("PRISMA_DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 model User {
-  id             String          @id @default(cuid(2))
-  email          String          @unique
-  firstName       String?
-  lastName       String?
-  avatarUrl      String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  ownedTrips     Trip[]
-  collaborations Collaborator[]
-  providers      Provider[]
+  id            String    @id @default(cuid(2))
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  trips        Trip[]
+  collaborator Collaborator[]
 }
 
-model Provider {
-  id            String       @id @default(cuid(2))
-  type          ProviderType
-  providerId    String       @unique
-  providerData  Json?
-  emailVerified  Boolean      @default(false)
-  expiresAt     DateTime?
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+model Account {
+  id                String @id @default(cuid(2))
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  scope             String?
+  refresh_token     String? @map(name: "refreshToken")
+  access_token      String? @map(name: "accessToken")
+  expires_at        Int?    @map(name: "expiresAt")
+  token_type        String? @map(name: "tokenType")
+  id_token          String? @map(name: "idToken")
+  session_state     String? @map(name: "sessionState")
 
-  @@unique([type, providerId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier  String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }
 
 model Trip {
-  id            String          @id @default(cuid(2))
+  id            String         @id @default(cuid(2))
   name          String
   startDate     DateTime
   endDate       DateTime
-  status        TripStatus      @default(ACTIVE)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  owner         User            @relation(fields: [ownerId], references: [id])
+  status        TripStatus     @default(NOT_STARTED)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId       String
+  access        TripAccess    @default(PRIVATE)
   days          Day[]
   stops         Stop[]
   travel        Travel?
@@ -56,52 +83,52 @@ model Trip {
 }
 
 model Stop {
-  id          String      @id @default(cuid(2))
-  name        String
-  customName  String?
-  latitude    Float
-  longitude   Float
-  placeId     String
-  order       Int
-  day         Day         @relation(fields: [dayId], references: [id], onDelete: Cascade)
-  dayId       String
-  trip        Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId      String
-  itinerary   Itinerary[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id         String      @id @default(cuid(2))
+  name       String
+  customName String?
+  latitude   Float
+  longitude  Float
+  placeId    String
+  order      Int
+  day        Day         @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  dayId      String
+  trip       Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId     String
+  itinerary  Itinerary[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model Travel {
-  id        String    @id @default(cuid(2))
-  travels   Json      // { stopId: { originId, duration, distance, cost, mode } }
+  id        String   @id @default(cuid(2))
+  travels   Json // { stopId: { originId, duration, distance, cost, mode } }
   originId  String?
-  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId    String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Day {
-  id        String    @id @default(cuid(2))
+  id        String   @id @default(cuid(2))
   date      DateTime
   order     Int
-  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   tripId    String
   stops     Stop[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Itinerary {
-  id        String             @id @default(cuid(2))
+  id        String           @id @default(cuid(2))
   name      String?
   notes     String?
   assets    ItineraryAsset[]
-  stop      Stop               @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  stop      Stop             @relation(fields: [stopId], references: [id], onDelete: Cascade)
   stopId    String
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model ItineraryAsset {
@@ -132,7 +159,7 @@ model Settings {
 
 model Collaborator {
   id        String   @id @default(cuid(2))
-  role      Role
+  tripRole  TripRole
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -143,15 +170,19 @@ model Collaborator {
   @@unique([userId, tripId])
 }
 
-enum Role {
+enum TripRole {
   OWNER
   EDITOR
   VIEWER
   PUBLIC
 }
 
+enum TripAccess {
+  PRIVATE
+  PUBLIC
+}
+
 enum TripStatus {
-  ACTIVE
   ARCHIVED
   DELETED
   COMPLETED
@@ -177,7 +208,7 @@ enum ItineraryAssetType {
   AUDIO
 }
 
-enum ProviderType {
+enum Provider {
   CREDENTIAL
   GOOGLE
 }

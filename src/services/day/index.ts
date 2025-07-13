@@ -1,10 +1,42 @@
+import { AddStopArg } from "@/app/api/utilities/validation/schemas/stop";
 import { prisma } from "@/lib/prisma";
 
-export async function deleteDayById(dayId: string) {
-  return prisma.day.delete({ where: { id: dayId } });
+/**
+ * Gets days by trip ID
+ * @param tripId - The ID of the trip
+ * @returns The days for the trip
+ */
+export async function getDaysByTripId(tripId: string) {
+  return prisma.day.findMany({
+    where: { tripId },
+    orderBy: { date: "asc" },
+    include: {
+      stops: { orderBy: { order: "asc" } },
+    },
+  });
 }
 
-export async function addStopToDay(dayId: string, stopData: any) {
+/**
+ * Gets stops from days
+ * @param tripId - The ID of the trip
+ * @returns The stops for the trip
+ */
+export async function getStopsFromDays(tripId: string) {
+  const days = await prisma.day.findMany({
+    where: { tripId },
+    orderBy: { date: "asc" },
+    include: { stops: { orderBy: { order: "asc" } } },
+  });
+  return days?.flatMap((day) => day.stops) || [];
+}
+
+/**
+ * Adds a stop to a day
+ * @param dayId - The ID of the day
+ * @param stopData - The data for the stop
+ * @returns The new stop
+ */
+export async function addStopToDay(dayId: string, stopData: AddStopArg) {
   // Get the day and count stops
   const day = await prisma.day.findUnique({
     where: { id: dayId },
@@ -23,12 +55,11 @@ export async function addStopToDay(dayId: string, stopData: any) {
   return newStop;
 }
 
-export async function getDaysForTrip(tripId: string) {
-  return prisma.day.findMany({
-    where: { tripId },
-    orderBy: { date: "asc" },
-    include: {
-      stops: { orderBy: { order: "asc" } },
-    },
-  });
+/**
+ * Deletes a day by ID
+ * @param dayId - The ID of the day
+ * @returns The deleted day
+ */
+export async function deleteDayById(dayId: string) {
+  return prisma.day.delete({ where: { id: dayId } });
 }

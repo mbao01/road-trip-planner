@@ -1,6 +1,5 @@
 "use client";
 
-import type { TripWithSettings } from "@/lib/api";
 import type { Settings, Travel, Trip } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useMemo, useState } from "react";
@@ -11,11 +10,9 @@ import { dayHelpers } from "@/helpers/day";
 import { tripHelpers } from "@/helpers/trip";
 import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
-import { DayWithStops } from "@/types/trip";
-import { createTempId } from "@/utilities/identity";
+import { DayWithStops, TripFull } from "@/types/trip";
 import { formatCurrency } from "@/utilities/numbers";
 import { Currency, DistanceUnit } from "@prisma/client";
-import { addDays, differenceInDays } from "date-fns";
 import { BanknoteIcon, Calendar, Clock, Globe, Loader2, MapPin, Route } from "lucide-react";
 import { DeleteDaysConfirmationDialog } from "./delete-days-confirmation-dialog";
 import { SettingsModal } from "./settings-modal";
@@ -25,13 +22,12 @@ import { TripMap } from "./trip-map";
 import { TripSidebar } from "./trip-sidebar";
 
 interface TripPlannerClientProps {
-  initialTripData: TripWithSettings | null;
   tripId: string;
 }
 
-export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClientProps) {
-  const [trip, setTrip] = useState<TripWithSettings | null>(initialTripData);
-  const [isLoading, setIsLoading] = useState(!initialTripData);
+export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
+  const [trip, setTrip] = useState<TripFull | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState<string | null>(null);
   const [daysToDeleteInfo, setDaysToDeleteInfo] = useState<{
@@ -46,21 +42,19 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
   useEffect(() => {
     setGoogleMapsApiKey(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
 
-    if (!initialTripData) {
-      setIsLoading(true);
-      api
-        .fetchTrip(tripId)
-        .then((trip) => {
-          setTrip(trip);
-          setError(null);
-        })
-        .catch((e) => {
-          setError("Failed to load trip data. Please try again later.");
-          console.error(e);
-        })
-        .finally(() => setIsLoading(false));
-    }
-  }, [initialTripData, tripId]);
+    setIsLoading(true);
+    api
+      .fetchTrip(tripId)
+      .then((trip) => {
+        setTrip(trip);
+        setError(null);
+      })
+      .catch((e) => {
+        setError("Failed to load trip data. Please try again later.");
+        console.error(e);
+      })
+      .finally(() => setIsLoading(false));
+  }, [tripId]);
 
   /**
    * Handles an action that updates the trip and trip travel.
@@ -71,7 +65,7 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
    */
   const handleAction = async (
     action: () => Promise<unknown>,
-    optimisticState: TripWithSettings,
+    optimisticState: TripFull,
     successMessage: string,
     failureMessage: string,
     options: { refetchTripTravel?: boolean } = {}
@@ -236,7 +230,6 @@ export function TripPlannerClient({ initialTripData, tripId }: TripPlannerClient
         <div className="w-96 border-r bg-background flex flex-col">
           <TripHeader
             trip={trip}
-            access={trip.access}
             onTripNameChange={({ name }) => handleTripDetailsChange({ name })}
             onDateRangeChange={handleDateRangeChange}
             onSettings={() => setShowSettings(true)}
