@@ -17,6 +17,13 @@
     "id": "3",
     "email": "viewer@example.com",
     "name": "Taylor Jones",
+    "password": "12345678",
+    "image": null
+  },
+  {
+    "id": "4",
+    "email": "johndoe@example.com",
+    "name": "John Doe",
     "password": null,
     "image": null
   }

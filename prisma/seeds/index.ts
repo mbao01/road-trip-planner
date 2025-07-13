@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, TripRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -64,6 +64,12 @@ async function main() {
         settings: {
           create: settings,
         },
+        collaborators: {
+          create: {
+            userId: owner.id,
+            tripRole: TripRole.OWNER,
+          },
+        },
       },
     });
 
@@ -113,19 +119,34 @@ async function main() {
   console.log("Seeded viewer.");
   if (!editor || !viewer) throw new Error("Editor or viewer not found.");
 
-  await prisma.collaborator.create({
-    data: {
-      tripId: "coastal-cruise",
-      userId: String(editor.id),
-      tripRole: "EDITOR",
-    },
-  });
-  await prisma.collaborator.create({
-    data: {
-      tripId: "highland-fling",
-      userId: String(viewer.id),
-      tripRole: "VIEWER",
-    },
+  await prisma.collaborator.createMany({
+    data: [
+      {
+        tripId: "coastal-cruise",
+        userId: String(editor.id),
+        tripRole: TripRole.EDITOR,
+      },
+      {
+        tripId: "highland-fling",
+        userId: String(editor.id),
+        tripRole: TripRole.VIEWER,
+      },
+      {
+        tripId: "northbound-up",
+        userId: String(editor.id),
+        tripRole: TripRole.EDITOR,
+      },
+      {
+        tripId: "highland-fling",
+        userId: String(viewer.id),
+        tripRole: TripRole.VIEWER,
+      },
+      {
+        tripId: "northbound-up",
+        userId: String(viewer.id),
+        tripRole: TripRole.VIEWER,
+      },
+    ],
   });
   console.log("Seeded collaborators.");
 

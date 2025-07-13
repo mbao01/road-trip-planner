@@ -56,7 +56,7 @@ export const getUserTrips = async (userId: string) => {
     access: trip.access,
 
     // new properties of Trip type
-    collaborators: trip.collaborators.find((c) => c.userId === userId),
+    collaborators: trip.collaborators.filter((c) => c.userId === userId),
     collaboratorsCount: trip.collaborators.length,
     dayCount: trip.days.length,
     stopCount: trip.days.reduce((acc, day) => acc + day.stops.length, 0),
