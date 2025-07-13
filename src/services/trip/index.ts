@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { isTempId } from "@/utilities/identity";
 import { TripAccess, TripRole, TripStatus } from "@prisma/client";
 import { addDays, differenceInDays } from "date-fns";
+import { includes } from "zod";
 
 /**
  * @param tripId - The ID of the trip to retrieve
@@ -29,6 +30,19 @@ export const getTripCollaborator = async (userId: string, tripId: string) => {
   });
 };
 
+const TRIP_QUERY_BASE_INCLUDE = {
+  days: {
+    orderBy: { date: "asc" },
+    include: {
+      stops: { orderBy: { order: "asc" }, include: { _count: true } },
+    },
+  },
+  collaborators: {
+    include: { user: { select: { id: true, name: true, email: true, image: true } } },
+  },
+  _count: { select: { stops: true } },
+} as const;
+
 /**
  * @param userId - The ID of the user to retrieve
  * @returns An array of trips owned by the specified user
@@ -38,29 +52,34 @@ export const getUserTrips = async (userId: string) => {
     where: {
       OR: [{ ownerId: userId }, { collaborators: { some: { userId } } }],
     },
-    include: {
-      days: { include: { stops: { select: { _count: true } } } },
-      collaborators: true,
-    },
+    include: TRIP_QUERY_BASE_INCLUDE,
     orderBy: { createdAt: "desc" },
   });
 
-  return userTrips.map((trip) => ({
-    id: trip.id,
-    name: trip.name,
-    startDate: trip.startDate,
-    endDate: trip.endDate,
-    createdAt: trip.createdAt,
-    updatedAt: trip.updatedAt,
-    status: trip.status,
-    access: trip.access,
+  return userTrips.map((trip) => {
+    const ownerId = trip.ownerId === userId ? trip.ownerId : null;
+    const collaborators = ownerId
+      ? trip.collaborators
+      : trip.collaborators.filter((c) => c.userId === userId);
 
-    // new properties of Trip type
-    collaborators: trip.collaborators.filter((c) => c.userId === userId),
-    collaboratorsCount: trip.collaborators.length,
-    dayCount: trip.days.length,
-    stopCount: trip.days.reduce((acc, day) => acc + day.stops.length, 0),
-  }));
+    return {
+      id: trip.id,
+      name: trip.name,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      createdAt: trip.createdAt,
+      updatedAt: trip.updatedAt,
+      status: trip.status,
+      access: trip.access,
+      ownerId: trip.ownerId === userId ? trip.ownerId : null,
+
+      // new properties of Trip type
+      collaborators,
+      collaboratorsCount: trip.collaborators.length,
+      dayCount: trip.days.length,
+      stopCount: trip.days.reduce((acc, day) => acc + day.stops.length, 0),
+    };
+  });
 };
 
 /**
@@ -75,16 +94,9 @@ export async function getUserTrip(userId: string, tripId: string) {
       OR: [{ ownerId: userId }, { collaborators: { some: { userId } } }],
     },
     include: {
-      days: {
-        orderBy: { date: "asc" },
-        include: {
-          stops: { orderBy: { order: "asc" } },
-        },
-      },
       travel: true,
       settings: true,
-      collaborators: true,
-      _count: { select: { stops: true } },
+      ...TRIP_QUERY_BASE_INCLUDE,
     },
   });
 }

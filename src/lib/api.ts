@@ -1,7 +1,7 @@
-import { DayWithStops, TripFull } from "@/types/trip";
+import { DayWithStops, UserTrip } from "@/types/trip";
 import { Day, Settings, Stop, Travel, Trip } from "@prisma/client";
 
-export async function fetchTrip(tripId: string): Promise<TripFull> {
+export async function fetchTrip(tripId: string): Promise<UserTrip> {
   const res = await fetch(`/api/trips/${tripId}`);
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -85,7 +85,7 @@ export async function deleteTrip(tripId: Trip["id"]): Promise<void> {
   if (!res.ok) throw new Error(await res.text());
 }
 
-export async function reorderTrip(tripId: string, trip: TripFull): Promise<void> {
+export async function reorderTrip(tripId: string, trip: UserTrip): Promise<void> {
   const res = await fetch(`/api/trips/${tripId}/reorder`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

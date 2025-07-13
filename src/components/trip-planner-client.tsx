@@ -10,7 +10,7 @@ import { dayHelpers } from "@/helpers/day";
 import { tripHelpers } from "@/helpers/trip";
 import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
-import { DayWithStops, TripFull } from "@/types/trip";
+import { DayWithStops, UserTrip } from "@/types/trip";
 import { formatCurrency } from "@/utilities/numbers";
 import { Currency, DistanceUnit } from "@prisma/client";
 import { BanknoteIcon, Calendar, Clock, Globe, Loader2, MapPin, Route } from "lucide-react";
@@ -26,7 +26,7 @@ interface TripPlannerClientProps {
 }
 
 export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
-  const [trip, setTrip] = useState<TripFull | null>(null);
+  const [trip, setTrip] = useState<UserTrip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState<string | null>(null);
@@ -65,7 +65,7 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
    */
   const handleAction = async (
     action: () => Promise<unknown>,
-    optimisticState: TripFull,
+    optimisticState: UserTrip,
     successMessage: string,
     failureMessage: string,
     options: { refetchTripTravel?: boolean } = {}
@@ -289,7 +289,12 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
           settings={trip.settings}
           onUpdateSettings={handleUpdateSettings}
         />
-        <ShareModal open={showShare} onOpenChange={setShowShare} tripName={trip.name} />
+        <ShareModal
+          trip={trip}
+          open={showShare}
+          onOpenChange={setShowShare}
+          onTripChange={(t) => setTrip({ ...trip, ...t })}
+        />
       </div>
       <Toaster />
       {daysToDeleteInfo && (

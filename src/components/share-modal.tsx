@@ -21,6 +21,11 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
+import { toast } from "@/hooks/use-toast";
+import * as api from "@/lib/api";
+import { CollaboratorWithUser, UserTrips } from "@/types/trip";
+import { createTempId } from "@/utilities/identity";
 import { TripRole } from "@prisma/client";
 import {
   Code,
@@ -33,85 +38,118 @@ import {
   Trash2,
   Twitter,
 } from "lucide-react";
+import { TripRoleBadge } from "./trip-role-badge";
 
 interface ShareModalProps {
+  trip: UserTrips[number];
   open: boolean;
+  onTripChange: (trip: UserTrips[number]) => void;
   onOpenChange: (open: boolean) => void;
-  tripName: string;
 }
 
-interface Collaborator {
-  id: string;
-  name: string;
-  email: string;
-  image: string;
-  tripRole: TripRole;
-}
-
-const initialCollaborators: Collaborator[] = [
-  {
-    id: "1",
-    name: "Olivia Martin",
-    email: "olivia.martin@example.com",
-    image: "/placeholder.svg?height=32&width=32",
-    tripRole: TripRole.EDITOR,
-  },
-  {
-    id: "2",
-    name: "Liam Johnson",
-    email: "liam.johnson@example.com",
-    image: "/placeholder.svg?height=32&width=32",
-    tripRole: TripRole.VIEWER,
-  },
-  {
-    id: "3",
-    name: "You",
-    email: "your.email@example.com",
-    image: "/placeholder.svg?height=32&width=32",
-    tripRole: TripRole.EDITOR,
-  },
-];
-
-export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
+export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModalProps) {
   const [shareEnabled, setShareEnabled] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TripRole>(TripRole.VIEWER);
-  const [collaborators, setCollaborators] = useState<Collaborator[]>(initialCollaborators);
 
-  const shareUrl = `https://www.wildertrips.com/share/${tripName.toLowerCase().replace(/\s/g, "-")}`;
+  const shareUrl = `https://www.wildertrips.com/share/${trip.id.toLowerCase().replace(/\s/g, "-")}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
     // Maybe add a toast notification here
   };
 
+  const handleAction = async (
+    action: () => Promise<unknown>,
+    optimisticState: UserTrips[number],
+    successMessage: string,
+    failureMessage: string
+  ) => {
+    const originalState = trip;
+    onTripChange(optimisticState);
+    try {
+      await action();
+      const result = await api.fetchTrip(trip.id);
+      onTripChange({ ...optimisticState, ...result });
+      toast({ title: successMessage });
+    } catch (error) {
+      onTripChange(originalState);
+      console.error(error);
+      toast({ variant: "destructive", title: failureMessage });
+    }
+  };
+
   const handleInvite = () => {
-    if (inviteEmail && !collaborators.some((c) => c.email === inviteEmail)) {
-      const newCollaborator: Collaborator = {
-        id: String(Date.now()),
-        name: inviteEmail.split("@")[0],
-        email: inviteEmail,
-        image: `/placeholder.svg?height=32&width=32&query=avatar`,
+    const hasNoCollaborator =
+      inviteEmail && !trip.collaborators.some((c) => c.user.email === inviteEmail);
+
+    if (hasNoCollaborator) {
+      const userId = createTempId("user");
+      const newCollaborator: CollaboratorWithUser = {
+        userId,
+        tripId: trip.id,
+        id: createTempId("collaborator"),
+        user: {
+          id: createTempId("user"),
+          name: "-",
+          email: inviteEmail,
+          image: `/placeholder.svg?height=32&width=32&query=avatar`,
+        },
         tripRole: inviteRole,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
-      setCollaborators([...collaborators, newCollaborator]);
-      setInviteEmail("");
+
+      const clone = structuredClone(trip);
+      clone.collaborators = [newCollaborator, ...clone.collaborators];
+
+      handleAction(
+        async () => {
+          // TODO: call endpoint to invite user
+          setInviteEmail("");
+        },
+        clone,
+        "User invited successfully",
+        "Failed to invite user"
+      );
     }
   };
 
   const handleRoleChange = (id: string, newTripRole: TripRole) => {
-    setCollaborators(collaborators.map((c) => (c.id === id ? { ...c, tripRole: newTripRole } : c)));
+    const clone = structuredClone(trip);
+    clone.collaborators = clone.collaborators.map((c) =>
+      c.id === id ? { ...c, tripRole: newTripRole } : c
+    );
+
+    handleAction(
+      async () => {
+        // TODO: call endpoint to invite user
+      },
+      clone,
+      "User role updated successfully",
+      "Failed to update user role"
+    );
   };
 
   const handleRemoveCollaborator = (id: string) => {
-    setCollaborators(collaborators.filter((c) => c.id !== id));
+    const clone = structuredClone(trip);
+    clone.collaborators = clone.collaborators.filter((c) => c.id !== id);
+
+    handleAction(
+      async () => {
+        // TODO: call endpoint to invite user
+      },
+      clone,
+      "User removed successfully",
+      "Failed to remove user"
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Share &quot;{tripName}&quot;</DialogTitle>
+          <DialogTitle>Share &quot;{trip.name}&quot;</DialogTitle>
           <DialogDescription>Invite collaborators or share a public link.</DialogDescription>
         </DialogHeader>
 
@@ -156,51 +194,63 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Shared with</h4>
             <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
-              {collaborators.map((collaborator) => (
-                <div key={collaborator.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={collaborator.image || "/placeholder.svg"}
-                        alt={collaborator.name}
-                      />
-                      <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{collaborator.name}</p>
-                      <p className="text-xs text-muted-foreground">{collaborator.email}</p>
+              {trip.collaborators.map((collaborator) => {
+                const collaboratorId = collaborator.id;
+                const name = collaborator.user.name ?? "-";
+                const email = collaborator.user.email;
+                const image = collaborator.user.image || "/placeholder.svg";
+                const tripRole = collaborator.tripRole;
+                const isOwner = trip.ownerId && collaborator.user.id === trip.ownerId;
+
+                return (
+                  <div key={collaboratorId} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={image} alt={name} />
+                        <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{isOwner ? "You" : name}</p>
+                        <p className="text-xs text-muted-foreground">{email}</p>
+                      </div>
                     </div>
+                    {!isOwner ? (
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={tripRole}
+                          onValueChange={(value) =>
+                            handleRoleChange(collaboratorId, value as TripRole)
+                          }
+                        >
+                          <SelectTrigger className="w-[100px] text-xs h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={TripRole.EDITOR}>
+                              {TRIP_ROLE[TripRole.EDITOR]}
+                            </SelectItem>
+                            <SelectItem value={TripRole.VIEWER}>
+                              {TRIP_ROLE[TripRole.VIEWER]}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleRemoveCollaborator(collaboratorId)}
+                        >
+                          <Trash2 className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        <TripRoleBadge tripRole={tripRole} />
+                      </span>
+                    )}
                   </div>
-                  {collaborator.name !== "You" ? (
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={collaborator.tripRole}
-                        onValueChange={(value) =>
-                          handleRoleChange(collaborator.id, value as TripRole)
-                        }
-                      >
-                        <SelectTrigger className="w-[100px] text-xs h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Editor">Editor</SelectItem>
-                          <SelectItem value="Viewer">Viewer</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleRemoveCollaborator(collaborator.id)}
-                      >
-                        <Trash2 className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">Owner</span>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

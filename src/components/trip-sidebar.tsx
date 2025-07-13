@@ -9,7 +9,7 @@ import { useState } from "react";
 import { dayHelpers } from "@/helpers/day";
 import { stopHelpers } from "@/helpers/stop";
 import * as api from "@/lib/api";
-import { TripFull } from "@/types/trip";
+import { UserTrip } from "@/types/trip";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { DayCard } from "./day-card";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
@@ -52,10 +52,10 @@ import { StopCard } from "./stop-card";
 
 // --------------- Component ---------------
 interface TripSidebarProps {
-  trip: TripFull;
+  trip: UserTrip;
   handleAction: (
     action: () => Promise<unknown>,
-    optimisticState: TripFull,
+    optimisticState: UserTrip,
     successMessage: string,
     failureMessage: string
   ) => Promise<void>;

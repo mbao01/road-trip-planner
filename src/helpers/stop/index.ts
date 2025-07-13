@@ -1,10 +1,10 @@
 import { PlaceDetails } from "@/lib/google-maps-api";
-import { TripFull } from "@/types/trip";
+import { UserTrip } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { Day, Stop } from "@prisma/client";
 
-const addStop = (trip: TripFull, dayId: Day["id"], loc: PlaceDetails) => {
+const addStop = (trip: UserTrip, dayId: Day["id"], loc: PlaceDetails) => {
   const clone = structuredClone(trip);
   const day = clone.days.find((d) => d.id === dayId)!;
 
@@ -27,7 +27,7 @@ const addStop = (trip: TripFull, dayId: Day["id"], loc: PlaceDetails) => {
   };
 };
 
-const deleteStop = (trip: TripFull, dayId: Day["id"], stopId: Stop["id"]) => {
+const deleteStop = (trip: UserTrip, dayId: Day["id"], stopId: Stop["id"]) => {
   const clone = structuredClone(trip);
   const day = clone.days.find((d) => d.id === dayId)!;
   day.stops = day.stops.filter((s) => s.id !== stopId);
@@ -36,7 +36,7 @@ const deleteStop = (trip: TripFull, dayId: Day["id"], stopId: Stop["id"]) => {
 };
 
 const reorderStop = (
-  trip: TripFull,
+  trip: UserTrip,
   srcDayId: Day["id"],
   dstDayId: Day["id"],
   activeId: UniqueIdentifier,

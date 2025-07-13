@@ -4,33 +4,24 @@ import type React from "react";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { TripFull } from "@/types/trip";
+import { UserTrip } from "@/types/trip";
 import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date";
-import { TripRole } from "@prisma/client";
 import { isSameDay } from "date-fns";
 import { CheckIcon, Download, Settings, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { DateRangePicker } from "./date-range-picker";
+import { TripRoleBadge } from "./trip-role-badge";
 import { UserDropdown } from "./user-dropdown";
 
 interface TripHeaderProps {
-  trip: TripFull;
+  trip: UserTrip;
   onTripNameChange: (data: { name?: string }) => void;
   onDateRangeChange: (dateRange: DateRange | undefined) => void;
   onSettings: () => void;
   onShare: () => void;
 }
-
-const roleBadgeColors: Record<TripRole, string> = {
-  [TripRole.OWNER]: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100",
-  [TripRole.EDITOR]: "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
-  [TripRole.VIEWER]: "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100",
-  [TripRole.PUBLIC]: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100",
-};
 
 export function TripHeader({
   trip,
@@ -141,14 +132,7 @@ export function TripHeader({
             </>
           )}
 
-          {collaborator && (
-            <Badge
-              variant="outline"
-              className={cn("font-medium ml-auto", roleBadgeColors[collaborator.tripRole])}
-            >
-              {collaborator.tripRole}
-            </Badge>
-          )}
+          {collaborator && <TripRoleBadge tripRole={collaborator.tripRole} />}
         </div>
       </div>
     </div>

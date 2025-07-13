@@ -3,7 +3,7 @@
 // import { redirect } from "next/navigation";
 // import { auth } from "@/lib/auth";
 // import { getUserTrips } from "@/services/trip";
-import type { UserTrip } from "@/types/trip";
+import type { UserTrips } from "@/types/trip";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateTripModal } from "@/components/create-trip-modal";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { UserDropdown } from "@/components/user-dropdown";
 
-async function getTrips(): Promise<UserTrip[]> {
+async function getTrips(): Promise<UserTrips> {
   const res = await fetch("/api/trips", { cache: "no-store" });
   if (!res.ok) {
     console.error(await res.text());
@@ -22,7 +22,7 @@ async function getTrips(): Promise<UserTrip[]> {
 }
 
 export default function TripsPage() {
-  const [trips, setTrips] = useState<UserTrip[]>([]);
+  const [trips, setTrips] = useState<UserTrips>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const router = useRouter();

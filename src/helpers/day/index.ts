@@ -1,4 +1,4 @@
-import { TripFull } from "@/types/trip";
+import { UserTrip } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
 import { Day } from "@prisma/client";
 import { addDays, differenceInDays } from "date-fns";
@@ -31,7 +31,7 @@ const createTripDays = ({
   return days;
 };
 
-const deleteDay = (trip: TripFull, dayId: Day["id"]) => {
+const deleteDay = (trip: UserTrip, dayId: Day["id"]) => {
   const clone = structuredClone(trip);
 
   if (clone.days.length <= 1) {
@@ -50,7 +50,7 @@ const deleteDay = (trip: TripFull, dayId: Day["id"]) => {
   return { clone };
 };
 
-// const deleteDays = (trip: TripFull, dayId: Day["id"]) => {
+// const deleteDays = (trip: UserTrip, dayId: Day["id"]) => {
 //   const clone = structuredClone(trip);
 //   const { from: startDate, to: endDate } = daysToDeleteInfo.newDateRange;
 //   const newDayCount = differenceInDays(endDate, startDate) + 1;
@@ -70,7 +70,7 @@ const deleteDay = (trip: TripFull, dayId: Day["id"]) => {
  * @param dayId
  * @returns
  */
-const pruneDays = (trip: TripFull, dateRange: { from: Date; to: Date }) => {
+const pruneDays = (trip: UserTrip, dateRange: { from: Date; to: Date }) => {
   const clone = structuredClone(trip);
 
   const { from: startDate, to: endDate } = dateRange;
@@ -87,7 +87,7 @@ const pruneDays = (trip: TripFull, dateRange: { from: Date; to: Date }) => {
   return { clone };
 };
 
-const moveDay = (trip: TripFull, dayId: Day["id"], direction: "up" | "down") => {
+const moveDay = (trip: UserTrip, dayId: Day["id"], direction: "up" | "down") => {
   const clone = structuredClone(trip);
   const index = clone.days.findIndex((d) => d.id === dayId);
 

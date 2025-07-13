@@ -1,9 +1,8 @@
 "use client";
 
-import type { UserTrip } from "@/types/trip";
+import type { UserTrips } from "@/types/trip";
 import { useState } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,8 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
-import { TRIP_STATUS } from "@/helpers/constants/tripStatus";
 import { useToast } from "@/hooks/use-toast";
 import { deleteTrip } from "@/lib/api";
 import { formatDate } from "@/utilities/dates";
@@ -36,23 +33,17 @@ import {
 } from "lucide-react";
 import { DeleteTripConfirmationDialog } from "./delete-trip-confirmation-dialog";
 import { ShareModal } from "./share-modal";
+import { TripRoleBadge } from "./trip-role-badge";
+import { TripStatusBadge } from "./trip-status-badge";
 
 interface TripsTableProps {
-  initialTrips: UserTrip[];
+  initialTrips: UserTrips;
 }
-
-const statusColors: Record<TripStatus, string> = {
-  [TripStatus.IN_PROGRESS]: "bg-blue-100 text-blue-800",
-  [TripStatus.NOT_STARTED]: "bg-gray-100 text-gray-800",
-  [TripStatus.COMPLETED]: "bg-green-100 text-green-800",
-  [TripStatus.ARCHIVED]: "bg-yellow-100 text-yellow-800",
-  [TripStatus.DELETED]: "bg-red-100 text-red-800",
-};
 
 export function TripsTable({ initialTrips }: TripsTableProps) {
   const [trips, setTrips] = useState(initialTrips);
-  const [tripToDelete, setTripToDelete] = useState<UserTrip | null>(null);
-  const [tripToShare, setTripToShare] = useState<UserTrip | null>(null);
+  const [tripToDelete, setTripToDelete] = useState<UserTrips[number] | null>(null);
+  const [tripToShare, setTripToShare] = useState<UserTrips[number] | null>(null);
   const { toast } = useToast();
 
   const handleArchive = async (tripId: string) => {
@@ -89,7 +80,12 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
           </TableHeader>
           <TableBody>
             {trips.map((trip) => {
-              const { tripRole } = trip.collaborators[0];
+              const { ownerId, collaborators } = trip;
+              const collaborator = ownerId
+                ? collaborators.find((c) => c.userId === ownerId)!
+                : collaborators[0];
+              const { tripRole } = collaborator;
+
               return (
                 <TableRow key={trip.id}>
                   <TableCell className="font-medium">{trip.name}</TableCell>
@@ -100,11 +96,11 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
                   <TableCell className="text-center">{trip.dayCount}</TableCell>
                   <TableCell className="text-center">{trip.stopCount}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={statusColors[trip.status]}>
-                      {TRIP_STATUS[trip.status]}
-                    </Badge>
+                    <TripStatusBadge status={trip.status} />
                   </TableCell>
-                  <TableCell>{TRIP_ROLE[tripRole]}</TableCell>
+                  <TableCell>
+                    <TripRoleBadge tripRole={tripRole} />
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -132,10 +128,12 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
                             </Link>
                           )}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTripToShare(trip)}>
-                          <Share2Icon className="mr-2 h-4 w-4" />
-                          <span>Share trip</span>
-                        </DropdownMenuItem>
+                        {tripRole === TripRole.OWNER && (
+                          <DropdownMenuItem onClick={() => setTripToShare(trip)}>
+                            <Share2Icon className="mr-2 h-4 w-4" />
+                            <span>Share trip</span>
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem onClick={() => handleArchive(trip.id)}>
                           <ArchiveIcon className="mr-2 h-4 w-4" />
                           <span>Archive trip</span>
@@ -166,9 +164,14 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
       )}
       {tripToShare && (
         <ShareModal
+          trip={tripToShare}
           open={!!tripToShare}
           onOpenChange={() => setTripToShare(null)}
-          tripName={tripToShare.name}
+          onTripChange={(trip) => {
+            setTrips((prevTrips) => {
+              return prevTrips.map((t) => (trip.id === t.id ? { ...t, ...trip } : t));
+            });
+          }}
         />
       )}
     </>
