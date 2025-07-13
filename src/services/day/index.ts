@@ -1,7 +1,13 @@
 import { prisma } from "@/lib/prisma";
 
-export async function deleteDayById(dayId: string) {
-  return prisma.day.delete({ where: { id: dayId } });
+export async function getDaysStops(tripId: string) {
+  return prisma.day.findMany({
+    where: { tripId },
+    include: {
+      stops: { orderBy: { order: "asc" } },
+    },
+    orderBy: { date: "asc" },
+  });
 }
 
 export async function addStopToDay(dayId: string, stopData: any) {
@@ -21,4 +27,8 @@ export async function addStopToDay(dayId: string, stopData: any) {
     },
   });
   return newStop;
+}
+
+export async function deleteDayById(dayId: string) {
+  return prisma.day.delete({ where: { id: dayId } });
 }

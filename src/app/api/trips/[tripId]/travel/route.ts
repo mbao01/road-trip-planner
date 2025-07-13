@@ -1,22 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { findFirstTravel, getDaysStops, updateTravel } from "@/services/travel";
+import { getDaysStops } from "@/services/day";
+import { getTravel, updateTravel } from "@/services/travel";
 import { TripRole } from "@prisma/client";
 
 /**
  * GET /api/trips/[tripId]/travel
  * @returns The trip travel
  */
-export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
   });
 
   try {
-    const travel = await findFirstTravel({
-      where: { tripId },
-    });
+    const travel = await getTravel(tripId);
 
     if (!travel) {
       return NextResponse.json(
@@ -36,10 +35,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ trip
  * PUT /api/trips/[tripId]/travel
  * @returns The updated trip travel
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ tripId: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
@@ -55,8 +51,7 @@ export async function PUT(
       );
     }
 
-    // TODO::
-    // - Add support for caching such that only places without a route matrix are fetched
+    // TODO:: Add support for caching such that only places without a route matrix are fetched
 
     const stops = days.flatMap((day) => day.stops);
     const places = stops.map((stop) => stop.placeId);
@@ -65,7 +60,7 @@ export async function PUT(
       return NextResponse.json({ data: {} });
     }
 
-    const url = new URL(`/api/routes/matrix`, request.nextUrl.origin);
+    const url = new URL(`/api/routes/matrix`, req.nextUrl.origin);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -1,16 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Stop } from "@prisma/client";
 
-export async function getDaysStops(tripId: string) {
-  return prisma.day.findMany({
-    where: { tripId },
-    include: {
-      stops: { orderBy: { order: "asc" } },
-    },
-    orderBy: { date: "asc" },
-  });
-}
-
 type Matrix = {
   originIndex: number;
   destinationIndex: number;
@@ -20,6 +10,26 @@ type Matrix = {
   condition: string;
 };
 
+/**
+ * Gets the travel for a trip
+ * @param tripId - The ID of the trip
+ * @returns The travel for the trip
+ */
+export async function getTravel(tripId: string) {
+  return prisma.travel.findFirst({
+    where: {
+      tripId,
+    },
+  });
+}
+
+/**
+ * Updates the travel for a trip
+ * @param tripId - The ID of the trip
+ * @param matrix - The matrix of stops
+ * @param stops - The stops for the trip
+ * @returns The updated travel for the trip
+ */
 export async function updateTravel(tripId: string, matrix: Matrix[], stops: Stop[]) {
   const travels = matrix.reduce(
     (
@@ -79,8 +89,4 @@ export async function updateTravel(tripId: string, matrix: Matrix[], stops: Stop
   });
 
   return travel;
-}
-
-export async function findFirstTravel(where: any) {
-  return prisma.travel.findFirst({ where });
 }
