@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { getDaysStops } from "@/services/day";
+import { getDaysByTripId } from "@/services/day";
 import { getTravel, updateTravel } from "@/services/travel";
 import { TripRole } from "@prisma/client";
 
@@ -42,7 +42,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ trip
   });
 
   try {
-    const days = await getDaysStops(tripId);
+    const days = await getDaysByTripId(tripId);
 
     if (!days) {
       return NextResponse.json(

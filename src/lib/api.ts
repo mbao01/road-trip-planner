@@ -62,8 +62,12 @@ export async function updateSettings(
   return res.json();
 }
 
-export async function addStop(dayId: Day["id"], stopData: Omit<Stop, "id">): Promise<Stop> {
-  const res = await fetch(`/api/days/${dayId}/stops`, {
+export async function addStop(
+  tripId: Trip["id"],
+  dayId: Day["id"],
+  stopData: Omit<Stop, "id">
+): Promise<Stop> {
+  const res = await fetch(`/api/trips/${tripId}/days/${dayId}/stops`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(stopData),
@@ -73,13 +77,13 @@ export async function addStop(dayId: Day["id"], stopData: Omit<Stop, "id">): Pro
   return result.data;
 }
 
-export async function deleteStop(stopId: Stop["id"]): Promise<void> {
-  const res = await fetch(`/api/stops/${stopId}`, { method: "DELETE" });
+export async function deleteStop(tripId: Trip["id"], stopId: Stop["id"]): Promise<void> {
+  const res = await fetch(`/api/trips/${tripId}/stops/${stopId}`, { method: "DELETE" });
   if (!res.ok) throw new Error(await res.text());
 }
 
-export async function deleteDay(dayId: Day["id"]): Promise<void> {
-  const res = await fetch(`/api/days/${dayId}`, { method: "DELETE" });
+export async function deleteDay(tripId: Trip["id"], dayId: Day["id"]): Promise<void> {
+  const res = await fetch(`/api/trips/${tripId}/days/${dayId}`, { method: "DELETE" });
   if (!res.ok) throw new Error(await res.text());
 }
 

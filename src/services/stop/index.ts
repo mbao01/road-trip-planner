@@ -1,18 +1,21 @@
 import { prisma } from "@/lib/prisma";
 
-export async function deleteStopById(stopId: string) {
-  return prisma.stop.delete({ where: { id: stopId } });
-}
-
-export async function getStopsForTrip(tripId: string) {
-  const days = await prisma.day.findMany({
+/**
+ * Gets stops by trip ID
+ * @param tripId - The ID of the trip
+ * @returns The stops for the trip
+ */
+export async function getStopsByTripId(tripId: string) {
+  return prisma.stop.findMany({
     where: { tripId },
-    orderBy: { date: "asc" },
-    include: { stops: { orderBy: { order: "asc" } } },
   });
-  return days?.flatMap((day) => day.stops) || [];
 }
 
+/**
+ * Bulk updates the order of stops for a trip
+ * @param updatedDays - The updated days with their stops
+ * @returns The updated stops
+ */
 export async function bulkUpdateStopsOrder(
   updatedDays: {
     id: string;
@@ -30,6 +33,7 @@ export async function bulkUpdateStopsOrder(
       where: { id: day.id },
       data: { order: dayIndex, date: day.date },
     });
+    // TODO:: Do you need to reorder stops when you reorder days???
     const stopUpdates = day.stops.map((stop, stopIndex) =>
       prisma.stop.update({
         where: { id: stop.id },
@@ -39,4 +43,13 @@ export async function bulkUpdateStopsOrder(
     return [dayUpdate, ...stopUpdates];
   });
   return prisma.$transaction(transaction);
+}
+
+/**
+ * Deletes a stop by ID
+ * @param stopId - The ID of the stop
+ * @returns The deleted stop
+ */
+export async function deleteStopById(stopId: string) {
+  return prisma.stop.delete({ where: { id: stopId } });
 }

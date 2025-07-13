@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { reorderDaysSchema } from "@/app/api/utilities/validation/schemas";
 import { bulkUpdateStopsOrder } from "@/services/stop";
+import { TripRole } from "@prisma/client";
 
 /**
  * PUT /api/trips/[tripId]/reorder
@@ -9,6 +11,9 @@ import { bulkUpdateStopsOrder } from "@/services/stop";
  */
 export async function PUT(req: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
 
   try {
     const body = await req.json();

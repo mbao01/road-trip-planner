@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { addStopSchema } from "@/app/api/utilities/validation/schemas";
 import { addStopToDay } from "@/services/day";
+import { TripRole } from "@prisma/client";
 
-// POST /api/days/[dayId]/stops - Adds a new stop to a specific day
-export async function POST(request: Request, { params }: { params: Promise<{ dayId: string }> }) {
-  const { dayId } = await params;
+/**
+ * POST /api/trips/[tripId]/days/[dayId]/stops
+ * @returns Adds a new stop to a specific day
+ */
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ dayId: string; tripId: string }> }
+) {
+  const { dayId, tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
   try {
     const body = await request.json();
     const result = validator(body, addStopSchema);
@@ -18,7 +30,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ day
       const newStop = await addStopToDay(dayId, result.data);
       return NextResponse.json({ success: true, data: newStop }, { status: 201 });
     } catch (error) {
-      if (error.message === "Day not found") {
+      if (error?.message === "Day not found") {
         return NextResponse.json({ error: "Day not found" }, { status: 404 });
       }
       throw error;

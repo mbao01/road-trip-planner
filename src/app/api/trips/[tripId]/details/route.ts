@@ -6,7 +6,8 @@ import { updateTripDetails } from "@/services/trip";
 import { TripRole } from "@prisma/client";
 
 /**
- * PUT /api/trips/[tripId]/details - Updates only the top-level trip properties (name, status, access)
+ * PUT /api/trips/[tripId]/details
+ * Updates only the top-level trip properties (name, status, access)
  * @returns The updated trip
  */
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
