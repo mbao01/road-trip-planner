@@ -1,3 +1,4 @@
+import { UpdateTripDetailsArg } from "@/app/api/utilities/validation/schemas/trip";
 import { CollaboratorWithUser, DayWithStops, UserTrip } from "@/types/trip";
 import { Collaborator, Day, Settings, Stop, Travel, Trip } from "@prisma/client";
 
@@ -47,7 +48,7 @@ export async function updateTrip(
   return res.json();
 }
 
-export async function updateTripDetails(tripId: string, data: { name?: string }): Promise<Trip> {
+export async function updateTripDetails(tripId: string, data: UpdateTripDetailsArg): Promise<Trip> {
   const res = await fetch(`/api/trips/${tripId}/details`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

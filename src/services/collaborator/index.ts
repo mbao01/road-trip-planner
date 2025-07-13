@@ -1,5 +1,5 @@
 import {
-  InviteCollaboratorArg,
+  AddCollaboratorArg,
   UpdateCollaboratorArg,
 } from "@/app/api/utilities/validation/schemas/collaborator";
 import { prisma } from "@/lib/prisma";
@@ -19,7 +19,7 @@ export const getCollaborators = async (tripId: string) => {
   });
 };
 
-export const addCollaborator = async (tripId: string, data: InviteCollaboratorArg) => {
+export const addCollaborator = async (tripId: string, data: AddCollaboratorArg) => {
   const user = await getUserByEmail(data.email);
 
   if (!user) {

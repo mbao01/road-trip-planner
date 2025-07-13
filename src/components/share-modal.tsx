@@ -21,12 +21,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
+import { TRIP_ACCESS, TRIP_ROLE } from "@/helpers/constants/tripAccess";
 import { toast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
 import { CollaboratorWithUser, UserTrips } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
-import { TripRole } from "@prisma/client";
+import { TripAccess, TripRole } from "@prisma/client";
 import {
   Code,
   Copy,
@@ -48,7 +48,8 @@ interface ShareModalProps {
 }
 
 export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModalProps) {
-  const [shareEnabled, setShareEnabled] = useState(true);
+  const isTripPublic = trip.access === TripAccess.PUBLIC;
+  const [shareEnabled, setShareEnabled] = useState(isTripPublic);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TripRole>(TripRole.VIEWER);
 
@@ -71,6 +72,7 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
     try {
       await action();
       const result = await api.fetchTrip(trip.id);
+
       onTripChange({ ...optimisticState, ...result });
       toast({ title: successMessage });
     } catch (error) {
@@ -140,6 +142,19 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
       "User removed successfully",
       "Failed to remove user"
     );
+  };
+
+  const handleTripAccessChange = (checked: boolean) => {
+    handleAction(
+      () =>
+        api.updateTripDetails(trip.id, {
+          access: checked ? TripAccess.PUBLIC : TripAccess.PRIVATE,
+        }),
+      trip,
+      "Trip access updated",
+      "Failed to update trip access"
+    );
+    setShareEnabled(checked);
   };
 
   return (
@@ -259,7 +274,11 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
               <Label htmlFor="share-trip" className="text-sm font-medium">
                 Public access
               </Label>
-              <Switch id="share-trip" checked={shareEnabled} onCheckedChange={setShareEnabled} />
+              <Switch
+                id="share-trip"
+                checked={shareEnabled}
+                onCheckedChange={handleTripAccessChange}
+              />
             </div>
             {shareEnabled && (
               <div className="flex items-center gap-2">
@@ -269,11 +288,12 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
                     disabled
                     readOnly
                     id="share-url"
-                    value={shareUrl}
+                    value={isTripPublic ? shareUrl : "Loading..."}
                     className="flex-1 text-sm border-none focus-visible:ring-0 shadow-none h-auto p-2 bg-transparent"
                   />
                 </div>
                 <Button
+                  disabled={!isTripPublic}
                   onClick={handleCopy}
                   className="bg-gray-100 text-gray-800 hover:bg-gray-200"
                 >

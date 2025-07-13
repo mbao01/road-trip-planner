@@ -168,6 +168,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
           open={!!tripToShare}
           onOpenChange={() => setTripToShare(null)}
           onTripChange={(trip) => {
+            setTripToShare({ ...tripToShare, ...trip });
             setTrips((prevTrips) => {
               return prevTrips.map((t) => (trip.id === t.id ? { ...t, ...trip } : t));
             });
