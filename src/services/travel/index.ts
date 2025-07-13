@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Stop } from "@prisma/client";
 
-export async function getDaysWithStopsForTrip(tripId: string) {
+export async function getDaysStops(tripId: string) {
   return prisma.day.findMany({
     where: { tripId },
     include: {

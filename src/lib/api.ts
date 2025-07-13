@@ -1,9 +1,9 @@
 import { DayWithStops } from "@/types/trip";
-import { Day, Role, Settings, Stop, Travel, Trip } from "@prisma/client";
+import { Day, Settings, Stop, Travel, Trip, TripAccess } from "@prisma/client";
 
 export type TripWithSettings = Trip & {
   travel: Travel;
-  access: Role;
+  access: TripAccess;
   settings: Settings;
   days: DayWithStops[];
 };
@@ -102,7 +102,7 @@ export async function createTrip(data: {
   startDate: Date;
   endDate: Date;
   startStop: Partial<Stop>;
-}): Promise<{ tripId: string }> {
+}): Promise<Trip> {
   const res = await fetch("/api/trips", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validator } from "@/app/api/utilities/validation";
 import { updateTripSchema } from "@/app/api/utilities/validation/schemas";
-import { deleteTrip, getTripWithDetails, updateTripWithDays } from "@/services/trip";
+import { deleteTrip, getUserTrip, updateTripWithDays } from "@/services/trip";
+import { TripRole } from "@prisma/client";
+import { Resource, resourceGuard } from "../../utilities/guards";
 
-const MOCK_USER_ID = "1"; // Hardcoded user
-
-// GET /api/trips/[tripId] - Assembles and returns the full trip object
-export async function GET(
-  request: NextRequest,
+/**
+ * GET /api/trips/[tripId]
+ * @returns The full trip object
+ */
+export const GET = async function GET(
+  req: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
+  const session = await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
+  });
+
   try {
-    const trip = await getTripWithDetails(tripId, MOCK_USER_ID);
+    const trip = await getUserTrip(session.user.id, tripId);
 
     if (!trip) {
       return NextResponse.json(
@@ -23,7 +30,7 @@ export async function GET(
 
     if (!trip.travel && trip._count.stops > 1) {
       try {
-        const url = new URL(`/api/trips/${tripId}/travel`, request.nextUrl.origin);
+        const url = new URL(`/api/trips/${tripId}/travel`, req.nextUrl.origin);
         const res = await fetch(url, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -35,25 +42,28 @@ export async function GET(
       }
     }
 
-    let access: "Owner" | "Editor" | "Viewer" = "Owner";
-    if (trip.ownerId !== MOCK_USER_ID) {
-      const role = trip.collaborators[0]?.role;
-      if (role === "EDITOR") access = "Editor";
-      if (role === "VIEWER") access = "Viewer";
-    }
-
-    return NextResponse.json({ ...trip, access });
+    return NextResponse.json(trip);
   } catch (error) {
     console.error(`Failed to retrieve trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to retrieve trip data" }, { status: 500 });
   }
-}
+};
 
-// PUT /api/trips/[tripId] - Updates trip days and stops, including start date and end date
-export async function PUT(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+/**
+ * PUT /api/trips/[tripId]
+ * @returns The updated trip
+ */
+export const PUT = async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ tripId: string }> }
+) {
   const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
   try {
-    const body = await request.json();
+    const body = await req.json();
     const result = validator(body, updateTripSchema);
 
     if (!result.success) {
@@ -66,18 +76,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ trip
     console.error(`Failed to update trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to update trip" }, { status: 500 });
   }
-}
+};
 
-export async function DELETE(
-  request: Request,
+/**
+ * DELETE /api/trips/[tripId]
+ * @returns The deleted trip
+ */
+export const DELETE = async function DELETE(
+  req: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
+  const session = await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
+  });
+
   try {
-    await deleteTrip(tripId);
+    await deleteTrip(session.user.id, tripId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to delete trip" }, { status: 500 });
   }
-}
+};

@@ -1,6 +1,6 @@
 "use client";
 
-import type { TripTableRow } from "@/types/trip";
+import type { UserTrip } from "@/types/trip";
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TRIP_ACCESS } from "@/helpers/constants/tripAccess";
+import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
 import { TRIP_STATUS } from "@/helpers/constants/tripStatus";
 import { useToast } from "@/hooks/use-toast";
 import { deleteTrip } from "@/lib/api";
@@ -30,7 +30,7 @@ import { DeleteTripConfirmationDialog } from "./delete-trip-confirmation-dialog"
 import { ShareModal } from "./share-modal";
 
 interface TripsTableProps {
-  initialTrips: TripTableRow[];
+  initialTrips: UserTrip[];
 }
 
 const statusColors: Record<TripStatus, string> = {
@@ -38,14 +38,13 @@ const statusColors: Record<TripStatus, string> = {
   [TripStatus.NOT_STARTED]: "bg-gray-100 text-gray-800",
   [TripStatus.COMPLETED]: "bg-green-100 text-green-800",
   [TripStatus.ARCHIVED]: "bg-yellow-100 text-yellow-800",
-  [TripStatus.ACTIVE]: "bg-blue-100 text-blue-800",
-  [TripStatus.DELETED]: "bg-gray-100 text-gray-800",
+  [TripStatus.DELETED]: "bg-red-100 text-red-800",
 };
 
 export function TripsTable({ initialTrips }: TripsTableProps) {
   const [trips, setTrips] = useState(initialTrips);
-  const [tripToDelete, setTripToDelete] = useState<TripTableRow | null>(null);
-  const [tripToShare, setTripToShare] = useState<TripTableRow | null>(null);
+  const [tripToDelete, setTripToDelete] = useState<UserTrip | null>(null);
+  const [tripToShare, setTripToShare] = useState<UserTrip | null>(null);
   const { toast } = useToast();
 
   const handleArchive = async (tripId: string) => {
@@ -95,7 +94,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
                     {TRIP_STATUS[trip.status]}
                   </Badge>
                 </TableCell>
-                <TableCell>{TRIP_ACCESS[trip.access]}</TableCell>
+                <TableCell>{TRIP_ROLE[trip.collaborators[0].tripRole]}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

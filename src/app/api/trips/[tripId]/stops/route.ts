@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { getStopsForTrip } from "@/services/stop";
+import { TripRole } from "@prisma/client";
 
-// GET /api/trips/[tripId]/stops - Assembles and returns all stops in the trip
+/**
+ * GET /api/trips/[tripId]/stops
+ * @returns All stops in the trip
+ */
 export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
+  });
+
   try {
     const stops = await getStopsForTrip(tripId);
     if (!stops) {

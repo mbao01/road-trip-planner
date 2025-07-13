@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { TripRole } from "@prisma/client";
 import {
   Code,
   Copy,
@@ -39,14 +40,12 @@ interface ShareModalProps {
   tripName: string;
 }
 
-type CollaboratorRole = "Editor" | "Viewer";
-
 interface Collaborator {
   id: string;
   name: string;
   email: string;
   image: string;
-  role: CollaboratorRole;
+  tripRole: TripRole;
 }
 
 const initialCollaborators: Collaborator[] = [
@@ -55,28 +54,28 @@ const initialCollaborators: Collaborator[] = [
     name: "Olivia Martin",
     email: "olivia.martin@example.com",
     image: "/placeholder.svg?height=32&width=32",
-    role: "Editor",
+    tripRole: TripRole.EDITOR,
   },
   {
     id: "2",
     name: "Liam Johnson",
     email: "liam.johnson@example.com",
     image: "/placeholder.svg?height=32&width=32",
-    role: "Viewer",
+    tripRole: TripRole.VIEWER,
   },
   {
     id: "3",
     name: "You",
     email: "your.email@example.com",
     image: "/placeholder.svg?height=32&width=32",
-    role: "Editor",
+    tripRole: TripRole.EDITOR,
   },
 ];
 
 export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
   const [shareEnabled, setShareEnabled] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<CollaboratorRole>("Viewer");
+  const [inviteRole, setInviteRole] = useState<TripRole>(TripRole.VIEWER);
   const [collaborators, setCollaborators] = useState<Collaborator[]>(initialCollaborators);
 
   const shareUrl = `https://www.wildertrips.com/share/${tripName.toLowerCase().replace(/\s/g, "-")}`;
@@ -93,15 +92,15 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
         name: inviteEmail.split("@")[0],
         email: inviteEmail,
         image: `/placeholder.svg?height=32&width=32&query=avatar`,
-        role: inviteRole,
+        tripRole: inviteRole,
       };
       setCollaborators([...collaborators, newCollaborator]);
       setInviteEmail("");
     }
   };
 
-  const handleRoleChange = (id: string, newRole: CollaboratorRole) => {
-    setCollaborators(collaborators.map((c) => (c.id === id ? { ...c, role: newRole } : c)));
+  const handleRoleChange = (id: string, newTripRole: TripRole) => {
+    setCollaborators(collaborators.map((c) => (c.id === id ? { ...c, tripRole: newTripRole } : c)));
   };
 
   const handleRemoveCollaborator = (id: string) => {
@@ -133,7 +132,7 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
               />
               <Select
                 value={inviteRole}
-                onValueChange={(value) => setInviteRole(value as CollaboratorRole)}
+                onValueChange={(value) => setInviteRole(value as TripRole)}
               >
                 <SelectTrigger className="w-[100px]">
                   <SelectValue placeholder="Role" />
@@ -175,9 +174,9 @@ export function ShareModal({ open, onOpenChange, tripName }: ShareModalProps) {
                   {collaborator.name !== "You" ? (
                     <div className="flex items-center gap-2">
                       <Select
-                        value={collaborator.role}
+                        value={collaborator.tripRole}
                         onValueChange={(value) =>
-                          handleRoleChange(collaborator.id, value as CollaboratorRole)
+                          handleRoleChange(collaborator.id, value as TripRole)
                         }
                       >
                         <SelectTrigger className="w-[100px] text-xs h-8">

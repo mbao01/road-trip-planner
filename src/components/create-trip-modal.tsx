@@ -93,14 +93,14 @@ export function CreateTripModal({ open, onOpenChange, onTripCreated }: CreateTri
     }
     setIsCreating(true);
     try {
-      const result = await createTrip({
+      const trip = await createTrip({
         name,
         startDate: dates.from,
         endDate: dates.to,
         startStop: selectedStartStop,
       });
       toast({ title: "Trip created successfully!" });
-      onTripCreated(result.tripId);
+      onTripCreated(trip.id);
       // Reset form
       setName("");
       setDates(undefined);

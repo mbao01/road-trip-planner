@@ -22,13 +22,3 @@ export async function addStopToDay(dayId: string, stopData: any) {
   });
   return newStop;
 }
-
-export async function getDaysForTrip(tripId: string) {
-  return prisma.day.findMany({
-    where: { tripId },
-    orderBy: { date: "asc" },
-    include: {
-      stops: { orderBy: { order: "asc" } },
-    },
-  });
-}

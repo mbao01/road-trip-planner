@@ -3,11 +3,14 @@ import { validator } from "@/app/api/utilities/validation";
 import { updateTripSettingsSchema } from "@/app/api/utilities/validation/schemas";
 import { updateSettingsForTrip } from "@/services/settings";
 
-// PUT /api/trips/[tripId]/settings
-export async function PUT(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+/**
+ * PUT /api/trips/[tripId]/settings
+ * @returns The updated trip settings
+ */
+export async function PUT(req: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   try {
-    const body = await request.json();
+    const body = await req.json();
     const result = validator(body, updateTripSettingsSchema);
 
     if (!result.success) {

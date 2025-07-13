@@ -117,14 +117,14 @@ async function main() {
     data: {
       tripId: "coastal-cruise",
       userId: String(editor.id),
-      role: "EDITOR",
+      tripRole: "EDITOR",
     },
   });
   await prisma.collaborator.create({
     data: {
       tripId: "highland-fling",
       userId: String(viewer.id),
-      role: "VIEWER",
+      tripRole: "VIEWER",
     },
   });
   console.log("Seeded collaborators.");

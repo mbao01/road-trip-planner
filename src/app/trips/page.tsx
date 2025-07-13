@@ -2,8 +2,8 @@
 
 // import { redirect } from "next/navigation";
 // import { auth } from "@/lib/auth";
-// import { getTripsByUserId } from "@/services/trip";
-import type { TripTableRow } from "@/types/trip";
+// import { getUserTrips } from "@/services/trip";
+import type { UserTrip } from "@/types/trip";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateTripModal } from "@/components/create-trip-modal";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { UserDropdown } from "@/components/user-dropdown";
 
-async function getTrips(): Promise<TripTableRow[]> {
+async function getTrips(): Promise<UserTrip[]> {
   const res = await fetch("/api/trips", { cache: "no-store" });
   if (!res.ok) {
     console.error(await res.text());
@@ -22,7 +22,7 @@ async function getTrips(): Promise<TripTableRow[]> {
 }
 
 export default function TripsPage() {
-  const [trips, setTrips] = useState<TripTableRow[]>([]);
+  const [trips, setTrips] = useState<UserTrip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const router = useRouter();
@@ -75,7 +75,7 @@ export default function TripsPage() {
 //     redirect("/auth/signin");
 //   }
 
-//   const trips = await getTripsByUserId(session.user.id);
+//   const trips = await getUserTrips(session.user.id);
 
 //   return (
 //     <div className="flex min-h-screen w-full flex-col">

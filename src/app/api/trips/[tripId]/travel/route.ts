@@ -1,14 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findFirstTravel, getDaysWithStopsForTrip, updateTravel } from "@/services/travel";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { findFirstTravel, getDaysStops, updateTravel } from "@/services/travel";
+import { TripRole } from "@prisma/client";
 
-// PUT /api/trips/[tripId]/travel - Updates trip travel
+/**
+ * GET /api/trips/[tripId]/travel
+ * @returns The trip travel
+ */
+export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
+  });
+
+  try {
+    const travel = await findFirstTravel({
+      where: { tripId },
+    });
+
+    if (!travel) {
+      return NextResponse.json(
+        { error: "Trip not found or you don't have access" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ travel });
+  } catch (error) {
+    console.error(`Failed to retrieve travel for trip ${tripId}:`, error);
+    return NextResponse.json({ error: "Failed to retrieve travel data" }, { status: 500 });
+  }
+}
+
+/**
+ * PUT /api/trips/[tripId]/travel
+ * @returns The updated trip travel
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
   try {
-    const days = await getDaysWithStopsForTrip(tripId);
+    const days = await getDaysStops(tripId);
 
     if (!days) {
       return NextResponse.json(
@@ -54,27 +92,5 @@ export async function PUT(
   } catch (error) {
     console.error(`Failed to retrieve trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to retrieve trip data" }, { status: 500 });
-  }
-}
-
-// GET /api/trips/[tripId]/travel - Gets trip travel
-export async function GET(request: Request, { params }: { params: Promise<{ tripId: string }> }) {
-  const { tripId } = await params;
-  try {
-    const travel = await findFirstTravel({
-      where: { tripId },
-    });
-
-    if (!travel) {
-      return NextResponse.json(
-        { error: "Trip not found or you don't have access" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ travel });
-  } catch (error) {
-    console.error(`Failed to retrieve travel for trip ${tripId}:`, error);
-    return NextResponse.json({ error: "Failed to retrieve travel data" }, { status: 500 });
   }
 }

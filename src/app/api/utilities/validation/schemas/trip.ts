@@ -1,4 +1,4 @@
-import { Currency, DistanceUnit, MapStyle } from "@prisma/client";
+import { Currency, DistanceUnit, MapStyle, TripAccess, TripStatus } from "@prisma/client";
 import { z } from "zod";
 
 export const createTripSchema = z.object({
@@ -29,6 +29,8 @@ export const updateTripSchema = z.object({
 
 export const updateTripDetailsSchema = z.object({
   name: z.string().min(1).optional(),
+  status: z.enum(TripStatus).optional(),
+  access: z.enum(TripAccess).optional(),
 });
 
 export const updateTripSettingsSchema = z.object({
