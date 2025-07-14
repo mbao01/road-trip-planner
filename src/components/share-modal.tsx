@@ -27,17 +27,8 @@ import * as api from "@/lib/api";
 import { CollaboratorWithUser, UserTrips } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
 import { TripAccess, TripRole } from "@prisma/client";
-import {
-  Code,
-  Copy,
-  Facebook,
-  LinkIcon,
-  Mail,
-  MessageCircle,
-  MessageSquare,
-  Trash2,
-  Twitter,
-} from "lucide-react";
+import { Copy, LinkIcon, Trash2 } from "lucide-react";
+import { SocialShare } from "./social-share";
 import { TripRoleBadge } from "./trip-role-badge";
 
 interface ShareModalProps {
@@ -305,29 +296,9 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
           </div>
 
           {/* Social sharing and embed */}
-          <div className="pt-4 border-t">
-            <div className="flex justify-center gap-3 mb-4">
-              <Button size="icon" variant="outline" className="rounded-full bg-transparent">
-                <Facebook className="w-4 h-4 text-blue-600" />
-              </Button>
-              <Button size="icon" variant="outline" className="rounded-full bg-transparent">
-                <MessageCircle className="w-4 h-4 text-blue-500" />
-              </Button>
-              <Button size="icon" variant="outline" className="rounded-full bg-transparent">
-                <Mail className="w-4 h-4 text-gray-600" />
-              </Button>
-              <Button size="icon" variant="outline" className="rounded-full bg-transparent">
-                <MessageSquare className="w-4 h-4 text-green-500" />
-              </Button>
-              <Button size="icon" variant="outline" className="rounded-full bg-transparent">
-                <Twitter className="w-4 h-4 text-blue-400" />
-              </Button>
-            </div>
-            <Button variant="outline" className="w-full justify-start bg-transparent">
-              <Code className="w-4 h-4 mr-2" />
-              Add to website
-            </Button>
-          </div>
+          {shareEnabled && (
+            <SocialShare shareUrl={shareUrl} tripName={trip.name} isPublic={isTripPublic} />
+          )}
         </div>
       </DialogContent>
     </Dialog>

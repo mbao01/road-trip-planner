@@ -86,6 +86,7 @@
     "react-resizable-panels": "latest",
     "react-responsive": "latest",
     "recharts": "latest",
+    "simple-icons": "^15.6.0",
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
