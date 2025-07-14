@@ -47,7 +47,5 @@ export async function signUpAction(values: z.infer<typeof SignUpSchema>) {
     },
   });
 
-  redirect("/auth/signin" + (values.callbackUrl ? `?callbackUrl=${values.callbackUrl}` : ""));
-
   return { success: "Account created successfully!" };
 }
