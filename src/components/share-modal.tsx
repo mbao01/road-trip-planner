@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,8 +44,13 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
   const [shareEnabled, setShareEnabled] = useState(isTripPublic);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TripRole>(TripRole.VIEWER);
+  const [shareUrl, setShareUrl] = useState("");
 
-  const shareUrl = `${window?.location.origin}/share/${trip.id.toLowerCase().replace(/\s/g, "-")}`;
+  useEffect(
+    () =>
+      setShareUrl(`${window?.location.origin}/share/${trip.id.toLowerCase().replace(/\s/g, "-")}`),
+    [trip.id]
+  );
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);

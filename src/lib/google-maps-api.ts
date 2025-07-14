@@ -1,5 +1,3 @@
-import { Stop } from "@prisma/client";
-
 export interface PlaceSearchResult {
   id: string; // This will be the Google Place ID
   name: string; // This will be the description from Google
