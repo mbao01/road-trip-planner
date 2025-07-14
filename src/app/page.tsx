@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { ArrowRight, PlaneIcon as PaperPlane } from "lucide-react"
+import Image from "next/image"
+import { ArrowRight } from "lucide-react"
 
 import { auth } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
@@ -8,50 +9,60 @@ export default async function Home() {
   const session = await auth()
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center bg-background/80 backdrop-blur-sm">
-        <Link href="/" className="flex items-center gap-2 text-foreground">
-          <PaperPlane className="w-8 h-8 text-primary" />
-          <span className="font-heading text-xl font-bold">Trip Planner</span>
-        </Link>
-        <nav className="flex items-center gap-2 sm:gap-4">
+    <main className="relative flex flex-col min-h-screen bg-background text-white">
+      <Image
+        src="/placeholder.svg?width=1920&height=1080"
+        alt="Scenic travel background"
+        fill
+        className="object-cover z-0"
+      />
+      <div className="absolute inset-0 bg-black/40 z-10" />
+
+      <div className="relative z-20 flex flex-col flex-1 p-8 md:p-12">
+        <h1 className="font-heading text-6xl md:text-8xl font-extrabold tracking-tight uppercase">
+          Make the most
+          <br />
+          of travel
+        </h1>
+
+        <nav className="absolute top-8 right-8 md:top-12 md:right-12 flex items-center gap-2 sm:gap-4">
           {session?.user ? (
-            <Button asChild>
+            <Button
+              asChild
+              variant="outline"
+              className="bg-transparent border-white text-white hover:bg-white hover:text-black"
+            >
               <Link href="/trips">Go to Dashboard</Link>
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost">
+              <Button asChild variant="ghost" className="hover:bg-white/10">
                 <Link href="/auth/signin">Sign In</Link>
               </Button>
-              <Button asChild>
+              <Button
+                asChild
+                variant="outline"
+                className="bg-transparent border-white text-white hover:bg-white hover:text-black"
+              >
                 <Link href="/auth/signup">Sign Up</Link>
               </Button>
             </>
           )}
         </nav>
-      </header>
-      <main className="flex-1">
-        <section className="flex flex-col items-center justify-center min-h-screen text-center px-4">
-          <div className="max-w-5xl">
-            <h1 className="font-heading text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter">
-              Make the most of travel
-            </h1>
-            <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto text-muted-foreground">
-              The ultimate planner for your next adventure. Collaborate with friends, discover hidden gems, and build
-              your perfect itinerary—all in one place.
-            </p>
-            <div className="mt-8">
-              <Button asChild size="lg">
-                <Link href={session?.user ? "/trips" : "/auth/signup"}>
-                  Get Started for Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+
+        <div className="mt-auto flex flex-col items-center text-center w-full">
+          <p className="text-lg md:text-xl max-w-2xl mx-auto">
+            The ultimate planner for your next adventure. Collaborate with friends, discover hidden gems, and build your
+            perfect itinerary—all in one place.
+          </p>
+          <Button asChild size="lg" className="mt-8">
+            <Link href={session?.user ? "/trips" : "/auth/signup"}>
+              Start Your Journey
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </main>
   )
 }
