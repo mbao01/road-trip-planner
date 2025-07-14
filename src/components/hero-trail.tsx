@@ -34,18 +34,19 @@ const locations = [
 
 const Path = ({ from, to, transport: TransportIcon }) => {
   const pathRef = React.useRef<SVGPathElement>(null)
-  const [pathLength, setPathLength] = React.useState(0)
   const { scrollYProgress } = useScroll({
     target: from,
     offset: ["start center", "end center"],
   })
 
-  const pathOffset = useTransform(scrollYProgress, [0, 1], [1, 0])
   const pathLengthTransform = useTransform(scrollYProgress, [0, 1], [0, 1])
+  const iconOffset = useTransform(scrollYProgress, [0, 1], [0, 1])
 
   React.useLayoutEffect(() => {
     if (pathRef.current) {
-      setPathLength(pathRef.current.getTotalLength())
+      const pathLength = pathRef.current.getTotalLength()
+      pathRef.current.style.strokeDasharray = `${pathLength} ${pathLength}`
+      pathRef.current.style.strokeDashoffset = `${pathLength}`
     }
   }, [])
 
@@ -58,12 +59,11 @@ const Path = ({ from, to, transport: TransportIcon }) => {
         stroke="hsl(var(--foreground))"
         strokeWidth="2"
         strokeDasharray="4 4"
-        initial={{ pathLength: 0 }}
         style={{ pathLength: pathLengthTransform }}
         transition={{ duration: 0.5, ease: "linear" }}
       />
-      {TransportIcon && (
-        <motion.g style={{ offsetDistance: useTransform(pathOffset, (v) => `${v * 100}%`) }}>
+      {TransportIcon && pathRef.current && (
+        <motion.g style={{ offsetDistance: iconOffset }}>
           <motion.path d={to} fill="none" stroke="transparent" strokeWidth="20" />
           <g transform="translate(-12, -12)">
             <TransportIcon className="w-6 h-6 text-primary" />
@@ -83,9 +83,10 @@ const LocationMarker = ({ location }) => {
       className="absolute"
       style={{ top: location.position.top, left: location.position.left }}
     >
-      <div className="group relative">
+      <div className="group relative flex justify-center items-center">
+        <div className="absolute w-10 h-10 -m-5 cursor-pointer" />
         <div className="w-4 h-4 rounded-full bg-primary border-2 border-background ring-2 ring-primary" />
-        <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-10 transform group-hover:-translate-y-2">
           <Card className="w-[250px] shadow-2xl">
             <CardContent className="p-0">
               <Image
@@ -93,7 +94,7 @@ const LocationMarker = ({ location }) => {
                 width={250}
                 height={180}
                 alt={`Postcard from ${location.name}`}
-                className="rounded-t-lg"
+                className="rounded-t-lg object-cover"
               />
               <div className="p-4">
                 <h3 className="font-heading font-semibold">{location.name}</h3>
@@ -112,6 +113,16 @@ export function HeroTrail() {
   return (
     <div className="relative w-full h-[200vh]">
       <div className="sticky top-0 h-screen overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center max-w-2xl mx-auto px-4">
+            <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+              Your Adventure, Perfectly Planned.
+            </h1>
+            <p className="mt-4 text-muted-foreground md:text-xl">
+              Stop dreaming, start exploring. The ultimate tool to craft your perfect itinerary.
+            </p>
+          </div>
+        </div>
         <svg
           className="absolute top-0 left-0 w-full h-full"
           viewBox="0 0 1000 1000"
