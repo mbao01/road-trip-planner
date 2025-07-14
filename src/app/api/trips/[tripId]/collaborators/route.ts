@@ -50,7 +50,7 @@ export const POST = async function POST(
     }
 
     const collaborator = await addCollaborator(tripId, session.user.id, result.data);
-    return NextResponse.json(collaborator);
+    return NextResponse.json({ ...collaborator });
   } catch (error) {
     console.error(`Failed to add/invite collaborator:`, error);
     return NextResponse.json({ error: "Failed to add/invite collaborator" }, { status: 500 });

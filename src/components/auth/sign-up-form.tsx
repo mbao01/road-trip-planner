@@ -43,7 +43,9 @@ export function SignUpForm() {
         toast.error(result.error);
       } else {
         toast.success("Account created! Please sign in.");
-        redirect("/auth/signin" + (callbackUrl ? `?callbackUrl=${callbackUrl}` : ""));
+        redirect(
+          "/auth/signin" + (callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : "")
+        );
       }
     });
   };

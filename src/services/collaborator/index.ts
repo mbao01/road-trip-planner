@@ -57,7 +57,8 @@ export const addCollaborator = async (
 
   // If the user doesn't exist, create an invite for them.
   if (!collaboratorUser?.email) {
-    return createTripInvite(inviterId, tripId, data.email, data.tripRole);
+    await createTripInvite(inviterId, tripId, data.email, data.tripRole);
+    return;
   }
 
   // If the user already exists, add them as a collaborator and send them an email.

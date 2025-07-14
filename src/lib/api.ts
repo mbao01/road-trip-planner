@@ -1,6 +1,6 @@
 import { UpdateTripDetailsArg } from "@/app/api/utilities/validation/schemas/trip";
 import { CollaboratorWithUser, DayWithStops, UserTrip } from "@/types/trip";
-import { Collaborator, Day, Settings, Stop, Travel, Trip } from "@prisma/client";
+import { Collaborator, Day, Settings, Stop, Travel, Trip, TripInvite } from "@prisma/client";
 
 export async function fetchTrip(tripId: string): Promise<UserTrip> {
   const res = await fetch(`/api/trips/${tripId}`);
@@ -100,7 +100,10 @@ export async function addStop(
   return result.data;
 }
 
-export async function addCollaborator(tripId: string, data: Collaborator): Promise<Collaborator> {
+export async function addCollaborator(
+  tripId: string,
+  data: TripInvite
+): Promise<Collaborator | undefined> {
   const res = await fetch(`/api/trips/${tripId}/collaborators`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

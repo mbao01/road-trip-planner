@@ -32,7 +32,7 @@ export function SignInForm() {
     defaultValues: {
       email: "",
       password: "",
-      callbackUrl,
+      callbackUrl: encodeURIComponent(callbackUrl),
     },
   });
 

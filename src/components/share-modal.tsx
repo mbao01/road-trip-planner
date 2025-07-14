@@ -108,7 +108,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
 
       handleAction(
         async () => {
-          await api.addCollaborator(clone.id, newCollaborator);
+          await api.addCollaborator(clone.id, newInvite);
           setInviteEmail("");
         },
         clone,
@@ -209,7 +209,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
               <div className="space-y-3 max-h-48 overflow-y-auto py-1 pr-2">
                 {trip.invites.map((invite) => {
                   const inviteId = invite.id;
-                  const name = "-";
+                  const name = "∞";
                   const email = invite.email;
                   const tripRole = invite.tripRole;
 
@@ -221,7 +221,6 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
                           <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-normal italic">{"<pending>"}</p>
                           <p className="text-xs text-muted-foreground">{email}</p>
                         </div>
                       </div>
