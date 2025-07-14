@@ -4,13 +4,14 @@ import { formatCurrency } from "@/utilities/numbers";
 import { convertCurrency } from "@/utilities/units/currency";
 import { convertDistance } from "@/utilities/units/distance";
 import { convertDuration } from "@/utilities/units/duration";
-import { Settings, Travel } from "@prisma/client";
+import { Travel } from "@prisma/client";
 import { TRAVEL_MODE } from "./constants/travelMode";
+import { NormalizedSettings } from "./settings";
 
 export const calculateTravelDetails = (
   type: "stop" | "day" | "trip",
-  travel: Travel | undefined,
-  settings: Settings,
+  travel: Travel | null,
+  settings: NormalizedSettings,
   id?: string
 ) => {
   const { travels = {} } = (travel ?? {}) as TravelWithDetails;

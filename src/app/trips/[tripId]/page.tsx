@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { TripPlannerClient } from "@/components/trip-planner-client";
-import * as api from "@/lib/api";
 import { auth } from "@/lib/auth";
+import { tripService } from "@/services/trip";
 
 export default async function TripPage({ params }: { params: Promise<{ tripId: string }> }) {
   const session = await auth();
@@ -11,7 +11,7 @@ export default async function TripPage({ params }: { params: Promise<{ tripId: s
     redirect("/auth/signin");
   }
 
-  const trip = await api.fetchTrip(tripId);
+  const { trip } = await tripService.getUserTrip({ tripId });
 
   return (
     <div className="min-h-screen bg-background">

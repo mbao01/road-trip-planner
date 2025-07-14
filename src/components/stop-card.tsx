@@ -1,6 +1,6 @@
 "use client";
 
-import type { Day, Settings, Stop, Travel } from "@prisma/client";
+import type { Day, Stop, Travel } from "@prisma/client";
 import type { FC } from "react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
+import { NormalizedSettings } from "@/helpers/settings";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -34,9 +35,9 @@ import { TravelDetails } from "./travel-details";
 
 interface StopCardProps {
   stop: Stop;
-  travel: Travel;
+  travel: Travel | null;
   dayId: Day["id"];
-  settings: Settings;
+  settings: NormalizedSettings;
   stopNumber: number;
   onDeleteStop: (dayId: Day["id"], stopId: Stop["id"]) => void;
   isFirstStopOfTrip: boolean;

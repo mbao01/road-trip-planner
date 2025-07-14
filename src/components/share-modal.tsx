@@ -45,7 +45,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TripRole>(TripRole.VIEWER);
 
-  const shareUrl = `${window.location.origin}/share/${trip.id.toLowerCase().replace(/\s/g, "-")}`;
+  const shareUrl = `${window?.location.origin}/share/${trip.id.toLowerCase().replace(/\s/g, "-")}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -89,7 +89,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
       };
 
       const clone = structuredClone(trip);
-      clone.invites = [newInvite, ...clone.invites];
+      clone.invites = [newInvite, ...(clone.invites ?? [])];
 
       handleAction(
         async () => {

@@ -7,13 +7,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
 import { dayHelpers } from "@/helpers/day";
+import { settingsHelpers } from "@/helpers/settings";
 import { tripHelpers } from "@/helpers/trip";
 import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
 import { DayWithStops, UserTrip } from "@/types/trip";
 import { formatCurrency } from "@/utilities/numbers";
-import { Currency, DistanceUnit } from "@prisma/client";
-import { BanknoteIcon, Calendar, Clock, Globe, Loader2, MapPin, Route } from "lucide-react";
+import { BanknoteIcon, Calendar, Clock, Globe, MapPin, Route } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { DeleteDaysConfirmationDialog } from "./delete-days-confirmation-dialog";
 import { SettingsModal } from "./settings-modal";
@@ -37,6 +37,7 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
   const [showSettings, setShowSettings] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const { toast } = useToast();
+  const settings = settingsHelpers.getNormalizedSettings(trip.settings);
 
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -89,9 +90,10 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
   ) => {
     if (!trip) return;
     const clone = structuredClone(trip);
-    clone.settings = { ...clone.settings, ...newSettings };
+    clone.settings = { ...settings, ...newSettings };
 
     handleAction(
+      // TODO upsert settings
       () => api.updateSettings(trip.id, newSettings),
       clone,
       "Settings updated",
@@ -169,7 +171,7 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
         cost: 0,
       };
     }
-    const { computed } = calculateTravelDetails("trip", trip.travel, trip.settings);
+    const { computed } = calculateTravelDetails("trip", trip.travel, settings);
     const totalStops = trip?.days?.reduce((acc, day) => acc + day.stops.length, 0);
 
     return {
@@ -182,7 +184,7 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
       countries: 1,
       cost: Number.parseFloat(computed.cost.value.toFixed(2)),
     };
-  }, [trip]);
+  }, [trip, settings]);
 
   if (!googleMapsApiKey) {
     return (
@@ -219,7 +221,7 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
                 <Route className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
                 <div className="text-2xl font-bold">{stats.distance}</div>
                 <div className="text-xs text-muted-foreground">
-                  {DISTANCE_UNITS[trip.settings.distanceUnit ?? DistanceUnit.MI]}
+                  {DISTANCE_UNITS[settings.distanceUnit]}
                 </div>
               </div>
               <div className="text-center">
@@ -235,7 +237,9 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
               <div className="text-center">
                 <BanknoteIcon className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
                 <div className="text-2xl font-bold">
-                  {formatCurrency(stats.cost, { currency: trip.settings.currency ?? Currency.GBP })}
+                  {formatCurrency(stats.cost, {
+                    currency: settings.currency,
+                  })}
                 </div>
                 <div className="text-xs text-muted-foreground">cost</div>
               </div>
@@ -245,7 +249,7 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
         </div>
         <div className="flex-1 relative">
           <TripMap
-            mapStyle={trip.settings.mapStyle}
+            mapStyle={settings.mapStyle}
             stops={trip.days.flatMap((day) => day.stops)}
             googleMapsApiKey={googleMapsApiKey}
           />
@@ -254,7 +258,7 @@ export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps)
           open={showSettings}
           onOpenChange={setShowSettings}
           tripName={trip.name}
-          settings={trip.settings}
+          settings={settings}
           onUpdateSettings={handleUpdateSettings}
         />
         <ShareModal

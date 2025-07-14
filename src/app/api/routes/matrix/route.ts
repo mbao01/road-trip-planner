@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { googleService } from "@/services/google";
 
 export async function POST(request: Request) {
-  const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
   const body = await request.json();
   const { origins, destinations } = body;
 

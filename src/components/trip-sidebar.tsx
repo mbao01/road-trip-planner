@@ -7,6 +7,7 @@ import type React from "react";
 import type { FC } from "react";
 import { useState } from "react";
 import { dayHelpers } from "@/helpers/day";
+import { settingsHelpers } from "@/helpers/settings";
 import { stopHelpers } from "@/helpers/stop";
 import * as api from "@/lib/api";
 import { UserTrip } from "@/types/trip";
@@ -65,6 +66,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
   const [activeStop, setActiveStop] = useState<Stop | null>(null);
   const [dayToDelete, setDayToDelete] = useState<Day | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const settings = settingsHelpers.getNormalizedSettings(trip.settings);
 
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveStop(null);
@@ -158,7 +160,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
                 onDeleteDay={() => setDayToDelete(day)}
                 onAddStop={addStop}
                 onDeleteStop={deleteStop}
-                settings={trip.settings}
+                settings={settings}
               />
             );
           })}
@@ -170,7 +172,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
               stop={activeStop}
               dayId="0"
               stopNumber={0}
-              settings={trip.settings}
+              settings={settings}
               onDeleteStop={() => {}}
               isFirstStopOfTrip={false}
             />

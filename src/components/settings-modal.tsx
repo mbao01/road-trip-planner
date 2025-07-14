@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
+import { NormalizedSettings } from "@/helpers/settings";
 import { Currency, DistanceUnit, MapStyle } from "@prisma/client";
 import { InfoIcon } from "lucide-react";
 
@@ -16,7 +17,7 @@ interface SettingsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tripName: string;
-  settings: Settings;
+  settings: NormalizedSettings;
   onUpdateSettings: (
     newSettings: Omit<Settings, "id" | "tripId" | "createdAt" | "updatedAt">
   ) => void;

@@ -35,9 +35,9 @@ export type UserTrip = Omit<Trip, "ownerId"> &
     collaboratorsCount: number;
     dayCount: number;
     stopCount: number;
-    invites: TripInvite[];
-    travel: Travel; // TODO:: this is possibly undefined when fetching all trips
-    settings: Settings; // TODO:: this is possibly undefined when fetching all trips
+    invites: TripInvite[] | undefined;
+    travel: Travel | null; // TODO:: this is possibly undefined when fetching all trips
+    settings: Omit<Settings, "id" | "tripId" | "createdAt" | "updatedAt"> | null; // TODO:: this is possibly undefined when fetching all trips
   };
 
 export type UserTrips = Omit<UserTrip, "travel" | "settings" | "days">[];

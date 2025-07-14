@@ -109,10 +109,17 @@ async function getUserTrip(userId: string, tripId: string) {
   }
 
   const isOwner = trip.ownerId === userId;
-  const ownerId = isOwner ? trip.ownerId : null;
-  const invites = isOwner ? trip.invites : null;
+  const ownerId = isOwner ? trip.ownerId : undefined;
+  const invites = isOwner ? trip.invites : undefined;
 
-  return { ...trip, invites, ownerId };
+  return {
+    ...trip,
+    invites,
+    ownerId,
+    collaboratorsCount: trip.collaborators.length,
+    dayCount: trip.days.length,
+    stopCount: trip.days.reduce((acc, day) => acc + day.stops.length, 0),
+  };
 }
 
 /**
