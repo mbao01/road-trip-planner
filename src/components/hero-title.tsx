@@ -2,16 +2,16 @@ export function HeroTitle() {
   return (
     <svg
       viewBox="0 0 1350 950"
-      className="w-[90vw] h-auto md:h-[65vh] md:w-auto"
+      className="w-[55vw]"
       xmlns="http://www.w3.org/2000/svg"
       fill="white"
     >
       <g
         fontFamily="var(--font-lexend), sans-serif"
         fontWeight="800"
-        textTransform="uppercase"
         letterSpacing="-0.05em"
         fontSize="250"
+        fill="#4b1800"
       >
         <text x="0" y="200">
           MAKE
@@ -27,5 +27,5 @@ export function HeroTitle() {
         </text>
       </g>
     </svg>
-  )
+  );
 }
