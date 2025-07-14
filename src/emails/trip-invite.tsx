@@ -21,7 +21,7 @@ export const TripInviteEmail = ({ invitedBy, tripName }: TripInviteEmailProps) =
     <Preview>You have been invited to join {tripName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>You're Invited!</Heading>
+        <Heading style={h1}>You&apos;re Invited!</Heading>
         <Text style={text}>
           <strong>{invitedBy}</strong> has invited you to join the trip:
           <strong> {tripName}</strong>.
@@ -35,8 +35,8 @@ export const TripInviteEmail = ({ invitedBy, tripName }: TripInviteEmailProps) =
           </Button>
         </Section>
         <Text style={text}>
-          We're excited to have you on board. Plan, collaborate, and make memories that will last a
-          lifetime.
+          We&apos;re excited to have you on board. Plan, collaborate, and make memories that will
+          last a lifetime.
         </Text>
       </Container>
     </Body>

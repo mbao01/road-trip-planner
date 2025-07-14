@@ -10,10 +10,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  * Sends a trip invite email to the specified email address.
  */
 export const sendTripInviteEmail = async (email: string, tripName: string, invitedBy: string) => {
-  const emailHtml = render(<TripInviteEmail tripName={tripName} invitedBy={invitedBy} />);
+  const emailHtml = await render(<TripInviteEmail tripName={tripName} invitedBy={invitedBy} />);
 
   await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: process.env.RESEND_FROM_EMAIL!,
     to: email,
     subject: `You have been invited to join a trip: ${tripName}`,
     html: emailHtml,
@@ -29,12 +29,12 @@ export const sendTripCollaboratorEmail = async (
   addedBy: string,
   tripRole: TripRole
 ) => {
-  const emailHtml = render(
+  const emailHtml = await render(
     <TripCollaboratorEmail tripName={tripName} addedBy={addedBy} tripRole={tripRole} />
   );
 
   await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: process.env.RESEND_FROM_EMAIL!,
     to: email,
     subject: `You have been added to the trip: ${tripName}`,
     html: emailHtml,

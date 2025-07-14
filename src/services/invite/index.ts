@@ -18,9 +18,9 @@ export const createTripInvite = async (
   email: string,
   tripRole: TripRole
 ) => {
-  const [trip, user] = await Promise.allSettled([getTripById(tripId), getUserById(userId)]);
+  const [trip, user] = await Promise.all([getTripById(tripId), getUserById(userId)]);
 
-  if (!trip.value || !user.value) {
+  if (!trip || !user) {
     throw new Error("Trip or user not found");
   }
 
@@ -32,20 +32,22 @@ export const createTripInvite = async (
     },
   });
 
-  await sendTripInviteEmail(email, trip.value.name, user.value.name);
+  await sendTripInviteEmail(email, trip.name, user.name ?? "<concealed>");
 
   return tripInvite;
 };
 
 /**
  * Deletes a trip invite
+ * @param inviteId - The ID of the trip
  * @param tripId - The ID of the trip
  * @param email - The email of the user to invite
  * @returns The deleted trip invite
  */
-export const deleteTripInvite = async (tripId: string, email: string) => {
+export const deleteTripInvite = async (tripId: string, inviteId: string, email: string) => {
   return prisma.tripInvite.delete({
     where: {
+      id: inviteId,
       tripId,
       email,
     },
@@ -59,7 +61,7 @@ export const deleteTripInvite = async (tripId: string, email: string) => {
  * @returns The trip invite
  */
 export const getTripInvite = async (tripId: string, email: string) => {
-  return prisma.tripInvite.findUnique({
+  return prisma.tripInvite.findFirst({
     where: {
       tripId,
       email,

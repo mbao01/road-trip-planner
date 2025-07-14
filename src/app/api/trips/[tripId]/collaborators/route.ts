@@ -37,7 +37,7 @@ export const POST = async function POST(
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
-  await resourceGuard({
+  const session = await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
   });
 
@@ -49,7 +49,7 @@ export const POST = async function POST(
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const collaborator = await addCollaborator(tripId, result.data);
+    const collaborator = await addCollaborator(tripId, session.user.id, result.data);
     return NextResponse.json(collaborator);
   } catch (error) {
     console.error(`Failed to add/invite collaborator:`, error);

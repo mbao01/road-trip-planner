@@ -41,18 +41,22 @@ export const getCollaborators = async (tripId: string) => {
  */
 export const addCollaborator = async (
   tripId: string,
-  adderUserId: string,
+  inviterId: string,
   data: AddCollaboratorArg
 ) => {
-  const [trip, adderUser, collaboratorUser] = await Promise.all([
+  const [trip, inviter, collaboratorUser] = await Promise.all([
     getTripById(tripId),
-    getUserById(adderUserId),
+    getUserById(inviterId),
     getUserByEmail(data.email),
   ]);
 
+  if (!trip || !inviter) {
+    throw new Error("Could not invite user");
+  }
+
   // If the user doesn't exist, create an invite for them.
-  if (!collaboratorUser) {
-    return createTripInvite(adderUserId, tripId, data.email, data.tripRole);
+  if (!collaboratorUser?.email) {
+    return createTripInvite(inviterId, tripId, data.email, data.tripRole);
   }
 
   // If the user already exists, add them as a collaborator and send them an email.
@@ -64,7 +68,12 @@ export const addCollaborator = async (
     },
   });
 
-  await sendTripCollaboratorEmail(collaboratorUser.email, trip.name, adderUser.name, data.tripRole);
+  await sendTripCollaboratorEmail(
+    collaboratorUser.email,
+    trip.name,
+    inviter.name ?? "<concealed>",
+    data.tripRole
+  );
 
   return newCollaborator;
 };

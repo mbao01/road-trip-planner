@@ -179,6 +179,8 @@ model TripInvite {
   tripId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([tripId, email])
 }
 
 enum TripRole {

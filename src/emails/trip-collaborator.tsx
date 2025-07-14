@@ -1,3 +1,5 @@
+import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
+import { TripRole } from "@prisma/client";
 import {
   Body,
   Button,
@@ -9,7 +11,6 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import { TripRole } from "@prisma/client";
 
 interface TripCollaboratorEmailProps {
   addedBy: string;
@@ -17,13 +18,17 @@ interface TripCollaboratorEmailProps {
   tripRole: TripRole;
 }
 
-export const TripCollaboratorEmail = ({ addedBy, tripName, tripRole }: TripCollaboratorEmailProps) => (
+export const TripCollaboratorEmail = ({
+  addedBy,
+  tripName,
+  tripRole,
+}: TripCollaboratorEmailProps) => (
   <Html>
     <Head />
     <Preview>You have been added to the trip: {tripName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>You've Been Added to a Trip!</Heading>
+        <Heading style={h1}>You&apos;ve Been Added to a Trip!</Heading>
         <Text style={text}>
           <strong>{addedBy}</strong> has added you to the trip:
           <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
@@ -33,9 +38,7 @@ export const TripCollaboratorEmail = ({ addedBy, tripName, tripRole }: TripColla
             View Trip
           </Button>
         </Section>
-        <Text style={text}>
-          You can now collaborate on the trip plan. Happy travels!
-        </Text>
+        <Text style={text}>You can now collaborate on the trip plan. Happy travels!</Text>
       </Container>
     </Body>
   </Html>
