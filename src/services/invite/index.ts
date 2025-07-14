@@ -5,6 +5,40 @@ import { TripRole } from "@prisma/client";
 import { getUserById } from "./../user/index";
 
 /**
+ * Accepts all trip invites for a user
+ * @param userId - The ID of the user
+ * @param email - The email of the user
+ * @returns The collaborators created
+ */
+export const acceptInvites = async (userId: string, email: string) => {
+  const tripInvites = await getUserTripInvites(email);
+
+  if (!tripInvites || tripInvites.length === 0) {
+    return [];
+  }
+
+  const collaborators = await prisma.$transaction(async (tx) => {
+    const collaborators = await tx.collaborator.createMany({
+      data: tripInvites.map(({ tripId, tripRole }) => ({
+        userId,
+        tripId,
+        tripRole,
+      })),
+    });
+
+    await tx.tripInvite.deleteMany({
+      where: {
+        id: { in: tripInvites.map((invite) => invite.id) },
+      },
+    });
+
+    return collaborators;
+  });
+
+  return collaborators;
+};
+
+/**
  * Creates a trip invite
  * @param userId - The ID of the user who is inviting
  * @param tripId - The ID of the trip
@@ -78,6 +112,19 @@ export const getTripInvites = async (tripId: string) => {
   return prisma.tripInvite.findMany({
     where: {
       tripId,
+    },
+  });
+};
+
+/**
+ * Gets all trip invites for a user
+ * @param email - The email of the user
+ * @returns The trip invites
+ */
+export const getUserTripInvites = async (email: string) => {
+  return prisma.tripInvite.findMany({
+    where: {
+      email,
     },
   });
 };

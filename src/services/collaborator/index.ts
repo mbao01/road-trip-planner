@@ -4,6 +4,7 @@ import {
 } from "@/app/api/utilities/validation/schemas/collaborator";
 import { sendTripCollaboratorEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { TripRole } from "@prisma/client";
 import { createTripInvite } from "../invite";
 import { getTripById } from "../trip";
 import { getUserByEmail, getUserById } from "../user";
@@ -60,13 +61,7 @@ export const addCollaborator = async (
   }
 
   // If the user already exists, add them as a collaborator and send them an email.
-  const newCollaborator = await prisma.collaborator.create({
-    data: {
-      userId: collaboratorUser.id,
-      tripId,
-      tripRole: data.tripRole,
-    },
-  });
+  const newCollaborator = await createCollaborator(collaboratorUser.id, tripId, data.tripRole);
 
   await sendTripCollaboratorEmail(
     collaboratorUser.email,
@@ -77,6 +72,23 @@ export const addCollaborator = async (
   );
 
   return newCollaborator;
+};
+
+/**
+ * Creates a collaborator
+ * @param userId - The ID of the user
+ * @param tripId - The ID of the trip
+ * @param tripRole - The role of the user in the trip
+ * @returns The created collaborator
+ */
+export const createCollaborator = async (userId: string, tripId: string, tripRole: TripRole) => {
+  return prisma.collaborator.create({
+    data: {
+      userId,
+      tripId,
+      tripRole,
+    },
+  });
 };
 
 /**

@@ -2,6 +2,14 @@ import { UpdateTripDetailsArg } from "@/app/api/utilities/validation/schemas/tri
 import { CollaboratorWithUser, DayWithStops, UserTrip } from "@/types/trip";
 import { Collaborator, Day, Settings, Stop, Travel, Trip } from "@prisma/client";
 
+export async function acceptInvites(): Promise<void> {
+  const res = await fetch(`/api/invites/accept`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+
 export async function fetchTrip(tripId: string): Promise<UserTrip> {
   const res = await fetch(`/api/trips/${tripId}`);
   if (!res.ok) throw new Error(await res.text());
