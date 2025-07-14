@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { SignInSchema } from "@/lib/schemas/auth";
 import { userService } from "@/services/user";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
