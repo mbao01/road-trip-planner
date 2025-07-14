@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { addStopSchema } from "@/app/api/utilities/validation/schemas";
-import { addStopToDay } from "@/services/day";
+import { dayRepo } from "@/repository/day";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -26,7 +26,7 @@ export async function POST(
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const newStop = await addStopToDay(dayId, result.data);
+    const newStop = await dayRepo.addStopToDay(dayId, result.data);
 
     return NextResponse.json({ success: true, data: newStop }, { status: 201 });
   } catch (error) {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { updateCollaboratorSchema } from "@/app/api/utilities/validation/schemas/collaborator";
-import { getCollaborator, removeCollaborator, updateCollaborator } from "@/services/collaborator";
+import { collaboratorRepo } from "@/repository/collaborator";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -19,7 +19,7 @@ export const GET = async function GET(
   });
 
   try {
-    const collaborator = await getCollaborator(collaboratorId);
+    const collaborator = await collaboratorRepo.getCollaborator(collaboratorId);
 
     if (!collaborator) {
       return NextResponse.json(
@@ -56,7 +56,11 @@ export const PUT = async function PUT(
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const collaborator = await updateCollaborator(tripId, collaboratorId, result.data);
+    const collaborator = await collaboratorRepo.updateCollaborator(
+      tripId,
+      collaboratorId,
+      result.data
+    );
     return NextResponse.json(collaborator);
   } catch (error) {
     console.error(`Failed to update collaborator ${collaboratorId}:`, error);
@@ -78,7 +82,7 @@ export const DELETE = async function DELETE(
   });
 
   try {
-    await removeCollaborator(tripId, collaboratorId);
+    await collaboratorRepo.removeCollaborator(tripId, collaboratorId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete collaborator ${collaboratorId}:`, error);

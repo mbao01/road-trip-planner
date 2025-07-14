@@ -1,4 +1,4 @@
-import { getTripCollaborator } from "@/services/trip";
+import { tripRepo } from "@/repository/trip";
 import { TripRole } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { authGuard } from "./authGuard";
@@ -32,7 +32,7 @@ export async function resourceGuard(
       throw new Error("Access denied", { cause: { status: StatusCodes.FORBIDDEN } });
     }
 
-    const collaborator = await getTripCollaborator(userId, tripId);
+    const collaborator = await tripRepo.getTripCollaborator(userId, tripId);
     const hasAccess =
       collaborator?.tripRole &&
       roles.every((role) => TRIP_ROLES[role as TripRole].includes(collaborator.tripRole));

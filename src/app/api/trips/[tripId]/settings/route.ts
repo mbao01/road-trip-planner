@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { updateTripSettingsSchema } from "@/app/api/utilities/validation/schemas";
-import { updateTripSettings } from "@/services/settings";
+import { settingsRepo } from "@/repository/settings";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -23,7 +23,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ tripId: 
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const updatedSettings = await updateTripSettings(tripId, result.data);
+    const updatedSettings = await settingsRepo.updateTripSettings(tripId, result.data);
     return NextResponse.json({ success: true, data: updatedSettings });
   } catch (error) {
     console.error(`Failed to update settings for trip ${tripId}:`, error);

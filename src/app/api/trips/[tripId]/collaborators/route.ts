@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { addCollaboratorSchema } from "@/app/api/utilities/validation/schemas/collaborator";
-import { addCollaborator, getCollaborators } from "@/services/collaborator";
+import { collaboratorRepo } from "@/repository/collaborator";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -19,7 +19,7 @@ export const GET = async function GET(
   });
 
   try {
-    const collaborators = await getCollaborators(tripId);
+    const collaborators = await collaboratorRepo.getCollaborators(tripId);
 
     return NextResponse.json(collaborators);
   } catch (error) {
@@ -49,7 +49,11 @@ export const POST = async function POST(
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const collaborator = await addCollaborator(tripId, session.user.id, result.data);
+    const collaborator = await collaboratorRepo.addCollaborator(
+      tripId,
+      session.user.id,
+      result.data
+    );
     return NextResponse.json({ ...collaborator });
   } catch (error) {
     console.error(`Failed to add/invite collaborator:`, error);

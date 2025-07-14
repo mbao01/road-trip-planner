@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { deleteDayById } from "@/services/day";
+import { dayRepo } from "@/repository/day";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -18,7 +18,7 @@ export async function DELETE(
 
   try {
     // TODO:: confirm that prisma's cascading delete on the schema will handle deleting the stops
-    await deleteDayById(dayId);
+    await dayRepo.deleteDayById(dayId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete day ${dayId}:`, error);

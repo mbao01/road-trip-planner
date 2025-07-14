@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
  * @param tripId - The ID of the trip
  * @returns The stops for the trip
  */
-export async function getStopsByTripId(tripId: string) {
+async function getStopsByTripId(tripId: string) {
   return prisma.stop.findMany({
     where: { tripId },
   });
@@ -17,7 +17,7 @@ export async function getStopsByTripId(tripId: string) {
  * @param updatedDays - The updated days with their stops
  * @returns The updated stops
  */
-export async function bulkUpdateStopsOrder(updatedDays: ReorderDaysArg) {
+async function bulkUpdateStopsOrder(updatedDays: ReorderDaysArg) {
   const transaction = updatedDays.flatMap((day, dayIndex) => {
     const dayUpdate = prisma.day.update({
       where: { id: day.id },
@@ -40,6 +40,12 @@ export async function bulkUpdateStopsOrder(updatedDays: ReorderDaysArg) {
  * @param stopId - The ID of the stop
  * @returns The deleted stop
  */
-export async function deleteStopById(stopId: string) {
+async function deleteStopById(stopId: string) {
   return prisma.stop.delete({ where: { id: stopId } });
 }
+
+export const stopRepo = {
+  getStopsByTripId,
+  bulkUpdateStopsOrder,
+  deleteStopById,
+};

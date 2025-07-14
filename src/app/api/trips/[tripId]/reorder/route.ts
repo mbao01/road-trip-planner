@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { reorderDaysSchema } from "@/app/api/utilities/validation/schemas";
-import { bulkUpdateStopsOrder } from "@/services/stop";
+import { stopRepo } from "@/repository/stop";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -22,7 +22,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ tripId: 
     if (!result.success) {
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
-    await bulkUpdateStopsOrder(result.data);
+    await stopRepo.bulkUpdateStopsOrder(result.data);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to reorder trip ${tripId}:`, error);

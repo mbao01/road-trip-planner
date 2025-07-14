@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { getDaysByTripId } from "@/services/day";
-import { getTravel, updateTravel } from "@/services/travel";
+import { dayRepo } from "@/repository/day";
+import { travelRepo } from "@/repository/travel";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ trip
   });
 
   try {
-    const travel = await getTravel(tripId);
+    const travel = await travelRepo.getTravel(tripId);
 
     if (!travel) {
       return NextResponse.json(
@@ -42,7 +42,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ trip
   });
 
   try {
-    const days = await getDaysByTripId(tripId);
+    const days = await dayRepo.getDaysByTripId(tripId);
 
     if (!days) {
       return NextResponse.json(
@@ -78,7 +78,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ trip
     const matrix = await response.json();
 
     if (matrix && matrix.length > 0) {
-      const travel = await updateTravel(tripId, matrix, stops);
+      const travel = await travelRepo.updateTravel(tripId, matrix, stops);
 
       return NextResponse.json({ data: travel });
     }

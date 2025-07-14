@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { acceptInvites } from "@/services/invite";
+import { inviteRepo } from "@/repository/invite";
 import { authGuard } from "../../utilities/guards";
 
 /**
@@ -15,7 +15,7 @@ export async function POST() {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const collaborators = await acceptInvites(session.user.id, session.user.email);
+  const collaborators = await inviteRepo.acceptInvites(session.user.id, session.user.email);
 
   return NextResponse.json(collaborators);
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { updateTripDetailsSchema } from "@/app/api/utilities/validation/schemas";
-import { updateTripDetails } from "@/services/trip";
+import { tripRepo } from "@/repository/trip";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -24,7 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ trip
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const updatedTrip = await updateTripDetails(session.user.id, tripId, result.data);
+    const updatedTrip = await tripRepo.updateTripDetails(session.user.id, tripId, result.data);
 
     return NextResponse.json({ success: true, data: updatedTrip });
   } catch (error) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validator } from "@/app/api/utilities/validation";
 import { updateTripSchema } from "@/app/api/utilities/validation/schemas";
-import { deleteTrip, getUserTrip, updateTripWithDays } from "@/services/trip";
+import { tripRepo } from "@/repository/trip";
 import { TripRole } from "@prisma/client";
 import { Resource, resourceGuard } from "../../utilities/guards";
 
@@ -19,7 +19,7 @@ export const GET = async function GET(
   });
 
   try {
-    const trip = await getUserTrip(session.user.id, tripId);
+    const trip = await tripRepo.getUserTrip(session.user.id, tripId);
 
     if (!trip) {
       return NextResponse.json(
@@ -70,7 +70,7 @@ export const PUT = async function PUT(
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    const updatedTrip = await updateTripWithDays(tripId, result.data);
+    const updatedTrip = await tripRepo.updateTripWithDays(tripId, result.data);
     return NextResponse.json(updatedTrip);
   } catch (error) {
     console.error(`Failed to update trip ${tripId}:`, error);
@@ -92,7 +92,7 @@ export const DELETE = async function DELETE(
   });
 
   try {
-    await deleteTrip(session.user.id, tripId);
+    await tripRepo.deleteTrip(session.user.id, tripId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete trip ${tripId}:`, error);

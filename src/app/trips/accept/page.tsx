@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { acceptInvites } from "@/services/invite";
+import { inviteRepo } from "@/repository/invite";
 
 export default async function TripsAcceptPage() {
   const session = await auth();
@@ -9,7 +9,7 @@ export default async function TripsAcceptPage() {
     return redirect("");
   }
 
-  await acceptInvites(session?.user?.id, session?.user?.email);
+  await inviteRepo.acceptInvites(session?.user?.id, session?.user?.email);
 
   redirect("/");
 }

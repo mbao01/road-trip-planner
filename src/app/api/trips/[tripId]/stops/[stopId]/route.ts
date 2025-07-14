@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { deleteStopById } from "@/services/stop";
+import { stopRepo } from "@/repository/stop";
 import { TripRole } from "@prisma/client";
 
 /**
@@ -17,7 +17,7 @@ export async function DELETE(
   });
 
   try {
-    await deleteStopById(stopId);
+    await stopRepo.deleteStopById(stopId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete stop ${stopId}:`, error);

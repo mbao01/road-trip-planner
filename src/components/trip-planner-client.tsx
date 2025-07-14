@@ -2,7 +2,7 @@
 
 import type { Settings, Travel, Trip } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
@@ -23,15 +23,12 @@ import { TripMap } from "./trip-map";
 import { TripSidebar } from "./trip-sidebar";
 
 interface TripPlannerClientProps {
-  tripId: string;
+  trip: UserTrip;
 }
 
-export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
+export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps) {
   const session = useSession();
-  const [trip, setTrip] = useState<UserTrip | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [googleMapsApiKey, setGoogleMapsApiKey] = useState<string | null>(null);
+  const [trip, setTrip] = useState<UserTrip>(initialTrip);
   const [daysToDeleteInfo, setDaysToDeleteInfo] = useState<{
     days: DayWithStops[];
     newDateRange: DateRange;
@@ -41,22 +38,7 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
   const [showShare, setShowShare] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    setGoogleMapsApiKey(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
-
-    setIsLoading(true);
-    api
-      .fetchTrip(tripId)
-      .then((trip) => {
-        setTrip(trip);
-        setError(null);
-      })
-      .catch((e) => {
-        setError("Failed to load trip data. Please try again later.");
-        console.error(e);
-      })
-      .finally(() => setIsLoading(false));
-  }, [tripId]);
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   /**
    * Handles an action that updates the trip and trip travel.
@@ -79,16 +61,16 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
       await action();
       if (refetchTripTravel) {
         const [travelPromise, tripPromise] = await Promise.allSettled([
-          api.updateTripTravel(tripId),
-          api.fetchTrip(tripId),
+          api.updateTripTravel(trip.id),
+          api.fetchTrip(trip.id),
         ]);
         const travel =
           travelPromise.status === "fulfilled"
             ? travelPromise.value
             : (originalState?.travel ?? ({} as Travel));
-        const trip = tripPromise.status === "fulfilled" ? tripPromise.value : undefined;
+        const updatedTrip = tripPromise.status === "fulfilled" ? tripPromise.value : undefined;
 
-        setTrip({ ...optimisticState, ...trip, travel });
+        setTrip({ ...optimisticState, ...updatedTrip, travel });
       }
       toast({ title: successMessage });
     } catch (error) {
@@ -110,7 +92,7 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
     clone.settings = { ...clone.settings, ...newSettings };
 
     handleAction(
-      () => api.updateSettings(tripId, newSettings),
+      () => api.updateSettings(trip.id, newSettings),
       clone,
       "Settings updated",
       "Failed to update settings",
@@ -129,7 +111,7 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
     const clone = { ...structuredClone(trip), ...data };
 
     handleAction(
-      () => api.updateTripDetails(tripId, data),
+      () => api.updateTripDetails(trip.id, data),
       clone,
       "Trip updated",
       "Failed to update trip details",
@@ -201,22 +183,6 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
       cost: Number.parseFloat(computed.cost.value.toFixed(2)),
     };
   }, [trip]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-      </div>
-    );
-  }
-
-  if (error || !trip) {
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        <p>{error || "Trip data could not be loaded."}</p>
-      </div>
-    );
-  }
 
   if (!googleMapsApiKey) {
     return (

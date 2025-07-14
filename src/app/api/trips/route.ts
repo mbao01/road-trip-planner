@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validator } from "@/app/api/utilities/validation";
 import { createTripSchema } from "@/app/api/utilities/validation/schemas";
-import { createTrip, getUserTrips } from "@/services/trip";
+import { tripRepo } from "@/repository/trip";
 import { authGuard } from "../utilities/guards";
 
 /**
@@ -12,7 +12,7 @@ export const GET = async function GET() {
   const session = await authGuard();
 
   try {
-    const userTrips = await getUserTrips(session.user.id);
+    const userTrips = await tripRepo.getUserTrips(session.user.id);
     return NextResponse.json(userTrips);
   } catch (error) {
     console.error("Failed to retrieve trips:", error);
@@ -35,7 +35,7 @@ export const POST = async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
     const { name, startDate, endDate, startStop } = result.data;
-    const trip = await createTrip({
+    const trip = await tripRepo.createTrip({
       name,
       startDate,
       endDate,

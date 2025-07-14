@@ -5,7 +5,7 @@ import type { SignInSchema, SignUpSchema } from "@/lib/schemas/auth";
 import type { z } from "zod";
 import { signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getUserByEmail } from "@/services/user";
+import { userRepo } from "@/repository/user";
 import { AuthError } from "next-auth";
 
 export async function signInAction(values: z.infer<typeof SignInSchema>) {
@@ -29,7 +29,7 @@ export async function signInAction(values: z.infer<typeof SignInSchema>) {
 }
 
 export async function signUpAction(values: z.infer<typeof SignUpSchema>) {
-  const existingUser = await getUserByEmail(values.email);
+  const existingUser = await userRepo.getUserByEmail(values.email);
 
   if (existingUser) {
     return { error: "An account with this email already exists." };

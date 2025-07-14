@@ -15,7 +15,7 @@ type Matrix = {
  * @param tripId - The ID of the trip
  * @returns The travel for the trip
  */
-export async function getTravel(tripId: string) {
+async function getTravel(tripId: string) {
   return prisma.travel.findFirst({
     where: {
       tripId,
@@ -30,7 +30,7 @@ export async function getTravel(tripId: string) {
  * @param stops - The stops for the trip
  * @returns The updated travel for the trip
  */
-export async function updateTravel(tripId: string, matrix: Matrix[], stops: Stop[]) {
+async function updateTravel(tripId: string, matrix: Matrix[], stops: Stop[]) {
   const travels = matrix.reduce(
     (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,3 +90,8 @@ export async function updateTravel(tripId: string, matrix: Matrix[], stops: Stop
 
   return travel;
 }
+
+export const travelRepo = {
+  getTravel,
+  updateTravel,
+};

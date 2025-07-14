@@ -14,7 +14,7 @@ import { getUserByEmail, getUserById } from "../user";
  * @param collaboratorId - The ID of the collaborator
  * @returns The collaborator
  */
-export const getCollaborator = async (collaboratorId: string) => {
+const getCollaborator = async (collaboratorId: string) => {
   return prisma.collaborator.findUnique({
     where: { id: collaboratorId },
     include: { user: { select: { id: true, name: true, email: true, image: true } } },
@@ -26,7 +26,7 @@ export const getCollaborator = async (collaboratorId: string) => {
  * @param tripId - The ID of the trip
  * @returns The collaborators for the trip
  */
-export const getCollaborators = async (tripId: string) => {
+const getCollaborators = async (tripId: string) => {
   return prisma.collaborator.findMany({
     where: { tripId },
     include: { user: { select: { id: true, name: true, email: true, image: true } } },
@@ -40,11 +40,7 @@ export const getCollaborators = async (tripId: string) => {
  * @param data - The data to add the collaborator with
  * @returns The added collaborator or trip invite
  */
-export const addCollaborator = async (
-  tripId: string,
-  inviterId: string,
-  data: AddCollaboratorArg
-) => {
+const addCollaborator = async (tripId: string, inviterId: string, data: AddCollaboratorArg) => {
   const [trip, inviter, collaboratorUser] = await Promise.all([
     getTripById(tripId),
     getUserById(inviterId),
@@ -82,7 +78,7 @@ export const addCollaborator = async (
  * @param tripRole - The role of the user in the trip
  * @returns The created collaborator
  */
-export const createCollaborator = async (userId: string, tripId: string, tripRole: TripRole) => {
+const createCollaborator = async (userId: string, tripId: string, tripRole: TripRole) => {
   return prisma.collaborator.create({
     data: {
       userId,
@@ -99,7 +95,7 @@ export const createCollaborator = async (userId: string, tripId: string, tripRol
  * @param data - The data to update the collaborator with
  * @returns The updated collaborator
  */
-export const updateCollaborator = async (
+const updateCollaborator = async (
   tripId: string,
   collaboratorId: string,
   data: UpdateCollaboratorArg
@@ -116,8 +112,17 @@ export const updateCollaborator = async (
  * @param collaboratorId - The ID of the collaborator
  * @returns The removed collaborator
  */
-export const removeCollaborator = async (tripId: string, collaboratorId: string) => {
+const removeCollaborator = async (tripId: string, collaboratorId: string) => {
   return prisma.collaborator.delete({
     where: { id: collaboratorId, tripId },
   });
+};
+
+export const collaboratorRepo = {
+  getCollaborator,
+  getCollaborators,
+  addCollaborator,
+  createCollaborator,
+  updateCollaborator,
+  removeCollaborator,
 };

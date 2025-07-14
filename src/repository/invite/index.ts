@@ -1,6 +1,6 @@
 import { sendTripInviteEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
-import { getTripById } from "@/services/trip";
+import { tripRepo } from "@/repository/trip";
 import { TripRole } from "@prisma/client";
 import { getUserById } from "./../user/index";
 
@@ -10,7 +10,7 @@ import { getUserById } from "./../user/index";
  * @param email - The email of the user
  * @returns The collaborators created
  */
-export const acceptInvites = async (userId: string, email: string) => {
+const acceptInvites = async (userId: string, email: string) => {
   const tripInvites = await getUserTripInvites(email);
 
   if (!tripInvites || tripInvites.length === 0) {
@@ -46,13 +46,13 @@ export const acceptInvites = async (userId: string, email: string) => {
  * @param tripRole - The role of the user in the trip
  * @returns The created trip invite
  */
-export const createTripInvite = async (
+const createTripInvite = async (
   userId: string,
   tripId: string,
   email: string,
   tripRole: TripRole
 ) => {
-  const [trip, user] = await Promise.all([getTripById(tripId), getUserById(userId)]);
+  const [trip, user] = await Promise.all([tripRepo.getTripById(tripId), getUserById(userId)]);
 
   if (!trip || !user) {
     throw new Error("Trip or user not found");
@@ -78,7 +78,7 @@ export const createTripInvite = async (
  * @param email - The email of the user to invite
  * @returns The deleted trip invite
  */
-export const deleteTripInvite = async (tripId: string, inviteId: string, email: string) => {
+const deleteTripInvite = async (tripId: string, inviteId: string, email: string) => {
   return prisma.tripInvite.delete({
     where: {
       id: inviteId,
@@ -94,7 +94,7 @@ export const deleteTripInvite = async (tripId: string, inviteId: string, email: 
  * @param email - The email of the user to invite
  * @returns The trip invite
  */
-export const getTripInvite = async (tripId: string, email: string) => {
+const getTripInvite = async (tripId: string, email: string) => {
   return prisma.tripInvite.findFirst({
     where: {
       tripId,
@@ -108,7 +108,7 @@ export const getTripInvite = async (tripId: string, email: string) => {
  * @param tripId - The ID of the trip
  * @returns The trip invites
  */
-export const getTripInvites = async (tripId: string) => {
+const getTripInvites = async (tripId: string) => {
   return prisma.tripInvite.findMany({
     where: {
       tripId,
@@ -121,10 +121,19 @@ export const getTripInvites = async (tripId: string) => {
  * @param email - The email of the user
  * @returns The trip invites
  */
-export const getUserTripInvites = async (email: string) => {
+const getUserTripInvites = async (email: string) => {
   return prisma.tripInvite.findMany({
     where: {
       email,
     },
   });
+};
+
+export const inviteRepo = {
+  acceptInvites,
+  createTripInvite,
+  deleteTripInvite,
+  getTripInvite,
+  getTripInvites,
+  getUserTripInvites,
 };
