@@ -1,249 +1,172 @@
+import { authGuard, Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { validator } from "@/app/api/utilities/validation";
+import { createTripSchema } from "@/app/api/utilities/validation/schemas";
+import { ReorderDaysArg, reorderDaysSchema } from "@/app/api/utilities/validation/schemas/day";
 import {
   CreateTripArg,
   UpdateTripArg,
   UpdateTripDetailsArg,
+  updateTripDetailsSchema,
+  updateTripSchema,
 } from "@/app/api/utilities/validation/schemas/trip";
-import { prisma } from "@/lib/prisma";
-import { isTempId } from "@/utilities/identity";
-import { TripAccess, TripRole, TripStatus } from "@prisma/client";
-import { addDays, differenceInDays } from "date-fns";
+import { stopRepo } from "@/repository/stop";
+import { tripRepo } from "@/repository/trip";
+import { TripRole } from "@prisma/client";
+import { StatusCodes } from "http-status-codes";
+import { travelService } from "../travel";
 
 /**
- * @param tripId - The ID of the trip to retrieve
- * @returns The trip with the specified ID, or null if not found
+ * Gets a trip for a user
+ * @param tripId - The ID of the trip
+ * @returns The trip for the user
  */
-export const getTripById = async (tripId: string) => {
-  return prisma.trip.findFirst({
-    where: { id: tripId },
-  });
-};
-
-/**
- * @param userId - The ID of the user to retrieve
- * @param tripId - The ID of the trip to retrieve
- * @returns The collaborator with the specified user ID and trip ID, or null if not found
- */
-export const getTripCollaborator = async (userId: string, tripId: string) => {
-  return prisma.collaborator.findFirst({
-    where: { userId, tripId },
-  });
-};
-
-/**
- * @param userId - The ID of the user to retrieve
- * @returns An array of trips owned by the specified user
- */
-export const getUserTrips = async (userId: string) => {
-  const userTrips = await prisma.trip.findMany({
-    where: {
-      OR: [{ ownerId: userId }, { collaborators: { some: { userId } } }],
-    },
-    include: {
-      days: { include: { stops: { select: { _count: true } } } },
-      collaborators: true,
-    },
-    orderBy: { createdAt: "desc" },
+const getUserTrip = async ({ tripId }: { tripId: string }) => {
+  const session = await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
   });
 
-  return userTrips.map((trip) => ({
-    id: trip.id,
-    name: trip.name,
-    startDate: trip.startDate,
-    endDate: trip.endDate,
-    createdAt: trip.createdAt,
-    updatedAt: trip.updatedAt,
-    status: trip.status,
-    access: trip.access,
+  const trip = await tripRepo.getUserTrip(session.user.id, tripId);
 
-    // new properties of Trip type
-    collaborators: trip.collaborators.filter((c) => c.userId === userId),
-    collaboratorsCount: trip.collaborators.length,
-    dayCount: trip.days.length,
-    stopCount: trip.days.reduce((acc, day) => acc + day.stops.length, 0),
-  }));
-};
-
-/**
- * @param userId - The ID of the user to retrieve
- * @param tripId - The ID of the trip to retrieve
- * @returns The trip with the specified ID and user ID, or null if not found
- */
-export async function getUserTrip(userId: string, tripId: string) {
-  return prisma.trip.findFirst({
-    where: {
-      id: tripId,
-      OR: [{ ownerId: userId }, { collaborators: { some: { userId } } }],
-    },
-    include: {
-      days: {
-        orderBy: { date: "asc" },
-        include: {
-          stops: { orderBy: { order: "asc" } },
-        },
-      },
-      travel: true,
-      settings: true,
-      collaborators: true,
-      _count: { select: { stops: true } },
-    },
-  });
-}
-
-/**
- * @param tripId - The ID of the trip to update
- * @param data - The data to update the trip with
- * @returns The updated trip
- */
-export async function updateTripWithDays(tripId: string, data: UpdateTripArg) {
-  const trip = await prisma.$transaction(async (tx) => {
-    // Expects data to have: days, startDate, endDate
-    const { days = [], startDate, endDate } = data;
-    // Find existing days
-    const existingDays = await tx.day.findMany({ where: { tripId } });
-    const daysToDelete = existingDays.filter((day) => !days.some((d) => d.id === day.id));
-
-    // Update existing days
-    // TODO:: in order to avoid a connection/pool timeout, confirm that this query is batched
-    await Promise.allSettled(
-      days
-        .filter((day) => !isTempId(day.id))
-        .map((day) =>
-          tx.day.update({
-            where: { id: day.id, tripId },
-            data: { order: day.order, date: day.date },
-          })
-        )
-    );
-
-    // Delete removed days
-    if (daysToDelete.length > 0) {
-      await tx.day.deleteMany({
-        where: { id: { in: daysToDelete.map((day) => day.id) } },
-      });
-    }
-
-    // Update trip and create new days
-    const updatedTrip = await tx.trip.update({
-      where: { id: tripId },
-      data: {
-        startDate,
-        endDate,
-        days: {
-          createMany: {
-            data: days
-              .filter((d) => isTempId(d.id))
-              .map((day) => ({ date: day.date, order: day.order })),
-          },
-        },
-      },
+  if (!trip) {
+    throw new Error("Trip not found or you don't have access", {
+      cause: { status: StatusCodes.NOT_FOUND },
     });
+  }
 
-    return updatedTrip;
-  });
+  if (!trip.travel && trip._count.stops > 1) {
+    const { travel } = await travelService.createTravel({ tripId });
+    trip.travel = travel;
+  }
 
-  return trip;
-}
+  return { trip };
+};
 
 /**
- * @param userId - The ID of the user to update the trip for
- * @param tripId - The ID of the trip to update
- * @param data - The data to update the trip with
- * @returns The updated trip
+ * Gets trips for a user
+ * @returns The trips for the user
  */
-export async function updateTripDetails(
-  userId: string,
-  tripId: string,
-  data: UpdateTripDetailsArg
-) {
-  return prisma.trip.update({
-    where: {
-      id: tripId,
-      collaborators: { some: { userId } },
-    },
-    data,
-  });
-}
+const getUserTrips = async () => {
+  const session = await authGuard();
+  const trips = await tripRepo.getUserTrips(session.user.id);
+
+  return { trips };
+};
 
 /**
- * @param name - The name of the trip
- * @param startDate - The start date of the trip
- * @param endDate - The end date of the trip
- * @param ownerId - The ID of the owner of the trip
- * @param startStop - The start stop of the trip
+ * Creates a trip for a user
+ * @param data - The data to create the trip with
  * @returns The created trip
  */
-export async function createTrip({
-  name,
-  startDate,
-  endDate,
-  ownerId,
-  startStop,
-}: CreateTripArg & {
-  ownerId: string;
-}) {
-  const trip = await prisma.$transaction(async (tx) => {
-    const dayCount = differenceInDays(endDate, startDate) + 1;
+const createTrip = async (data: CreateTripArg) => {
+  const session = await authGuard();
 
-    const newTrip = await tx.trip.create({
-      data: {
-        name,
-        startDate,
-        endDate,
-        ownerId,
-        status: TripStatus.NOT_STARTED,
-        access: TripAccess.PRIVATE,
-        settings: { create: {} },
-        collaborators: {
-          create: {
-            userId: ownerId,
-            tripRole: TripRole.OWNER,
-          },
-        },
-      },
+  const result = validator(data, createTripSchema);
+
+  if (!result.success) {
+    throw new Error(result.message, {
+      cause: { status: StatusCodes.BAD_REQUEST, errors: result.errors },
     });
+  }
 
-    await tx.day.createMany({
-      data: Array.from({ length: dayCount }, (_, i) => ({
-        date: addDays(startDate, i),
-        tripId: trip.id,
-        order: i,
-      })),
-    });
+  const { name, startDate, endDate, startStop } = result.data;
 
-    const day = await tx.day.findFirst({
-      where: {
-        tripId: trip.id,
-        order: 0,
-      },
-    });
-
-    if (day) {
-      await tx.stop.create({
-        data: {
-          order: 0,
-          name: startStop.name,
-          tripId: trip.id,
-          placeId: startStop.placeId,
-          latitude: startStop.latitude,
-          longitude: startStop.longitude,
-          dayId: day.id,
-        },
-      });
-    }
-
-    return newTrip;
+  const trip = await tripRepo.createTrip({
+    name,
+    startDate,
+    endDate,
+    ownerId: session.user.id,
+    startStop,
   });
 
-  return trip;
-}
+  return { trip };
+};
 
 /**
- * @param userId - The ID of the user to delete the trip for
- * @param tripId - The ID of the trip to delete
- * @returns The deleted trip
+ * Updates a trip for a user
+ * @param tripId - The ID of the trip
+ * @param data - The data to update the trip with
+ * @returns The updated trip
  */
-export async function deleteTrip(userId: string, tripId: string) {
-  return prisma.trip.delete({
-    where: { id: tripId, ownerId: userId },
+const updateTrip = async ({ tripId }: { tripId: string }, data: UpdateTripArg) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
   });
-}
+
+  const result = validator(data, updateTripSchema);
+
+  if (!result.success) {
+    throw new Error(result.message, {
+      cause: { status: StatusCodes.BAD_REQUEST, errors: result.errors },
+    });
+  }
+
+  const trip = await tripRepo.updateTripWithDays(tripId, result.data);
+
+  return { trip };
+};
+
+/**
+ * Updates the details of a trip for a user
+ * @param tripId - The ID of the trip
+ * @param data - The data to update the trip details with
+ * @returns The updated trip details
+ */
+const updateTripDetails = async ({ tripId }: { tripId: string }, data: UpdateTripDetailsArg) => {
+  const session = await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
+  const result = validator(data, updateTripDetailsSchema);
+
+  if (!result.success) {
+    throw new Error(result.message, {
+      cause: { status: StatusCodes.BAD_REQUEST, errors: result.errors },
+    });
+  }
+
+  const trip = await tripRepo.updateTripDetails(session.user.id, tripId, result.data);
+
+  return { trip };
+};
+
+/**
+ * Reorders the days of a trip for a user
+ * @param tripId - The ID of the trip
+ * @param data - The data to reorder the days with
+ */
+const reorderTrip = async ({ tripId }: { tripId: string }, data: ReorderDaysArg) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
+  const result = validator(data, reorderDaysSchema);
+  if (!result.success) {
+    throw new Error(result.message, {
+      cause: { status: StatusCodes.BAD_REQUEST, errors: result.errors },
+    });
+  }
+
+  await stopRepo.bulkUpdateStopsOrder(result.data);
+};
+
+/**
+ * Deletes a trip for a user
+ * @param tripId - The ID of the trip
+ */
+const deleteTrip = async ({ tripId }: { tripId: string }) => {
+  const session = await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
+  });
+
+  await tripRepo.deleteTrip(session.user.id, tripId);
+};
+
+export const tripService = {
+  getUserTrip,
+  getUserTrips,
+  createTrip,
+  updateTrip,
+  updateTripDetails,
+  reorderTrip,
+  deleteTrip,
+};

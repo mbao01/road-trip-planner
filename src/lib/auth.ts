@@ -1,8 +1,8 @@
+import { verifyPassword } from "@/helpers/passwordHash";
 import { prisma } from "@/lib/prisma";
 import { SignInSchema } from "@/lib/schemas/auth";
-import { getUserByEmail } from "@/services/user";
+import { userService } from "@/services/user";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-// import bcrypt from "bcrypt";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -23,11 +23,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (validatedFields.success) {
           const { email, password } = validatedFields.data;
 
-          const user = await getUserByEmail(email);
+          const { user } = await userService.getUserByEmail({ email });
           if (!user || !user.password) return null;
 
-          // const passwordsMatch = await bcrypt.compare(password, user.password);
-          const passwordsMatch = Boolean(password);
+          const passwordsMatch = verifyPassword(password, user.password);
 
           if (passwordsMatch) return user;
           return null;
@@ -37,7 +36,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // ⏳ 24 hrs (in seconds)
+    updateAge: 1 * 60 * 60, // 🔁 Refresh JWT if session is older than 1 hr
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // ensures the token itself also expires in the same timeframe.
+  },
   pages: {
     signIn: "/auth/signin",
   },

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { getDaysByTripId } from "@/services/day";
-import { getTravel, updateTravel } from "@/services/travel";
-import { TripRole } from "@prisma/client";
+import { travelService } from "@/services/travel";
+import { StatusCodes } from "http-status-codes";
 
 /**
  * GET /api/trips/[tripId]/travel
@@ -10,24 +8,23 @@ import { TripRole } from "@prisma/client";
  */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
-  });
 
   try {
-    const travel = await getTravel(tripId);
-
+    const { travel } = await travelService.getTravel({ tripId });
     if (!travel) {
       return NextResponse.json(
         { error: "Trip not found or you don't have access" },
-        { status: 404 }
+        { status: StatusCodes.NOT_FOUND }
       );
     }
 
     return NextResponse.json({ travel });
   } catch (error) {
     console.error(`Failed to retrieve travel for trip ${tripId}:`, error);
-    return NextResponse.json({ error: "Failed to retrieve travel data" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to retrieve travel data" },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR }
+    );
   }
 }
 
@@ -37,53 +34,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ trip
  */
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
-  });
 
   try {
-    const days = await getDaysByTripId(tripId);
-
-    if (!days) {
-      return NextResponse.json(
-        { error: "Trip not found or you don't have access" },
-        { status: 404 }
-      );
-    }
-
-    // TODO:: Add support for caching such that only places without a route matrix are fetched
-
-    const stops = days.flatMap((day) => day.stops);
-    const places = stops.map((stop) => stop.placeId);
-
-    if (places.length === 0) {
-      return NextResponse.json({ data: {} });
-    }
-
-    const url = new URL(`/api/routes/matrix`, req.nextUrl.origin);
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        origins: places,
-        destinations: places,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to get distance matrix");
-    }
-
-    const matrix = await response.json();
-
-    if (matrix && matrix.length > 0) {
-      const travel = await updateTravel(tripId, matrix, stops);
-
-      return NextResponse.json({ data: travel });
-    }
-
-    return NextResponse.json({ data: {} });
+    const { travel } = await travelService.createTravel({ tripId });
+    return NextResponse.json({ data: travel });
   } catch (error) {
     console.error(`Failed to retrieve trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to retrieve trip data" }, { status: 500 });

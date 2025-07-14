@@ -1,65 +1,70 @@
-import { AddStopArg } from "@/app/api/utilities/validation/schemas/stop";
-import { prisma } from "@/lib/prisma";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { validator } from "@/app/api/utilities/validation";
+import { AddStopArg, addStopSchema } from "@/app/api/utilities/validation/schemas/stop";
+import { dayRepo } from "@/repository/day";
+import { TripRole } from "@prisma/client";
+import { StatusCodes } from "http-status-codes";
 
 /**
- * Gets days by trip ID
+ * Gets days for a trip
  * @param tripId - The ID of the trip
  * @returns The days for the trip
  */
-export async function getDaysByTripId(tripId: string) {
-  return prisma.day.findMany({
-    where: { tripId },
-    orderBy: { date: "asc" },
-    include: {
-      stops: { orderBy: { order: "asc" } },
-    },
+const getDays = async ({ tripId }: { tripId: string }) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
   });
-}
+
+  const days = await dayRepo.getDaysByTripId(tripId);
+
+  return { days };
+};
 
 /**
- * Gets stops from days
+ * Creates a stop for a day
+ * @param dayId - The ID of the day
  * @param tripId - The ID of the trip
- * @returns The stops for the trip
+ * @param data - The data to create the stop with
+ * @returns The created stop
  */
-export async function getStopsFromDays(tripId: string) {
-  const days = await prisma.day.findMany({
-    where: { tripId },
-    orderBy: { date: "asc" },
-    include: { stops: { orderBy: { order: "asc" } } },
+const createDayStop = async (
+  { dayId, tripId }: { dayId: string; tripId: string },
+  data: AddStopArg
+) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
   });
-  return days?.flatMap((day) => day.stops) || [];
-}
+
+  const result = validator(data, addStopSchema);
+
+  if (!result.success) {
+    throw new Error(result.message, {
+      cause: { status: StatusCodes.BAD_REQUEST, errors: result.errors },
+    });
+  }
+
+  const stop = await dayRepo.addStopToDay(dayId, result.data);
+
+  return { stop };
+};
 
 /**
- * Adds a stop to a day
+ * Deletes a day
  * @param dayId - The ID of the day
- * @param stopData - The data for the stop
- * @returns The new stop
- */
-export async function addStopToDay(dayId: string, stopData: AddStopArg) {
-  // Get the day and count stops
-  const day = await prisma.day.findUnique({
-    where: { id: dayId },
-    include: { _count: { select: { stops: true } } },
-  });
-  if (!day) throw new Error("Day not found");
-  // Create the stop
-  const newStop = await prisma.stop.create({
-    data: {
-      ...stopData,
-      dayId: dayId,
-      tripId: day.tripId,
-      order: day._count.stops,
-    },
-  });
-  return newStop;
-}
-
-/**
- * Deletes a day by ID
- * @param dayId - The ID of the day
+ * @param tripId - The ID of the trip
  * @returns The deleted day
  */
-export async function deleteDayById(dayId: string) {
-  return prisma.day.delete({ where: { id: dayId } });
-}
+const deleteDay = async ({ dayId, tripId }: { dayId: string; tripId: string }) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
+  // TODO:: confirm that prisma's cascading delete on the schema will handle deleting the stops
+  await dayRepo.deleteDayById(dayId);
+};
+
+export const dayService = {
+  getDays,
+  createDayStop,
+  deleteDay,
+};

@@ -1,22 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validator } from "@/app/api/utilities/validation";
-import { createTripSchema } from "@/app/api/utilities/validation/schemas";
-import { createTrip, getUserTrips } from "@/services/trip";
-import { authGuard } from "../utilities/guards";
+import { tripService } from "@/services/trip";
+import { StatusCodes } from "http-status-codes";
 
 /**
  * GET /api/trips
  * @returns An array of trips owned by the current user
  */
 export const GET = async function GET() {
-  const session = await authGuard();
-
   try {
-    const userTrips = await getUserTrips(session.user.id);
-    return NextResponse.json(userTrips);
+    const { trips } = await tripService.getUserTrips();
+    return NextResponse.json(trips);
   } catch (error) {
     console.error("Failed to retrieve trips:", error);
-    return NextResponse.json({ error: "Failed to retrieve trips" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to retrieve trips" },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR }
+    );
   }
 };
 
@@ -25,26 +24,15 @@ export const GET = async function GET() {
  * @returns The created trip
  */
 export const POST = async function POST(req: NextRequest) {
-  const session = await authGuard();
-
   try {
     const body = await req.json();
-    const result = validator(body, createTripSchema);
-
-    if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
-    }
-    const { name, startDate, endDate, startStop } = result.data;
-    const trip = await createTrip({
-      name,
-      startDate,
-      endDate,
-      ownerId: session.user.id,
-      startStop,
-    });
-    return NextResponse.json(trip, { status: 201 });
+    const { trip } = await tripService.createTrip(body);
+    return NextResponse.json(trip, { status: StatusCodes.CREATED });
   } catch (error) {
     console.error("Failed to create trip:", error);
-    return NextResponse.json({ error: "Failed to create trip" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create trip" },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR }
+    );
   }
 };

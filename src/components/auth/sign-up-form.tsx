@@ -3,6 +3,7 @@
 import type { z } from "zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { redirect, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,6 +23,8 @@ import { toast } from "sonner";
 type SignUpFormValues = z.infer<typeof SignUpSchema>;
 
 export function SignUpForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<SignUpFormValues>({
@@ -40,6 +43,9 @@ export function SignUpForm() {
         toast.error(result.error);
       } else {
         toast.success("Account created! Please sign in.");
+        redirect(
+          "/auth/signin" + (callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : "")
+        );
       }
     });
   };

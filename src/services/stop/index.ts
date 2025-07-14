@@ -1,45 +1,38 @@
-import { ReorderDaysArg } from "@/app/api/utilities/validation/schemas/day";
-import { prisma } from "@/lib/prisma";
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { dayRepo } from "@/repository/day";
+import { stopRepo } from "@/repository/stop";
+import { TripRole } from "@prisma/client";
 
 /**
- * Gets stops by trip ID
+ * Gets stops for a trip
  * @param tripId - The ID of the trip
  * @returns The stops for the trip
  */
-export async function getStopsByTripId(tripId: string) {
-  return prisma.stop.findMany({
-    where: { tripId },
+const getStops = async ({ tripId }: { tripId: string }) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
   });
-}
+
+  const stops = await dayRepo.getStopsFromDays(tripId);
+
+  return { stops };
+};
 
 /**
- * Bulk updates the order of stops for a trip
- * @param updatedDays - The updated days with their stops
- * @returns The updated stops
- */
-export async function bulkUpdateStopsOrder(updatedDays: ReorderDaysArg) {
-  const transaction = updatedDays.flatMap((day, dayIndex) => {
-    const dayUpdate = prisma.day.update({
-      where: { id: day.id },
-      data: { order: dayIndex, date: day.date },
-    });
-    // TODO:: Do you need to reorder stops when you reorder days???
-    const stopUpdates = day.stops.map((stop, stopIndex) =>
-      prisma.stop.update({
-        where: { id: stop.id },
-        data: { order: stopIndex, dayId: day.id },
-      })
-    );
-    return [dayUpdate, ...stopUpdates];
-  });
-  return prisma.$transaction(transaction);
-}
-
-/**
- * Deletes a stop by ID
+ * Deletes a stop
+ * @param tripId - The ID of the trip
  * @param stopId - The ID of the stop
  * @returns The deleted stop
  */
-export async function deleteStopById(stopId: string) {
-  return prisma.stop.delete({ where: { id: stopId } });
-}
+const deleteStop = async ({ tripId, stopId }: { tripId: string; stopId: string }) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
+
+  await stopRepo.deleteStopById(stopId);
+};
+
+export const stopService = {
+  getStops,
+  deleteStop,
+};

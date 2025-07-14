@@ -1,5 +1,5 @@
-import { getTripById, getTripCollaborator } from "@/services/trip";
-import { TripAccess, TripRole } from "@prisma/client";
+import { tripRepo } from "@/repository/trip";
+import { TripRole } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { authGuard } from "./authGuard";
 import { Resource } from "./constants";
@@ -12,7 +12,7 @@ const TRIP_ROLES: Record<TripRole, TripRole[]> = {
 } satisfies Record<TripRole, TripRole[]>;
 
 export async function resourceGuard(
-  m: Record<
+  guard: Record<
     Resource,
     {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,25 +23,22 @@ export async function resourceGuard(
 ) {
   const session = await authGuard();
   const userId = session.user.id;
-  const resources = Object.keys(m) as unknown as Resource[];
+  const resources = Object.keys(guard) as unknown as Resource[];
 
   if (resources.includes(Resource.TRIP)) {
-    const { roles, tripId } = m[Resource.TRIP];
+    const { roles, tripId } = guard[Resource.TRIP];
+
     if (!tripId) {
       throw new Error("Access denied", { cause: { status: StatusCodes.FORBIDDEN } });
     }
 
-    // TODO:: get trip here (tripId, userId) -> compare tripRole from collaborators in there with required tripRole
-    const trip = await getTripById(tripId);
-    if (trip?.access !== TripAccess.PUBLIC) {
-      const collaborator = await getTripCollaborator(userId, tripId);
-      const hasAccess =
-        collaborator?.tripRole &&
-        roles.every((role) => TRIP_ROLES[role as TripRole].includes(collaborator.tripRole));
+    const collaborator = await tripRepo.getTripCollaborator(userId, tripId);
+    const hasAccess =
+      collaborator?.tripRole &&
+      roles.every((role) => TRIP_ROLES[role as TripRole].includes(collaborator.tripRole));
 
-      if (!hasAccess) {
-        throw new Error("Access denied", { cause: { status: StatusCodes.FORBIDDEN } });
-      }
+    if (!hasAccess) {
+      throw new Error("Access denied", { cause: { status: StatusCodes.FORBIDDEN } });
     }
   }
 

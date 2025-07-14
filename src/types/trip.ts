@@ -7,7 +7,9 @@ import {
   Travel,
   Trip,
   TripAccess,
+  TripInvite,
   TripStatus,
+  User,
 } from "@prisma/client";
 
 // Type for the data displayed in the trips table
@@ -22,19 +24,23 @@ export type TripTableRow = {
   access: TripAccess;
 };
 
-export type UserTrip = Omit<Trip, "ownerId"> & {
-  collaborators: [Collaborator];
-  collaboratorsCount: number;
-  dayCount: number;
-  stopCount: number;
+export type CollaboratorWithUser = Collaborator & {
+  user: Pick<User, "id" | "name" | "email" | "image">;
 };
 
-export type TripFull = Omit<Trip, "ownerId"> & {
-  travel: Travel;
-  settings: Settings;
-  collaborators: Collaborator[];
-  days: DayWithStops[];
-};
+export type UserTrip = Omit<Trip, "ownerId"> &
+  Partial<Pick<Trip, "ownerId">> & {
+    days: DayWithStops[];
+    collaborators: CollaboratorWithUser[];
+    collaboratorsCount: number;
+    dayCount: number;
+    stopCount: number;
+    invites: TripInvite[] | undefined;
+    travel: Travel | null; // TODO:: this is possibly undefined when fetching all trips
+    settings: Omit<Settings, "id" | "tripId" | "createdAt" | "updatedAt"> | null; // TODO:: this is possibly undefined when fetching all trips
+  };
+
+export type UserTrips = Omit<UserTrip, "travel" | "settings" | "days">[];
 
 export type DayWithStops = Day & {
   stops: Stop[];

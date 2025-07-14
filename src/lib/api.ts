@@ -1,7 +1,8 @@
-import { DayWithStops, TripFull } from "@/types/trip";
-import { Day, Settings, Stop, Travel, Trip } from "@prisma/client";
+import { UpdateTripDetailsArg } from "@/app/api/utilities/validation/schemas/trip";
+import { CollaboratorWithUser, DayWithStops, UserTrip } from "@/types/trip";
+import { Collaborator, Day, Settings, Stop, Travel, Trip, TripInvite } from "@prisma/client";
 
-export async function fetchTrip(tripId: string): Promise<TripFull> {
+export async function fetchTrip(tripId: string): Promise<UserTrip> {
   const res = await fetch(`/api/trips/${tripId}`);
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -19,6 +20,21 @@ export async function fetchStops(tripId: string): Promise<Stop[]> {
   return res.json();
 }
 
+export async function fetchCollaborators(tripId: string): Promise<CollaboratorWithUser[]> {
+  const res = await fetch(`/api/trips/${tripId}/collaborators`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function fetchCollaborator(
+  tripId: string,
+  collaboratorId: string
+): Promise<CollaboratorWithUser> {
+  const res = await fetch(`/api/trips/${tripId}/collaborators/${collaboratorId}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function updateTrip(
   tripId: string,
   data: Partial<{ startDate: Date; endDate: Date; days: DayWithStops[] }>
@@ -32,7 +48,7 @@ export async function updateTrip(
   return res.json();
 }
 
-export async function updateTripDetails(tripId: string, data: { name?: string }): Promise<Trip> {
+export async function updateTripDetails(tripId: string, data: UpdateTripDetailsArg): Promise<Trip> {
   const res = await fetch(`/api/trips/${tripId}/details`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -55,6 +71,20 @@ export async function updateSettings(
   return res.json();
 }
 
+export async function updateCollaborator(
+  tripId: string,
+  collaboratorId: string,
+  data: Pick<Collaborator, "tripRole">
+): Promise<Collaborator> {
+  const res = await fetch(`/api/trips/${tripId}/collaborators/${collaboratorId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function addStop(
   tripId: Trip["id"],
   dayId: Day["id"],
@@ -68,6 +98,19 @@ export async function addStop(
   if (!res.ok) throw new Error(await res.text());
   const result = await res.json();
   return result.data;
+}
+
+export async function addCollaborator(
+  tripId: string,
+  data: TripInvite
+): Promise<Collaborator | undefined> {
+  const res = await fetch(`/api/trips/${tripId}/collaborators`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
 export async function deleteStop(tripId: Trip["id"], stopId: Stop["id"]): Promise<void> {
@@ -85,7 +128,14 @@ export async function deleteTrip(tripId: Trip["id"]): Promise<void> {
   if (!res.ok) throw new Error(await res.text());
 }
 
-export async function reorderTrip(tripId: string, trip: TripFull): Promise<void> {
+export async function removeCollaborator(tripId: string, collaboratorId: string): Promise<void> {
+  const res = await fetch(`/api/trips/${tripId}/collaborators/${collaboratorId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+
+export async function reorderTrip(tripId: string, trip: UserTrip): Promise<void> {
   const res = await fetch(`/api/trips/${tripId}/reorder`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

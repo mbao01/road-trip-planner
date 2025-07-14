@@ -1,92 +1,74 @@
-import { prisma } from "@/lib/prisma";
-import { Stop } from "@prisma/client";
-
-type Matrix = {
-  originIndex: number;
-  destinationIndex: number;
-  distanceMeters: number;
-  duration: string;
-  staticDuration: string;
-  condition: string;
-};
+import { Resource, resourceGuard } from "@/app/api/utilities/guards";
+import { dayRepo } from "@/repository/day";
+import { travelRepo } from "@/repository/travel";
+import { TripRole } from "@prisma/client";
+import { StatusCodes } from "http-status-codes";
+import { googleService } from "../google";
 
 /**
  * Gets the travel for a trip
  * @param tripId - The ID of the trip
  * @returns The travel for the trip
  */
-export async function getTravel(tripId: string) {
-  return prisma.travel.findFirst({
-    where: {
-      tripId,
-    },
+const getTravel = async ({ tripId }: { tripId: string }) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
   });
-}
+
+  const travel = await travelRepo.getTravel(tripId);
+
+  return { travel };
+};
 
 /**
- * Updates the travel for a trip
+ * Creates the travel for a trip
  * @param tripId - The ID of the trip
- * @param matrix - The matrix of stops
- * @param stops - The stops for the trip
- * @returns The updated travel for the trip
+ * @returns The created travel
  */
-export async function updateTravel(tripId: string, matrix: Matrix[], stops: Stop[]) {
-  const travels = matrix.reduce(
-    (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      acc: any,
-      datum: Matrix
-    ) => {
-      if (datum.originIndex !== datum.destinationIndex) {
-        const { id: destinationId } = stops[datum.destinationIndex];
-        const { id: originId } = stops[datum.originIndex];
+const createTravel = async ({ tripId }: { tripId: string }) => {
+  await resourceGuard({
+    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
+  });
 
-        // stopId: { originId, distance, duration, etc}
-        acc[destinationId] = acc[destinationId] || { relationships: {} };
-        acc[destinationId] = {
-          relationships: {
-            ...acc[destinationId].relationships,
-            [originId]: {
-              originId,
-              dayId: stops[datum.destinationIndex].dayId,
-              distance: datum.distanceMeters,
-              duration: Number(datum.duration.replace("s", "")),
-              staticDuration: Number(datum.staticDuration.replace("s", "")),
-              condition: datum.condition,
-            },
-          },
-        };
-      }
+  const days = await dayRepo.getDaysByTripId(tripId);
 
-      return acc;
-    },
-    {}
-  );
+  if (!days) {
+    throw new Error("Trip not found or you don't have access", {
+      cause: { status: StatusCodes.NOT_FOUND },
+    });
+  }
 
-  stops.forEach((stop, index) => {
-    const { id: stopId } = stop;
-    const prevStopId = stops[index - 1]?.id;
+  // TODO:: Add support for caching such that only places without a route matrix are fetched
 
-    if (prevStopId) {
-      travels[stopId] = {
-        ...travels[stopId],
-        details: travels[stopId]?.relationships?.[prevStopId],
-      };
+  const stops = days.flatMap((day) => day.stops);
+  const places = stops.map((stop) => stop.placeId);
+  let travel = null;
+
+  if (places.length === 0) {
+    return { travel };
+  }
+
+  try {
+    const { matrix } = await googleService.getRouteMatrix({
+      origins: places,
+      destinations: places,
+    });
+
+    if (matrix && matrix.length > 0) {
+      travel = await travelRepo.updateTravel(tripId, matrix, stops);
+
+      return { travel };
     }
-  });
 
-  const travel = await prisma.travel.upsert({
-    where: {
-      tripId,
-    },
-    create: {
-      tripId,
-      travels,
-    },
-    update: {
-      travels,
-    },
-  });
+    return { travel };
+  } catch (error) {
+    console.error(error || "Failed to get distance matrix");
 
-  return travel;
-}
+    return { travel };
+  }
+};
+
+export const travelService = {
+  getTravel,
+  createTravel,
+};

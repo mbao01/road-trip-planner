@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validator } from "@/app/api/utilities/validation";
-import { updateTripSchema } from "@/app/api/utilities/validation/schemas";
-import { deleteTrip, getUserTrip, updateTripWithDays } from "@/services/trip";
-import { TripRole } from "@prisma/client";
-import { Resource, resourceGuard } from "../../utilities/guards";
+import { tripService } from "@/services/trip";
 
 /**
  * GET /api/trips/[tripId]
@@ -14,32 +10,15 @@ export const GET = async function GET(
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
-  const session = await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
-  });
 
   try {
-    const trip = await getUserTrip(session.user.id, tripId);
+    const { trip } = await tripService.getUserTrip({ tripId });
 
     if (!trip) {
       return NextResponse.json(
         { error: "Trip not found or you don't have access" },
         { status: 404 }
       );
-    }
-
-    if (!trip.travel && trip._count.stops > 1) {
-      try {
-        const url = new URL(`/api/trips/${tripId}/travel`, req.nextUrl.origin);
-        const res = await fetch(url, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-        });
-        const { data: travel } = await res.json();
-        trip.travel = travel;
-      } catch (error) {
-        console.error(`Failed to retrieve travel for trip ${tripId}:`, error);
-      }
     }
 
     return NextResponse.json(trip);
@@ -58,20 +37,12 @@ export const PUT = async function PUT(
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
-  });
 
   try {
     const body = await req.json();
-    const result = validator(body, updateTripSchema);
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
-    }
-
-    const updatedTrip = await updateTripWithDays(tripId, result.data);
-    return NextResponse.json(updatedTrip);
+    const { trip } = await tripService.updateTrip({ tripId }, body);
+    return NextResponse.json(trip);
   } catch (error) {
     console.error(`Failed to update trip ${tripId}:`, error);
     return NextResponse.json({ error: "Failed to update trip" }, { status: 500 });
@@ -87,12 +58,9 @@ export const DELETE = async function DELETE(
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
-  const session = await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
-  });
 
   try {
-    await deleteTrip(session.user.id, tripId);
+    await tripService.deleteTrip({ tripId });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete trip ${tripId}:`, error);
