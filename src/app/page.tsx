@@ -19,7 +19,7 @@ export default async function Home() {
       />
       <div className="absolute inset-0 bg-black/40 z-10" />
 
-      <div className="relative z-20 flex flex-col flex-1 p-8 md:p-12">
+      <div className="relative z-20 flex flex-col flex-1 p-8 md:p-12 items-start">
         <HeroTitle />
 
         <nav className="absolute top-8 right-8 md:top-12 md:right-12 flex items-center gap-2 sm:gap-4">
