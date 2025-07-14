@@ -22,11 +22,11 @@ import { TripHeader } from "./trip-header";
 import { TripMap } from "./trip-map";
 import { TripSidebar } from "./trip-sidebar";
 
-interface TripPlannerClientProps {
+interface TripPlannerProps {
   trip: UserTrip;
 }
 
-export function TripPlannerClient({ trip: initialTrip }: TripPlannerClientProps) {
+export function TripPlanner({ trip: initialTrip }: TripPlannerProps) {
   const session = useSession();
   const [trip, setTrip] = useState<UserTrip>(initialTrip);
   const [daysToDeleteInfo, setDaysToDeleteInfo] = useState<{
