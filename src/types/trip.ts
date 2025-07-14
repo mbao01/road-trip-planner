@@ -7,6 +7,7 @@ import {
   Travel,
   Trip,
   TripAccess,
+  TripInvite,
   TripStatus,
   User,
 } from "@prisma/client";
@@ -34,6 +35,7 @@ export type UserTrip = Omit<Trip, "ownerId"> &
     collaboratorsCount: number;
     dayCount: number;
     stopCount: number;
+    invites: TripInvite[];
     travel: Travel; // TODO:: this is possibly undefined when fetching all trips
     settings: Settings; // TODO:: this is possibly undefined when fetching all trips
   };

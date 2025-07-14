@@ -94,9 +94,17 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
         createdAt: new Date(),
         updatedAt: new Date(),
       };
+      const newInvite = {
+        id: createTempId("invite"),
+        email: inviteEmail,
+        tripId: trip.id,
+        tripRole: inviteRole,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
       const clone = structuredClone(trip);
-      clone.collaborators = [newCollaborator, ...clone.collaborators];
+      clone.invites = [newInvite, ...clone.invites];
 
       handleAction(
         async () => {
@@ -194,6 +202,39 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
             </div>
           </div>
 
+          {/* Pending invite list */}
+          {trip.invites && trip.invites.length > 0 && (
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium">Sent invites</h4>
+              <div className="space-y-3 max-h-48 overflow-y-auto py-1 pr-2">
+                {trip.invites.map((invite) => {
+                  const inviteId = invite.id;
+                  const name = "-";
+                  const email = invite.email;
+                  const tripRole = invite.tripRole;
+
+                  return (
+                    <div key={inviteId} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src="" alt={name} />
+                          <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-normal italic">{"<pending>"}</p>
+                          <p className="text-xs text-muted-foreground">{email}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        <TripRoleBadge tripRole={tripRole} />
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Collaborators list */}
           <div className="space-y-1">
             <h4 className="text-sm font-medium">Shared with</h4>
@@ -204,7 +245,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
                 const email = collaborator.user.email;
                 const image = collaborator.user.image || "/placeholder.svg";
                 const tripRole = collaborator.tripRole;
-                const isOwner = trip.ownerId && collaborator.user.id === trip.ownerId;
+                const isOwner = collaborator.tripRole === TripRole.OWNER;
                 const isCurrentUser = collaborator.user.id === userId;
 
                 return (

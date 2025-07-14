@@ -40,6 +40,7 @@ const TRIP_QUERY_BASE_INCLUDE = {
     include: { user: { select: { id: true, name: true, email: true, image: true } } },
     orderBy: { createdAt: "desc" },
   },
+  invites: { orderBy: { createdAt: "desc" } },
   _count: { select: { stops: true } },
 } as const;
 
@@ -57,12 +58,16 @@ export const getUserTrips = async (userId: string) => {
   });
 
   return userTrips.map((trip) => {
-    const ownerId = trip.ownerId === userId ? trip.ownerId : null;
+    const isOwner = trip.ownerId === userId;
+    const ownerId = isOwner ? trip.ownerId : null;
+    const invites = isOwner ? trip.invites : null;
     const collaborators = ownerId
       ? trip.collaborators
       : trip.collaborators.filter((c) => c.userId === userId);
 
     return {
+      invites,
+      ownerId,
       id: trip.id,
       name: trip.name,
       startDate: trip.startDate,
@@ -71,7 +76,6 @@ export const getUserTrips = async (userId: string) => {
       updatedAt: trip.updatedAt,
       status: trip.status,
       access: trip.access,
-      ownerId: trip.ownerId === userId ? trip.ownerId : null,
 
       // new properties of Trip type
       collaborators,
@@ -88,7 +92,7 @@ export const getUserTrips = async (userId: string) => {
  * @returns The trip with the specified ID and user ID, or null if not found
  */
 export async function getUserTrip(userId: string, tripId: string) {
-  return prisma.trip.findFirst({
+  const trip = await prisma.trip.findFirst({
     where: {
       id: tripId,
       OR: [{ ownerId: userId }, { collaborators: { some: { userId } } }],
@@ -99,6 +103,16 @@ export async function getUserTrip(userId: string, tripId: string) {
       ...TRIP_QUERY_BASE_INCLUDE,
     },
   });
+
+  if (!trip) {
+    return trip;
+  }
+
+  const isOwner = trip.ownerId === userId;
+  const ownerId = isOwner ? trip.ownerId : null;
+  const invites = isOwner ? trip.invites : null;
+
+  return { ...trip, invites, ownerId };
 }
 
 /**
