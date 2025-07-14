@@ -1,9 +1,8 @@
 import Link from "next/link"
-import { PlaneIcon as PaperPlane } from "lucide-react"
+import { ArrowRight, PlaneIcon as PaperPlane } from "lucide-react"
 
 import { auth } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
-import { FeatureJourney } from "@/components/feature-journey"
 
 export default async function Home() {
   const session = await auth()
@@ -32,17 +31,26 @@ export default async function Home() {
           )}
         </nav>
       </header>
-      <main className="flex-1 pt-32">
-        <div className="text-center max-w-3xl mx-auto px-4">
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-            Your Adventure, Perfectly Planned.
-          </h1>
-          <p className="mt-4 text-muted-foreground md:text-xl">
-            From spontaneous getaways to meticulously planned expeditions, we've got the tools to bring your travel
-            dreams to life.
-          </p>
-        </div>
-        <FeatureJourney />
+      <main className="flex-1">
+        <section className="flex flex-col items-center justify-center min-h-screen text-center px-4">
+          <div className="max-w-5xl">
+            <h1 className="font-heading text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter">
+              Make the most of travel
+            </h1>
+            <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto text-muted-foreground">
+              The ultimate planner for your next adventure. Collaborate with friends, discover hidden gems, and build
+              your perfect itinerary—all in one place.
+            </p>
+            <div className="mt-8">
+              <Button asChild size="lg">
+                <Link href={session?.user ? "/trips" : "/auth/signup"}>
+                  Get Started for Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
