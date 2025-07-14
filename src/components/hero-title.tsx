@@ -1,11 +1,6 @@
 export function HeroTitle() {
   return (
-    <svg
-      viewBox="0 0 1200 950"
-      className="w-[70vw] max-w-[1200px] h-auto"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="currentColor"
-    >
+    <svg viewBox="0 0 1200 950" className="h-[65vh] w-auto" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
       <style>
         {`
           .hero-text {
