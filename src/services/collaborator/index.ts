@@ -10,6 +10,11 @@ import { collaboratorRepo } from "@/repository/collaborator";
 import { TripRole } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 
+/**
+ * Gets a collaborator
+ * @param collaboratorId - The ID of the collaborator
+ * @returns The collaborator
+ */
 const getCollaborator = async ({
   collaboratorId,
   tripId,
@@ -26,6 +31,11 @@ const getCollaborator = async ({
   return { collaborator };
 };
 
+/**
+ * Gets collaborators for a trip
+ * @param tripId - The ID of the trip
+ * @returns The collaborators for the trip
+ */
 const getCollaborators = async ({ tripId }: { tripId: string }) => {
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
@@ -36,6 +46,12 @@ const getCollaborators = async ({ tripId }: { tripId: string }) => {
   return { collaborators };
 };
 
+/**
+ * Adds a collaborator to a trip
+ * @param tripId - The ID of the trip
+ * @param data - The data to add the collaborator with
+ * @returns The added collaborator
+ */
 const addCollaborator = async ({ tripId }: { tripId: string }, data: AddCollaboratorArg) => {
   const session = await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
@@ -53,6 +69,13 @@ const addCollaborator = async ({ tripId }: { tripId: string }, data: AddCollabor
   return { collaborator };
 };
 
+/**
+ * Updates a collaborator
+ * @param tripId - The ID of the trip
+ * @param collaboratorId - The ID of the collaborator
+ * @param data - The data to update the collaborator with
+ * @returns The updated collaborator
+ */
 const updateCollaborator = async (
   { collaboratorId, tripId }: { collaboratorId: string; tripId: string },
   data: UpdateCollaboratorArg
@@ -78,6 +101,12 @@ const updateCollaborator = async (
   return { collaborator };
 };
 
+/**
+ * Removes a collaborator from a trip
+ * @param tripId - The ID of the trip
+ * @param collaboratorId - The ID of the collaborator
+ * @returns The removed collaborator
+ */
 const removeCollaborator = async ({
   collaboratorId,
   tripId,

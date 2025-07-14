@@ -8,6 +8,12 @@ import { settingsRepo } from "@/repository/settings";
 import { TripRole } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 
+/**
+ * Updates the settings for a trip
+ * @param tripId - The ID of the trip
+ * @param data - The data to update the settings with
+ * @returns The updated settings
+ */
 const updateSettings = async ({ tripId }: { tripId: string }, data: UpdateTripSettingsArg) => {
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },

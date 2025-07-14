@@ -40,23 +40,3 @@ export async function getRoute(startPos: Position, endPos: Position): Promise<Pl
   }
   return response.json();
 }
-
-export async function getRouteMatrix(stops: Stop[]): Promise<PlaceDetails> {
-  const origins = stops.map((stop) => stop.placeId);
-  const destinations = origins;
-
-  // TODO::
-  // - Add support for caching such that only places without a route matrix are fetched
-
-  const response = await fetch(`/api/routes/matrix`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ origins, destinations }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to get distance matrix");
-  }
-  return response.json();
-}

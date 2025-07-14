@@ -5,6 +5,11 @@ import { TripRole } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { googleService } from "../google";
 
+/**
+ * Gets the travel for a trip
+ * @param tripId - The ID of the trip
+ * @returns The travel for the trip
+ */
 const getTravel = async ({ tripId }: { tripId: string }) => {
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
@@ -15,6 +20,11 @@ const getTravel = async ({ tripId }: { tripId: string }) => {
   return { travel };
 };
 
+/**
+ * Creates the travel for a trip
+ * @param tripId - The ID of the trip
+ * @returns The created travel
+ */
 const createTravel = async ({ tripId }: { tripId: string }) => {
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },

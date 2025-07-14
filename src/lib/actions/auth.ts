@@ -1,11 +1,11 @@
 "use server";
 
-import type { SignInSchema, SignUpSchema } from "@/lib/schemas/auth";
-// import bcrypt from "bcrypt"
 import type { z } from "zod";
 import { signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { SignInSchema, SignUpSchema } from "@/lib/schemas/auth";
 import { userRepo } from "@/repository/user";
+import bcrypt from "bcrypt";
 import { AuthError } from "next-auth";
 
 export async function signInAction(values: z.infer<typeof SignInSchema>) {
@@ -35,8 +35,7 @@ export async function signUpAction(values: z.infer<typeof SignUpSchema>) {
     return { error: "An account with this email already exists." };
   }
 
-  // const hashedPassword = await bcrypt.hash(values.password, 10);
-  const hashedPassword = values.password;
+  const hashedPassword = await bcrypt.hash(values.password, 10);
 
   await prisma.user.create({
     data: {

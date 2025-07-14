@@ -1,5 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 
+/**
+ * Gets a route matrix from Google Maps
+ * @param data - The data to get the route matrix with
+ * @returns The route matrix
+ */
 const getRouteMatrix = async (data: { origins: string[]; destinations: string[] }) => {
   const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
   const { origins, destinations } = data;

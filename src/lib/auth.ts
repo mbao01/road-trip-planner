@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { SignInSchema } from "@/lib/schemas/auth";
 import { userService } from "@/services/user";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-// import bcrypt from "bcrypt";
+import bcrypt from "bcrypt";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -26,8 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const { user } = await userService.getUserByEmail({ email });
           if (!user || !user.password) return null;
 
-          // const passwordsMatch = await bcrypt.compare(password, user.password);
-          const passwordsMatch = Boolean(password);
+          const passwordsMatch = await bcrypt.compare(password, user.password);
 
           if (passwordsMatch) return user;
           return null;

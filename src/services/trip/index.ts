@@ -15,6 +15,11 @@ import { TripRole } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { travelService } from "../travel";
 
+/**
+ * Gets a trip for a user
+ * @param tripId - The ID of the trip
+ * @returns The trip for the user
+ */
 const getUserTrip = async ({ tripId }: { tripId: string }) => {
   const session = await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
@@ -36,6 +41,10 @@ const getUserTrip = async ({ tripId }: { tripId: string }) => {
   return { trip };
 };
 
+/**
+ * Gets trips for a user
+ * @returns The trips for the user
+ */
 const getUserTrips = async () => {
   const session = await authGuard();
   const trips = await tripRepo.getUserTrips(session.user.id);
@@ -43,6 +52,11 @@ const getUserTrips = async () => {
   return { trips };
 };
 
+/**
+ * Creates a trip for a user
+ * @param data - The data to create the trip with
+ * @returns The created trip
+ */
 const createTrip = async (data: CreateTripArg) => {
   const session = await authGuard();
 
@@ -67,6 +81,12 @@ const createTrip = async (data: CreateTripArg) => {
   return { trip };
 };
 
+/**
+ * Updates a trip for a user
+ * @param tripId - The ID of the trip
+ * @param data - The data to update the trip with
+ * @returns The updated trip
+ */
 const updateTrip = async ({ tripId }: { tripId: string }, data: UpdateTripArg) => {
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
@@ -85,6 +105,12 @@ const updateTrip = async ({ tripId }: { tripId: string }, data: UpdateTripArg) =
   return { trip };
 };
 
+/**
+ * Updates the details of a trip for a user
+ * @param tripId - The ID of the trip
+ * @param data - The data to update the trip details with
+ * @returns The updated trip details
+ */
 const updateTripDetails = async ({ tripId }: { tripId: string }, data: UpdateTripDetailsArg) => {
   const session = await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
@@ -103,6 +129,11 @@ const updateTripDetails = async ({ tripId }: { tripId: string }, data: UpdateTri
   return { trip };
 };
 
+/**
+ * Reorders the days of a trip for a user
+ * @param tripId - The ID of the trip
+ * @param data - The data to reorder the days with
+ */
 const reorderTrip = async ({ tripId }: { tripId: string }, data: ReorderDaysArg) => {
   await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
@@ -118,6 +149,10 @@ const reorderTrip = async ({ tripId }: { tripId: string }, data: ReorderDaysArg)
   await stopRepo.bulkUpdateStopsOrder(result.data);
 };
 
+/**
+ * Deletes a trip for a user
+ * @param tripId - The ID of the trip
+ */
 const deleteTrip = async ({ tripId }: { tripId: string }) => {
   const session = await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
