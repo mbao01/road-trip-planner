@@ -37,7 +37,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // ⏳ 24 hrs (in seconds)
+    updateAge: 1 * 60 * 60, // 🔁 Refresh JWT if session is older than 1 hr
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // ensures the token itself also expires in the same timeframe.
+  },
   pages: {
     signIn: "/auth/signin",
   },
