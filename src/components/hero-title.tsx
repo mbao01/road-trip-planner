@@ -1,10 +1,41 @@
+"use client"
+
+import { motion } from "framer-motion"
+
+const svgVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+}
+
+const textVariants = {
+  hidden: (direction: "left" | "right") => ({
+    opacity: 0,
+    x: direction === "left" ? -200 : 200,
+  }),
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut",
+    },
+  },
+}
+
 export function HeroTitle() {
   return (
-    <svg
+    <motion.svg
       viewBox="0 0 1350 950"
       className="w-[55vw]"
       xmlns="http://www.w3.org/2000/svg"
-      fill="white"
+      variants={svgVariants}
+      initial="hidden"
+      animate="visible"
     >
       <g
         fontFamily="var(--font-lexend), sans-serif"
@@ -13,19 +44,19 @@ export function HeroTitle() {
         fontSize="250"
         fill="#4b1800"
       >
-        <text x="0" y="200">
+        <motion.text x="0" y="200" custom="left" variants={textVariants}>
           MAKE
-        </text>
-        <text x="0" y="420">
+        </motion.text>
+        <motion.text x="0" y="420" custom="right" variants={textVariants}>
           THE MOST
-        </text>
-        <text x="0" y="640">
+        </motion.text>
+        <motion.text x="0" y="640" custom="left" variants={textVariants}>
           OF
-        </text>
-        <text x="0" y="860">
+        </motion.text>
+        <motion.text x="0" y="860" custom="right" variants={textVariants}>
           TRAVEL
-        </text>
+        </motion.text>
       </g>
-    </svg>
-  );
+    </motion.svg>
+  )
 }
