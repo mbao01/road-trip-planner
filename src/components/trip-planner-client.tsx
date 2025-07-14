@@ -14,6 +14,7 @@ import { DayWithStops, UserTrip } from "@/types/trip";
 import { formatCurrency } from "@/utilities/numbers";
 import { Currency, DistanceUnit } from "@prisma/client";
 import { BanknoteIcon, Calendar, Clock, Globe, Loader2, MapPin, Route } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { DeleteDaysConfirmationDialog } from "./delete-days-confirmation-dialog";
 import { SettingsModal } from "./settings-modal";
 import { ShareModal } from "./share-modal";
@@ -26,6 +27,7 @@ interface TripPlannerClientProps {
 }
 
 export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
+  const session = useSession();
   const [trip, setTrip] = useState<UserTrip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -291,6 +293,7 @@ export function TripPlannerClient({ tripId }: TripPlannerClientProps) {
         />
         <ShareModal
           trip={trip}
+          userId={session.data?.user?.id}
           open={showShare}
           onOpenChange={setShowShare}
           onTripChange={(t) => setTrip({ ...trip, ...t })}

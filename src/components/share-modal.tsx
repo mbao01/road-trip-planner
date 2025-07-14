@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { TRIP_ACCESS, TRIP_ROLE } from "@/helpers/constants/tripAccess";
+import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
 import { toast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
 import { CollaboratorWithUser, UserTrips } from "@/types/trip";
@@ -32,13 +32,14 @@ import { SocialShare } from "./social-share";
 import { TripRoleBadge } from "./trip-role-badge";
 
 interface ShareModalProps {
-  trip: UserTrips[number];
   open: boolean;
+  trip: UserTrips[number];
+  userId: string | undefined;
   onTripChange: (trip: UserTrips[number]) => void;
   onOpenChange: (open: boolean) => void;
 }
 
-export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModalProps) {
+export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: ShareModalProps) {
   const isTripPublic = trip.access === TripAccess.PUBLIC;
   const [shareEnabled, setShareEnabled] = useState(isTripPublic);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -204,6 +205,7 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
                 const image = collaborator.user.image || "/placeholder.svg";
                 const tripRole = collaborator.tripRole;
                 const isOwner = trip.ownerId && collaborator.user.id === trip.ownerId;
+                const isCurrentUser = collaborator.user.id === userId;
 
                 return (
                   <div key={collaboratorId} className="flex items-center justify-between">
@@ -213,11 +215,11 @@ export function ShareModal({ trip, open, onTripChange, onOpenChange }: ShareModa
                         <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium">{isOwner ? "You" : name}</p>
+                        <p className="text-sm font-medium">{isCurrentUser ? "You" : name}</p>
                         <p className="text-xs text-muted-foreground">{email}</p>
                       </div>
                     </div>
-                    {!isOwner ? (
+                    {!isCurrentUser && !isOwner ? (
                       <div className="flex items-center gap-2">
                         <Select
                           value={tripRole}

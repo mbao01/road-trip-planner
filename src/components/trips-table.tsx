@@ -31,6 +31,7 @@ import {
   Share2Icon,
   Trash2Icon,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { DeleteTripConfirmationDialog } from "./delete-trip-confirmation-dialog";
 import { ShareModal } from "./share-modal";
 import { TripRoleBadge } from "./trip-role-badge";
@@ -41,6 +42,7 @@ interface TripsTableProps {
 }
 
 export function TripsTable({ initialTrips }: TripsTableProps) {
+  const session = useSession();
   const [trips, setTrips] = useState(initialTrips);
   const [tripToDelete, setTripToDelete] = useState<UserTrips[number] | null>(null);
   const [tripToShare, setTripToShare] = useState<UserTrips[number] | null>(null);
@@ -165,6 +167,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
       {tripToShare && (
         <ShareModal
           trip={tripToShare}
+          userId={session.data?.user?.id}
           open={!!tripToShare}
           onOpenChange={() => setTripToShare(null)}
           onTripChange={(trip) => {
