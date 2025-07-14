@@ -32,7 +32,7 @@ export const createTripInvite = async (
     },
   });
 
-  await sendTripInviteEmail(email, trip.name, user.name ?? "<concealed>");
+  await sendTripInviteEmail(email, trip.name, user.name ?? "<concealed>", tripRole);
 
   return tripInvite;
 };

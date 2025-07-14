@@ -9,8 +9,20 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 /**
  * Sends a trip invite email to the specified email address.
  */
-export const sendTripInviteEmail = async (email: string, tripName: string, invitedBy: string) => {
-  const emailHtml = await render(<TripInviteEmail tripName={tripName} invitedBy={invitedBy} />);
+export const sendTripInviteEmail = async (
+  email: string,
+  tripName: string,
+  invitedBy: string,
+  tripRole: TripRole
+) => {
+  const emailHtml = await render(
+    <TripInviteEmail
+      tripName={tripName}
+      invitedBy={invitedBy}
+      tripRole={tripRole}
+      originUrl={process.env.APP_ORIGIN_URL!}
+    />
+  );
 
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
@@ -25,12 +37,19 @@ export const sendTripInviteEmail = async (email: string, tripName: string, invit
  */
 export const sendTripCollaboratorEmail = async (
   email: string,
+  tripId: string,
   tripName: string,
   addedBy: string,
   tripRole: TripRole
 ) => {
   const emailHtml = await render(
-    <TripCollaboratorEmail tripName={tripName} addedBy={addedBy} tripRole={tripRole} />
+    <TripCollaboratorEmail
+      tripId={tripId}
+      tripName={tripName}
+      addedBy={addedBy}
+      tripRole={tripRole}
+      originUrl={process.env.APP_ORIGIN_URL!}
+    />
   );
 
   await resend.emails.send({

@@ -70,6 +70,7 @@ export const addCollaborator = async (
 
   await sendTripCollaboratorEmail(
     collaboratorUser.email,
+    trip.id,
     trip.name,
     inviter.name ?? "<concealed>",
     data.tripRole

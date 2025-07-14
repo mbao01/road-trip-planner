@@ -1,3 +1,5 @@
+import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
+import { TripRole } from "@prisma/client";
 import {
   Body,
   Button,
@@ -13,9 +15,16 @@ import {
 interface TripInviteEmailProps {
   invitedBy: string;
   tripName: string;
+  tripRole: TripRole;
+  originUrl: string;
 }
 
-export const TripInviteEmail = ({ invitedBy, tripName }: TripInviteEmailProps) => (
+export const TripInviteEmail = ({
+  invitedBy,
+  tripName,
+  tripRole,
+  originUrl,
+}: TripInviteEmailProps) => (
   <Html>
     <Head />
     <Preview>You have been invited to join {tripName}</Preview>
@@ -24,13 +33,14 @@ export const TripInviteEmail = ({ invitedBy, tripName }: TripInviteEmailProps) =
         <Heading style={h1}>You&apos;re Invited!</Heading>
         <Text style={text}>
           <strong>{invitedBy}</strong> has invited you to join the trip:
-          <strong> {tripName}</strong>.
+          <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
+        </Text>
+        <Text style={text}>
+          To view the trip details and start collaborating, you'll need to create an
+          account first.
         </Text>
         <Section style={buttonContainer}>
-          <Button style={button} href="https://road-trip-planner.com/dashboard">
-            View Trip
-          </Button>
-          <Button style={buttonSecondary} href="https://road-trip-planner.com/register">
+          <Button style={button} href={`${originUrl}/auth/signup`}>
             Create Account
           </Button>
         </Section>
@@ -83,15 +93,9 @@ const button = {
   fontSize: "16px",
   textDecoration: "none",
   textAlign: "center" as const,
-  display: "inline-block",
+  display: "block",
   padding: "12px 24px",
   borderRadius: "var(--radius)",
-  marginRight: "8px",
 };
 
-const buttonSecondary = {
-  ...button,
-  backgroundColor: "hsl(var(--secondary))",
-  color: "hsl(var(--secondary-foreground))",
-  marginRight: "0",
-};
+

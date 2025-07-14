@@ -14,14 +14,18 @@ import {
 
 interface TripCollaboratorEmailProps {
   addedBy: string;
+  tripId: string;
   tripName: string;
   tripRole: TripRole;
+  originUrl: string;
 }
 
 export const TripCollaboratorEmail = ({
+  tripId,
   addedBy,
   tripName,
   tripRole,
+  originUrl,
 }: TripCollaboratorEmailProps) => (
   <Html>
     <Head />
@@ -34,7 +38,7 @@ export const TripCollaboratorEmail = ({
           <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
         </Text>
         <Section style={buttonContainer}>
-          <Button style={button} href="https://road-trip-planner.com/dashboard">
+          <Button style={button} href={`${originUrl}/trips/${tripId}`}>
             View Trip
           </Button>
         </Section>
