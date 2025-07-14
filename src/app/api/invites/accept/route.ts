@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { acceptInvites } from "@/services/invite";
 import { authGuard } from "../../utilities/guards";
 
@@ -8,7 +8,7 @@ import { authGuard } from "../../utilities/guards";
  * @param req - The request object
  * @returns The collaborators for the user
  */
-export async function POST(req: NextRequest) {
+export async function POST() {
   const session = await authGuard();
 
   if (!session || !session.user.email) {

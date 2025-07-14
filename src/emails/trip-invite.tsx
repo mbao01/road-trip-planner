@@ -39,7 +39,7 @@ export const TripInviteEmail = ({
             <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
           </Text>
           <Text style={text}>
-            To view the trip details and start collaborating, you'll need to create an account
+            To view the trip details and start collaborating, you&apos;ll need to create an account
             first.
           </Text>
           <Section style={buttonContainer}>

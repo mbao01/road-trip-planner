@@ -24,7 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
 import { toast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
-import { CollaboratorWithUser, UserTrips } from "@/types/trip";
+import { UserTrips } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
 import { TripAccess, TripRole } from "@prisma/client";
 import { Copy, LinkIcon, Trash2 } from "lucide-react";
@@ -79,21 +79,6 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
       inviteEmail && !trip.collaborators.some((c) => c.user.email === inviteEmail);
 
     if (hasNoCollaborator) {
-      const userId = createTempId("user");
-      const newCollaborator: CollaboratorWithUser = {
-        userId,
-        tripId: trip.id,
-        id: createTempId("collaborator"),
-        user: {
-          id: createTempId("user"),
-          name: "-",
-          email: inviteEmail,
-          image: `/placeholder.svg?height=32&width=32&query=avatar`,
-        },
-        tripRole: inviteRole,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
       const newInvite = {
         id: createTempId("invite"),
         email: inviteEmail,

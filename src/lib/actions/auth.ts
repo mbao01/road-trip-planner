@@ -3,7 +3,6 @@
 import type { SignInSchema, SignUpSchema } from "@/lib/schemas/auth";
 // import bcrypt from "bcrypt"
 import type { z } from "zod";
-import { redirect } from "next/navigation";
 import { signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getUserByEmail } from "@/services/user";
