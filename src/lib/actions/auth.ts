@@ -3,6 +3,7 @@
 import type { SignInSchema, SignUpSchema } from "@/lib/schemas/auth";
 // import bcrypt from "bcrypt"
 import type { z } from "zod";
+import { redirect } from "next/navigation";
 import { signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getUserByEmail } from "@/services/user";
@@ -13,7 +14,7 @@ export async function signInAction(values: z.infer<typeof SignInSchema>) {
     await signIn("credentials", {
       email: values.email,
       password: values.password,
-      redirectTo: "/trips",
+      redirectTo: values.callbackUrl,
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -45,6 +46,8 @@ export async function signUpAction(values: z.infer<typeof SignUpSchema>) {
       password: hashedPassword,
     },
   });
+
+  redirect("/auth/signin" + (values.callbackUrl ? `?callbackUrl=${values.callbackUrl}` : ""));
 
   return { success: "Account created successfully!" };
 }
