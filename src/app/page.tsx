@@ -3,7 +3,7 @@ import { PlaneIcon as PaperPlane } from "lucide-react"
 
 import { auth } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
-import { HeroTrail } from "@/components/hero-trail"
+import { FeatureJourney } from "@/components/feature-journey"
 
 export default async function Home() {
   const session = await auth()
@@ -32,8 +32,17 @@ export default async function Home() {
           )}
         </nav>
       </header>
-      <main className="flex-1">
-        <HeroTrail />
+      <main className="flex-1 pt-32">
+        <div className="text-center max-w-3xl mx-auto px-4">
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+            Your Adventure, Perfectly Planned.
+          </h1>
+          <p className="mt-4 text-muted-foreground md:text-xl">
+            From spontaneous getaways to meticulously planned expeditions, we've got the tools to bring your travel
+            dreams to life.
+          </p>
+        </div>
+        <FeatureJourney />
       </main>
     </div>
   )
