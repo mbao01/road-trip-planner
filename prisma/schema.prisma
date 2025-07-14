@@ -80,6 +80,7 @@ model Trip {
   travel        Travel?
   settings      Settings?
   collaborators Collaborator[]
+  invites       TripInvite[]
 }
 
 model Stop {
@@ -168,6 +169,16 @@ model Collaborator {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, tripId])
+}
+
+model TripInvite {
+  id        String   @id @default(cuid(2))
+  email     String
+  tripRole  TripRole
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum TripRole {
