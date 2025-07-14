@@ -40,7 +40,7 @@ export type UserTrip = Omit<Trip, "ownerId"> &
     settings: Settings; // TODO:: this is possibly undefined when fetching all trips
   };
 
-export type UserTrips = Omit<UserTrip, "travel" | "settings">[];
+export type UserTrips = Omit<UserTrip, "travel" | "settings" | "days">[];
 
 export type DayWithStops = Day & {
   stops: Stop[];

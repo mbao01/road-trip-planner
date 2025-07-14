@@ -59,8 +59,8 @@ export const getUserTrips = async (userId: string) => {
 
   return userTrips.map((trip) => {
     const isOwner = trip.ownerId === userId;
-    const ownerId = isOwner ? trip.ownerId : null;
-    const invites = isOwner ? trip.invites : null;
+    const ownerId = isOwner ? trip.ownerId : undefined;
+    const invites = isOwner ? trip.invites : [];
     const collaborators = ownerId
       ? trip.collaborators
       : trip.collaborators.filter((c) => c.userId === userId);
