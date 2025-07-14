@@ -24,34 +24,41 @@ export const TripInviteEmail = ({
   tripName,
   tripRole,
   originUrl,
-}: TripInviteEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>You have been invited to join {tripName}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>You&apos;re Invited!</Heading>
-        <Text style={text}>
-          <strong>{invitedBy}</strong> has invited you to join the trip:
-          <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
-        </Text>
-        <Text style={text}>
-          To view the trip details and start collaborating, you'll need to create an
-          account first.
-        </Text>
-        <Section style={buttonContainer}>
-          <Button style={button} href={`${originUrl}/auth/signup`}>
-            Create Account
-          </Button>
-        </Section>
-        <Text style={text}>
-          We&apos;re excited to have you on board. Plan, collaborate, and make memories that will
-          last a lifetime.
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-);
+}: TripInviteEmailProps) => {
+  const callbackUrl = `${originUrl}/trips/accept`;
+
+  return (
+    <Html>
+      <Head />
+      <Preview>You have been invited to join {tripName}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Heading style={h1}>You&apos;re Invited!</Heading>
+          <Text style={text}>
+            <strong>{invitedBy}</strong> has invited you to join the trip:
+            <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
+          </Text>
+          <Text style={text}>
+            To view the trip details and start collaborating, you'll need to create an account
+            first.
+          </Text>
+          <Section style={buttonContainer}>
+            <Button
+              style={button}
+              href={`${originUrl}/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            >
+              Create Account
+            </Button>
+          </Section>
+          <Text style={text}>
+            We&apos;re excited to have you on board. Plan, collaborate, and make memories that will
+            last a lifetime.
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  );
+};
 
 export default TripInviteEmail;
 
@@ -97,5 +104,3 @@ const button = {
   padding: "12px 24px",
   borderRadius: "var(--radius)",
 };
-
-
