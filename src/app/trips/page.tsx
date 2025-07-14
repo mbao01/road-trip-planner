@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { UserDropdown } from "@/components/user-dropdown";
 import { auth } from "@/lib/auth";
-import { tripRepo } from "@/repository/trip";
+import { tripService } from "@/services/trip";
 
 export default async function TripsPage() {
   const session = await auth();
@@ -14,7 +14,7 @@ export default async function TripsPage() {
     redirect("/auth/signin");
   }
 
-  const trips = (await tripRepo.getUserTrips(session.user.id)) ?? [];
+  const { trips } = (await tripService.getUserTrips()) ?? [];
 
   return (
     <>

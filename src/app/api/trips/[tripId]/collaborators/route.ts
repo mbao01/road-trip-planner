@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { validator } from "@/app/api/utilities/validation";
-import { addCollaboratorSchema } from "@/app/api/utilities/validation/schemas/collaborator";
-import { collaboratorRepo } from "@/repository/collaborator";
-import { TripRole } from "@prisma/client";
+import { collaboratorService } from "@/services/collaborator";
 
 /**
  * GET /api/trips/[tripId]/collaborators
@@ -14,12 +10,9 @@ export const GET = async function GET(
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
-  });
 
   try {
-    const collaborators = await collaboratorRepo.getCollaborators(tripId);
+    const { collaborators } = await collaboratorService.getCollaborators({ tripId });
 
     return NextResponse.json(collaborators);
   } catch (error) {
@@ -37,23 +30,11 @@ export const POST = async function POST(
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params;
-  const session = await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
-  });
 
   try {
     const body = await req.json();
-    const result = validator(body, addCollaboratorSchema);
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
-    }
-
-    const collaborator = await collaboratorRepo.addCollaborator(
-      tripId,
-      session.user.id,
-      result.data
-    );
+    const { collaborator } = await collaboratorService.addCollaborator({ tripId }, body);
     return NextResponse.json({ ...collaborator });
   } catch (error) {
     console.error(`Failed to add/invite collaborator:`, error);

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { dayRepo } from "@/repository/day";
-import { TripRole } from "@prisma/client";
+import { dayService } from "@/services/day";
 
 /**
  * GET /api/trips/[tripId]/days
@@ -9,12 +7,9 @@ import { TripRole } from "@prisma/client";
  */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
-  });
 
   try {
-    const days = await dayRepo.getDaysByTripId(tripId);
+    const days = await dayService.getDays({ tripId });
     if (!days) {
       return NextResponse.json({ error: "Days not found" }, { status: 404 });
     }

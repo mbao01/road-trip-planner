@@ -6,7 +6,7 @@ export const validator = <T>(data: unknown, schema: z.Schema<T>) => {
 
   if (!result.success) {
     const errors = z.treeifyError(result.error);
-    const message = result.error.format();
+    const message = result.error.message;
     return { success: false, errors, message } as const;
   }
 

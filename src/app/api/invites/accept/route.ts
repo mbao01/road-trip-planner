@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { inviteRepo } from "@/repository/invite";
-import { authGuard } from "../../utilities/guards";
+import { inviteService } from "@/services/invite";
 
 /**
  * POST /api/invites/accept
@@ -9,13 +8,7 @@ import { authGuard } from "../../utilities/guards";
  * @returns The collaborators for the user
  */
 export async function POST() {
-  const session = await authGuard();
-
-  if (!session || !session.user.email) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  const collaborators = await inviteRepo.acceptInvites(session.user.id, session.user.email);
+  const { collaborators } = await inviteService.acceptInvites();
 
   return NextResponse.json(collaborators);
 }

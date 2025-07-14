@@ -4,10 +4,10 @@ import {
 } from "@/app/api/utilities/validation/schemas/collaborator";
 import { sendTripCollaboratorEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { inviteRepo } from "@/repository/invite";
+import { tripRepo } from "@/repository/trip";
+import { userRepo } from "@/repository/user";
 import { TripRole } from "@prisma/client";
-import { createTripInvite } from "../invite";
-import { getTripById } from "../trip";
-import { getUserByEmail, getUserById } from "../user";
 
 /**
  * Gets a collaborator
@@ -42,9 +42,9 @@ const getCollaborators = async (tripId: string) => {
  */
 const addCollaborator = async (tripId: string, inviterId: string, data: AddCollaboratorArg) => {
   const [trip, inviter, collaboratorUser] = await Promise.all([
-    getTripById(tripId),
-    getUserById(inviterId),
-    getUserByEmail(data.email),
+    tripRepo.getTripById(tripId),
+    userRepo.getUserById(inviterId),
+    userRepo.getUserByEmail(data.email),
   ]);
 
   if (!trip || !inviter) {
@@ -53,7 +53,7 @@ const addCollaborator = async (tripId: string, inviterId: string, data: AddColla
 
   // If the user doesn't exist, create an invite for them.
   if (!collaboratorUser?.email) {
-    await createTripInvite(inviterId, tripId, data.email, data.tripRole);
+    await inviteRepo.createTripInvite(inviterId, tripId, data.email, data.tripRole);
     return;
   }
 

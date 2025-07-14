@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { validator } from "@/app/api/utilities/validation";
-import { updateTripSettingsSchema } from "@/app/api/utilities/validation/schemas";
-import { settingsRepo } from "@/repository/settings";
-import { TripRole } from "@prisma/client";
+import { settingsService } from "@/services/settings";
 
 /**
  * PUT /api/trips/[tripId]/settings
@@ -11,19 +7,12 @@ import { TripRole } from "@prisma/client";
  */
 export async function PUT(req: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
-  });
 
   try {
     const body = await req.json();
-    const result = validator(body, updateTripSettingsSchema);
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
-    }
+    const updatedSettings = await settingsService.updateSettings({ tripId }, body);
 
-    const updatedSettings = await settingsRepo.updateTripSettings(tripId, result.data);
     return NextResponse.json({ success: true, data: updatedSettings });
   } catch (error) {
     console.error(`Failed to update settings for trip ${tripId}:`, error);

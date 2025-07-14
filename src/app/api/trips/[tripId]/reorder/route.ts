@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { validator } from "@/app/api/utilities/validation";
-import { reorderDaysSchema } from "@/app/api/utilities/validation/schemas";
-import { stopRepo } from "@/repository/stop";
-import { TripRole } from "@prisma/client";
+import { tripService } from "@/services/trip";
 
 /**
  * PUT /api/trips/[tripId]/reorder
@@ -11,18 +7,11 @@ import { TripRole } from "@prisma/client";
  */
 export async function PUT(req: Request, { params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.EDITOR] },
-  });
 
   try {
     const body = await req.json();
-    const result = validator(body, reorderDaysSchema);
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
-    }
-    await stopRepo.bulkUpdateStopsOrder(result.data);
+    await tripService.reorderTrip({ tripId }, body);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to reorder trip ${tripId}:`, error);

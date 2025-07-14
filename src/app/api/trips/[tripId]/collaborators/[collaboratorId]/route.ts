@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resource, resourceGuard } from "@/app/api/utilities/guards";
-import { validator } from "@/app/api/utilities/validation";
-import { updateCollaboratorSchema } from "@/app/api/utilities/validation/schemas/collaborator";
-import { collaboratorRepo } from "@/repository/collaborator";
-import { TripRole } from "@prisma/client";
+import { collaboratorService } from "@/services/collaborator";
 
 /**
  * GET /api/trips/[tripId]/collaborators/[collaboratorId]
@@ -14,12 +10,9 @@ export const GET = async function GET(
   { params }: { params: Promise<{ tripId: string; collaboratorId: string }> }
 ) {
   const { tripId, collaboratorId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
-  });
 
   try {
-    const collaborator = await collaboratorRepo.getCollaborator(collaboratorId);
+    const { collaborator } = await collaboratorService.getCollaborator({ collaboratorId, tripId });
 
     if (!collaborator) {
       return NextResponse.json(
@@ -44,22 +37,13 @@ export const PUT = async function PUT(
   { params }: { params: Promise<{ tripId: string; collaboratorId: string }> }
 ) {
   const { tripId, collaboratorId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
-  });
 
   try {
     const body = await req.json();
-    const result = validator(body, updateCollaboratorSchema);
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
-    }
-
-    const collaborator = await collaboratorRepo.updateCollaborator(
-      tripId,
-      collaboratorId,
-      result.data
+    const { collaborator } = await collaboratorService.updateCollaborator(
+      { collaboratorId, tripId },
+      body
     );
     return NextResponse.json(collaborator);
   } catch (error) {
@@ -77,12 +61,9 @@ export const DELETE = async function DELETE(
   { params }: { params: Promise<{ tripId: string; collaboratorId: string }> }
 ) {
   const { tripId, collaboratorId } = await params;
-  await resourceGuard({
-    [Resource.TRIP]: { tripId, roles: [TripRole.OWNER] },
-  });
 
   try {
-    await collaboratorRepo.removeCollaborator(tripId, collaboratorId);
+    await collaboratorService.removeCollaborator({ collaboratorId, tripId });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(`Failed to delete collaborator ${collaboratorId}:`, error);

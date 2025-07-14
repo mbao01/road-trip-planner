@@ -1,8 +1,8 @@
 import { sendTripInviteEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { tripRepo } from "@/repository/trip";
+import { userRepo } from "@/repository/user";
 import { TripRole } from "@prisma/client";
-import { getUserById } from "./../user/index";
 
 /**
  * Accepts all trip invites for a user
@@ -52,7 +52,10 @@ const createTripInvite = async (
   email: string,
   tripRole: TripRole
 ) => {
-  const [trip, user] = await Promise.all([tripRepo.getTripById(tripId), getUserById(userId)]);
+  const [trip, user] = await Promise.all([
+    tripRepo.getTripById(tripId),
+    userRepo.getUserById(userId),
+  ]);
 
   if (!trip || !user) {
     throw new Error("Trip or user not found");

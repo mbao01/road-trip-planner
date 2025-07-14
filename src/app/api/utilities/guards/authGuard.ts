@@ -5,7 +5,7 @@ import { NextAuthRequest } from "next-auth";
 export async function authGuard(req?: NextAuthRequest) {
   const session = req?.auth ?? (await auth());
 
-  if (!session?.user?.id) {
+  if (!session?.user?.id || !session.user.email) {
     throw new Error("Unauthorized", { cause: { status: StatusCodes.UNAUTHORIZED } });
   }
 
@@ -16,6 +16,7 @@ export async function authGuard(req?: NextAuthRequest) {
     user: {
       ...user,
       id: session.user.id,
+      email: session.user.email,
     },
   };
 }

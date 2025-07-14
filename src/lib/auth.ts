@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { SignInSchema } from "@/lib/schemas/auth";
-import { userRepo } from "@/repository/user";
+import { userService } from "@/services/user";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 // import bcrypt from "bcrypt";
 import NextAuth from "next-auth";
@@ -23,7 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (validatedFields.success) {
           const { email, password } = validatedFields.data;
 
-          const user = await userRepo.getUserByEmail(email);
+          const { user } = await userService.getUserByEmail({ email });
           if (!user || !user.password) return null;
 
           // const passwordsMatch = await bcrypt.compare(password, user.password);
