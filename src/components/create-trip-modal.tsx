@@ -183,7 +183,7 @@ export function CreateTripModal({ trigger }: CreateTripModalProps) {
                     <li key={loc.id}>
                       <button
                         onMouseDown={() => handleSelectStop(loc)}
-                        className="w-full text-left p-2 rounded-md hover:bg-accent"
+                        className="w-full text-left p-2 rounded-md hover:bg-accent/40"
                       >
                         {loc.name}
                       </button>

@@ -95,7 +95,7 @@ export const DayCard: FC<DayCardProps> = ({
             )}
             <DropdownMenuItem
               onClick={onDeleteDay}
-              className="text-red-500"
+              className="text-destructive"
               disabled={totalDays <= 1}
             >
               <Trash2 className="mr-2 h-4 w-4" />
@@ -106,7 +106,7 @@ export const DayCard: FC<DayCardProps> = ({
       </div>
 
       <div className="mb-4">
-        <div className="inline-block max-w-full px-3 py-1 bg-gray-100 rounded-full text-xs text-muted-foreground truncate">
+        <div className="inline-block max-w-full px-3 py-1 bg-background rounded-full text-xs text-muted-foreground truncate">
           {details}
         </div>
       </div>

@@ -195,7 +195,7 @@ export function TripPlanner({ trip: initialTrip }: TripPlannerProps) {
 
   if (!googleMapsApiKey) {
     return (
-      <div className="flex items-center justify-center h-screen text-red-500">
+      <div className="flex items-center justify-center h-screen text-destructive">
         <p>Google Maps API key is missing.</p>
       </div>
     );
