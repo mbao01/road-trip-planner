@@ -11,7 +11,7 @@ async function getDaysByTripId(tripId: string) {
     where: { tripId },
     orderBy: { date: "asc" },
     include: {
-      stops: { orderBy: { order: "asc" } },
+      stops: { orderBy: { order: "asc" }, include: { itinerary: true } },
     },
   });
 }
@@ -25,7 +25,7 @@ async function getStopsFromDays(tripId: string) {
   const days = await prisma.day.findMany({
     where: { tripId },
     orderBy: { date: "asc" },
-    include: { stops: { orderBy: { order: "asc" } } },
+    include: { stops: { orderBy: { order: "asc" }, include: { itinerary: true } } },
   });
   return days?.flatMap((day) => day.stops) || [];
 }
