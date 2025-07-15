@@ -1,8 +1,11 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('OWNER', 'EDITOR', 'VIEWER', 'PUBLIC');
+CREATE TYPE "TripRole" AS ENUM ('OWNER', 'EDITOR', 'VIEWER', 'PUBLIC');
 
 -- CreateEnum
-CREATE TYPE "TripStatus" AS ENUM ('ACTIVE', 'ARCHIVED', 'DELETED', 'COMPLETED', 'IN_PROGRESS', 'NOT_STARTED');
+CREATE TYPE "TripAccess" AS ENUM ('PRIVATE', 'PUBLIC');
+
+-- CreateEnum
+CREATE TYPE "TripStatus" AS ENUM ('ARCHIVED', 'DELETED', 'COMPLETED', 'IN_PROGRESS', 'NOT_STARTED');
 
 -- CreateEnum
 CREATE TYPE "Currency" AS ENUM ('GBP', 'EUR', 'USD');
@@ -77,10 +80,11 @@ CREATE TABLE "Trip" (
     "name" TEXT NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL,
     "endDate" TIMESTAMP(3) NOT NULL,
-    "status" "TripStatus" NOT NULL DEFAULT 'ACTIVE',
+    "status" "TripStatus" NOT NULL DEFAULT 'NOT_STARTED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "ownerId" TEXT NOT NULL,
+    "access" "TripAccess" NOT NULL DEFAULT 'PRIVATE',
 
     CONSTRAINT "Trip_pkey" PRIMARY KEY ("id")
 );
@@ -171,13 +175,25 @@ CREATE TABLE "Settings" (
 -- CreateTable
 CREATE TABLE "Collaborator" (
     "id" TEXT NOT NULL,
-    "role" "Role" NOT NULL,
+    "tripRole" "TripRole" NOT NULL,
     "userId" TEXT NOT NULL,
     "tripId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Collaborator_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TripInvite" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "tripRole" "TripRole" NOT NULL,
+    "tripId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "TripInvite_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -197,6 +213,9 @@ CREATE UNIQUE INDEX "Settings_tripId_key" ON "Settings"("tripId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Collaborator_userId_tripId_key" ON "Collaborator"("userId", "tripId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TripInvite_tripId_email_key" ON "TripInvite"("tripId", "email");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -233,3 +252,6 @@ ALTER TABLE "Collaborator" ADD CONSTRAINT "Collaborator_userId_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "Collaborator" ADD CONSTRAINT "Collaborator_tripId_fkey" FOREIGN KEY ("tripId") REFERENCES "Trip"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TripInvite" ADD CONSTRAINT "TripInvite_tripId_fkey" FOREIGN KEY ("tripId") REFERENCES "Trip"("id") ON DELETE CASCADE ON UPDATE CASCADE;
