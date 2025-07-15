@@ -31,6 +31,7 @@ const mapStyleOptions = {
   [MapStyle.DEFAULT]: [],
   [MapStyle.HYBRID]: [],
   [MapStyle.TERRAIN]: [],
+  [MapStyle.SATELLITE]: [], // Satellite is a mapTypeId, not a style array
   [MapStyle.ROADMAP]: [
     {
       featureType: "poi.park",
@@ -43,10 +44,71 @@ const mapStyleOptions = {
       stylers: [{ color: "#fdfcf8" }],
     },
   ],
-  [MapStyle.SATELLITE]: [], // Satellite is a mapTypeId, not a style array
+  [MapStyle.MINIMAL]: [
+    {
+      featureType: "administrative",
+      elementType: "geometry.fill",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "administrative.country",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#d3d3d3" }, { weight: 1 }],
+    },
+    {
+      featureType: "administrative.province",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#e6e6e6" }, { weight: 0.5 }],
+    },
+    {
+      featureType: "landscape.natural",
+      elementType: "geometry.fill",
+      stylers: [{ color: "#f7f7f7" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "all",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "road",
+      elementType: "all",
+      stylers: [{ saturation: -100 }, { lightness: 45 }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "all",
+      stylers: [{ visibility: "simplified" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry.fill",
+      stylers: [{ color: "#f5a66e" }],
+    },
+    {
+      featureType: "road.arterial",
+      elementType: "labels.icon",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "all",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "water",
+      elementType: "geometry.fill",
+      stylers: [{ color: "#c9e6f5" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#999999" }],
+    },
+  ],
 };
 
-const getMarkerIcon = (index: number) => {
+const getMarkerIcon = () => {
   const svg = `
     <svg viewBox="0 0 36 50" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M18 0C8.058 0 0 8.058 0 18C0 28.296 15.66 46.308 16.524 47.328C17.256 48.192 18.744 48.192 19.476 47.328C20.34 46.308 36 28.296 36 18C36 8.058 27.942 0 18 0Z" fill="#FFEDD5"/>
@@ -171,16 +233,13 @@ export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
             color: "#F97316",
             fontWeight: "bold",
           }}
-          // onClick={() => setActiveMarker(stop)}
           icon={{
-            url: getMarkerIcon(index + 1),
+            url: getMarkerIcon(),
             scaledSize: new google.maps.Size(36, 48),
             anchor: new google.maps.Point(18, 48),
           }}
           zIndex={activeMarker?.id === stop.id ? 100 : index}
-          onClick={() => {
-            setActiveMarker(stop);
-          }}
+          onClick={() => setActiveMarker(stop)}
         />
       ))}
 

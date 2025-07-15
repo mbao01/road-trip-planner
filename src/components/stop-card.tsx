@@ -22,19 +22,15 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { StopEvent } from "@prisma/client";
 import {
-  CameraIcon,
   Check,
   ChevronDown,
   ChevronUp,
   ExternalLinkIcon,
-  Fuel,
   GripVertical,
-  Moon,
   Trash2,
-  TreePine,
-  Utensils,
 } from "lucide-react";
 import { StopItineraries } from "./stop-itineraries";
+import { STOP_TYPES, StopTypeIcon } from "./stop-type-icon";
 import { TravelDetails } from "./travel-details";
 
 interface StopCardProps {
@@ -51,33 +47,6 @@ interface StopCardProps {
   onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   isFirstStopOfTrip: boolean;
 }
-
-const STOP_TYPES = [
-  {
-    value: StopEvent.DEFAULT,
-    icon: <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white" />,
-  },
-  { value: StopEvent.OVERNIGHT, icon: <Moon className="w-4 h-4 text-blue-800" /> },
-  {
-    value: StopEvent.OUTDOOR_ACTIVITY,
-    icon: <TreePine className="w-4 h-4 text-green-600" />,
-  },
-  {
-    value: StopEvent.PLACE_OF_INTEREST,
-    icon: <CameraIcon className="w-4 h-4 text-teal-500" />,
-  },
-  { value: StopEvent.FUEL, icon: <Fuel className="w-4 h-4 text-red-500" /> },
-  {
-    value: StopEvent.FOOD_AND_DRINK,
-    icon: <Utensils className="w-4 h-4 text-orange-500" />,
-  },
-] as const;
-
-const StopTypeIcon: FC<{ value: StopEvent; className?: string }> = ({ value, className }) => {
-  const type = STOP_TYPES.find((t) => t.value === value);
-  if (!type) return null;
-  return <div className={className}>{type.icon}</div>;
-};
 
 export const StopCard: FC<StopCardProps> = ({
   stop,

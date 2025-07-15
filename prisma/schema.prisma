@@ -245,4 +245,5 @@ enum MapStyle {
   SATELLITE
   HYBRID
   TERRAIN
+  MINIMAL
 }
