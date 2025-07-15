@@ -1,3 +1,4 @@
+import { userHelper } from "@/helpers/user";
 import { userRepo } from "@/repository/user";
 
 /**
@@ -20,7 +21,13 @@ const getUserById = async ({ userId }: { userId: string }) => {
   return { user };
 };
 
+const isUserDeleted = async ({ userId }: { userId: string }) => {
+  const user = await userRepo.getUserById(userId);
+  return userHelper.isUserDeleted(user);
+};
+
 export const userService = {
   getUserByEmail,
   getUserById,
+  isUserDeleted,
 };
