@@ -140,7 +140,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
                                 variant="outline"
                                 onClick={() => fileInputRef.current?.click()}
                               >
-                                <Upload className="mr-2 h-4 w-4" />
+                                <Upload className="h-4 w-4" />
                                 Upload Picture
                               </Button>
                               <Input
@@ -183,9 +183,9 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
                   <div className="flex justify-end">
                     <Button type="submit" disabled={isPending || !profileForm.formState.isDirty}>
                       {isPending ? (
-                        <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2Icon className="h-4 w-4 animate-spin" />
                       ) : (
-                        <SaveIcon className="mr-2 h-4 w-4" />
+                        <SaveIcon className="h-4 w-4" />
                       )}
                       Save Changes
                     </Button>
@@ -206,7 +206,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
                     onClick={() => setIsDeleteConfirmOpen(true)}
                     disabled={isPending}
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                     Delete My Account
                   </Button>
                 </div>

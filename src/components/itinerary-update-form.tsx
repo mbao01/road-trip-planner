@@ -78,9 +78,9 @@ export const ItineraryUpdateForm = ({
           </Button>
           <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
             {isPending ? (
-              <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2Icon className="h-4 w-4 animate-spin" />
             ) : (
-              <SaveIcon className="mr-2 h-4 w-4" />
+              <SaveIcon className="h-4 w-4" />
             )}
             Update
           </Button>

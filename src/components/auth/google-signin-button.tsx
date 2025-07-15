@@ -16,7 +16,7 @@ export function GoogleSignInButton() {
 
   return (
     <Button variant="outline" className="w-full bg-transparent" onClick={onClick}>
-      <Icon src={siGoogle} className="mr-2 h-4 w-4" />
+      <Icon src={siGoogle} className="h-4 w-4" />
       Sign In with Google
     </Button>
   );

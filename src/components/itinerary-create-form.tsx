@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { addItineraryAction } from "@/lib/actions/itinerary";
 import { CreateItineraryArg, CreateItinerarySchema } from "@/lib/schemas/itinerary";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon, SaveIcon } from "lucide-react";
+import { ListPlusIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 export const ItineraryCreateForm = ({ stopId }: { stopId: string }) => {
@@ -65,10 +65,11 @@ export const ItineraryCreateForm = ({ stopId }: { stopId: string }) => {
         <div className="space-y-2 flex justify-end">
           <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
             {isPending ? (
-              <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2Icon className="h-4 w-4 animate-spin" />
             ) : (
-              <SaveIcon className="mr-2 h-4 w-4" />
+              <ListPlusIcon className="h-4 w-4" />
             )}
+            Add
           </Button>
         </div>
       </form>

@@ -126,7 +126,7 @@ export function CreateTripModal({ trigger }: CreateTripModalProps) {
             disabled={!isFormValid || isCreating}
             className="bg-orange-500 hover:bg-orange-600"
           >
-            {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
             Create Trip
           </Button>
         </>
