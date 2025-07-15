@@ -1,8 +1,16 @@
 "use client";
 
+import type { DayWithStops, UserTrip } from "@/types/trip";
 import type { Settings, Travel, Trip } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
 import { useMemo, useState } from "react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { DISTANCE_UNITS } from "@/helpers/constants/distance";
@@ -11,7 +19,6 @@ import { settingsHelpers } from "@/helpers/settings";
 import { tripHelpers } from "@/helpers/trip";
 import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
-import { DayWithStops, UserTrip } from "@/types/trip";
 import { formatCurrency } from "@/utilities/numbers";
 import { BanknoteIcon, Calendar, Clock, Globe, MapPin, Route } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -197,63 +204,76 @@ export function TripPlanner({ trip: initialTrip }: TripPlannerProps) {
   return (
     <>
       <div className="flex h-screen bg-background">
-        <div className="w-96 border-r bg-background flex flex-col">
-          <TripHeader
-            trip={trip}
-            onTripNameChange={({ name }) => handleTripDetailsChange({ name })}
-            onDateRangeChange={handleDateRangeChange}
-            onSettings={() => setShowSettings(true)}
-            onShare={() => setShowShare(true)}
-          />
-          <div className="p-4 border-b">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <Calendar className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-2xl font-bold">{stats.days}</div>
-                <div className="text-xs text-muted-foreground">days</div>
-              </div>
-              <div className="text-center">
-                <MapPin className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-2xl font-bold">{stats.stops}</div>
-                <div className="text-xs text-muted-foreground">stops</div>
-              </div>
-              <div className="text-center">
-                <Route className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-2xl font-bold">{stats.distance}</div>
-                <div className="text-xs text-muted-foreground">
-                  {DISTANCE_UNITS[settings.distanceUnit]}
+        <SidebarProvider style={{ "--sidebar-width": "24rem" } as React.CSSProperties}>
+          <Sidebar>
+            <div className="w-96 border-r bg-background flex flex-col h-screen">
+              <TripHeader
+                trip={trip}
+                onTripNameChange={({ name }) => handleTripDetailsChange({ name })}
+                onDateRangeChange={handleDateRangeChange}
+                onSettings={() => setShowSettings(true)}
+                onShare={() => setShowShare(true)}
+              />
+              <div className="p-4 border-b">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <Calendar className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                    <div className="text-2xl font-bold">{stats.days}</div>
+                    <div className="text-xs text-muted-foreground">days</div>
+                  </div>
+                  <div className="text-center">
+                    <MapPin className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                    <div className="text-2xl font-bold">{stats.stops}</div>
+                    <div className="text-xs text-muted-foreground">stops</div>
+                  </div>
+                  <div className="text-center">
+                    <Route className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                    <div className="text-2xl font-bold">{stats.distance}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {DISTANCE_UNITS[settings.distanceUnit]}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <Clock className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                    <div className="text-2xl font-bold">{stats.hours}</div>
+                    <div className="text-xs text-muted-foreground">hours</div>
+                  </div>
+                  <div className="text-center">
+                    <Globe className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                    <div className="text-2xl font-bold">{stats.countries}</div>
+                    <div className="text-xs text-muted-foreground">country</div>
+                  </div>
+                  <div className="text-center">
+                    <BanknoteIcon className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(stats.cost, {
+                        currency: settings.currency,
+                      })}
+                    </div>
+                    <div className="text-xs text-muted-foreground">cost</div>
+                  </div>
                 </div>
               </div>
-              <div className="text-center">
-                <Clock className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-2xl font-bold">{stats.hours}</div>
-                <div className="text-xs text-muted-foreground">hours</div>
-              </div>
-              <div className="text-center">
-                <Globe className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-2xl font-bold">{stats.countries}</div>
-                <div className="text-xs text-muted-foreground">country</div>
-              </div>
-              <div className="text-center">
-                <BanknoteIcon className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                <div className="text-2xl font-bold">
-                  {formatCurrency(stats.cost, {
-                    currency: settings.currency,
-                  })}
-                </div>
-                <div className="text-xs text-muted-foreground">cost</div>
-              </div>
+
+              <SidebarContent className="flex-1 p-0">
+                <TripSidebar trip={trip} handleAction={handleAction} />
+              </SidebarContent>
             </div>
-          </div>
-          <TripSidebar trip={trip} handleAction={handleAction} />
-        </div>
-        <div className="flex-1 relative">
-          <TripMap
-            mapStyle={settings.mapStyle}
-            stops={trip.days.flatMap((day) => day.stops)}
-            googleMapsApiKey={googleMapsApiKey}
-          />
-        </div>
+          </Sidebar>
+          <SidebarInset>
+            <div className="absolute top-4 left-4 z-10">
+              <SidebarTrigger className="bg-background text-primary rounded-sm" />
+            </div>
+            <div className="flex-1 relative w-full">
+              <TripMap
+                // className="flex-1"
+                mapStyle={settings.mapStyle}
+                stops={trip.days.flatMap((day) => day.stops)}
+                googleMapsApiKey={googleMapsApiKey}
+              />
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
         <SettingsModal
           open={showSettings}
           onOpenChange={setShowSettings}

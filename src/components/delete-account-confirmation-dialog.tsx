@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   AlertDialog,
@@ -9,15 +9,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Loader2 } from "lucide-react"
+} from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 
 type DeleteAccountConfirmationDialogProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-  isPending: boolean
-}
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  isPending: boolean;
+};
 
 export const DeleteAccountConfirmationDialog = ({
   open,
@@ -31,8 +31,8 @@ export const DeleteAccountConfirmationDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your account and remove all your data from our
-            servers.
+            This action cannot be undone. This will permanently delete your account and remove all
+            your data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -40,7 +40,7 @@ export const DeleteAccountConfirmationDialog = ({
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isPending}
-            className="bg-destructive hover:bg-destructive/90"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Yes, delete my account
@@ -48,5 +48,5 @@ export const DeleteAccountConfirmationDialog = ({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
-}
+  );
+};
