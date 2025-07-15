@@ -56,15 +56,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return !isDeleted;
     },
-    async jwt({ token, user }) {
-      if (!user.id) return {};
-
-      const isDeleted = await userService.isUserDeleted({ userId: user.id });
-
-      return isDeleted ? {} : token;
-    },
     async session({ token, session }) {
-      if (!token?.sub) return {} as Session;
+      if (!token?.sub) return null as unknown as Session;
+
+      const isDeleted = await userService.isUserDeleted({ userId: token.sub });
+
+      if (isDeleted) {
+        return null as unknown as Session;
+      }
 
       if (token.sub && session.user) {
         session.user.id = token.sub;

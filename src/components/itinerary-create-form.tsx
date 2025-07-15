@@ -62,14 +62,9 @@ export const ItineraryCreateForm = ({ stopId }: { stopId: string }) => {
             </FormItem>
           )}
         />
-        <div className="space-y-2">
-          <Button variant="outline" className="w-full justify-start bg-transparent">
-            <CameraIcon className="w-4 h-4 mr-2" />
-            Upload photo
-          </Button>
-          <Button variant="outline" className="w-full justify-start bg-transparent">
-            <ExternalLinkIcon className="w-4 h-4 mr-2" />
-            Open in Google Maps
+        <div className="space-y-2 flex justify-end">
+          <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+            Add
           </Button>
         </div>
       </form>

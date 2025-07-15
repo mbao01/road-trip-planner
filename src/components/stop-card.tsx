@@ -23,6 +23,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  ExternalLinkIcon,
   Fuel,
   GripVertical,
   Moon,
@@ -188,6 +189,14 @@ export const StopCard: FC<StopCardProps> = ({
                   placeholder="Enter custom name"
                 />
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start bg-transparent"
+              >
+                <ExternalLinkIcon className="w-4 h-4 mr-2" />
+                Open in Google Maps
+              </Button>
               <StopItineraries stopId={stop.id} itineraries={stop.itinerary} />
             </div>
           </CollapsibleContent>
