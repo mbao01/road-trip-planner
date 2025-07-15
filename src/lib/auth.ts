@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { SignInSchema } from "@/lib/schemas/auth";
 import { userService } from "@/services/user";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import NextAuth from "next-auth";
+import NextAuth, { Session } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
@@ -49,18 +49,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      const isDeleted = await userHelper.isUserDeleted({ userId: user.id });
+    async signIn({ user }) {
+      if (!user.id) return false;
+
+      const isDeleted = await userService.isUserDeleted({ userId: user.id });
 
       return !isDeleted;
     },
     async jwt({ token, user }) {
-      const isDeleted = await userHelper.isUserDeleted({ userId: user.id });
+      if (!user.id) return {};
+
+      const isDeleted = await userService.isUserDeleted({ userId: user.id });
 
       return isDeleted ? {} : token;
     },
     async session({ token, session }) {
-      if (!token?.sub) return null;
+      if (!token?.sub) return {} as Session;
 
       if (token.sub && session.user) {
         session.user.id = token.sub;

@@ -1,8 +1,5 @@
-import {
-  CreateItineraryArg,
-  UpdateItineraryArg,
-} from "@/app/api/utilities/validation/schemas/itinerary";
 import { prisma } from "@/lib/prisma";
+import { CreateItineraryArg, UpdateItineraryArg } from "@/lib/schemas/itinerary";
 
 const getItinerary = async ({ itineraryId }: { itineraryId: string }) => {
   return prisma.itinerary.findUnique({
@@ -16,30 +13,16 @@ const getItinerariesByStopId = async ({ stopId }: { stopId: string }) => {
   });
 };
 
-const getItinerariesByTripId = async ({ tripId }: { tripId: string }) => {
-  return prisma.itinerary.findMany({
-    where: { tripId },
-  });
-};
-
-const createItinerary = async ({ stopId, data }: { stopId: string; data: CreateItineraryArg }) => {
+const createItinerary = async (data: CreateItineraryArg) => {
   return prisma.itinerary.create({
-    data: {
-      ...data,
-      stop: {
-        connect: { id: stopId },
-      },
-    },
+    data,
   });
 };
 
-const updateItinerary = async ({
-  itineraryId,
-  data,
-}: {
-  itineraryId: string;
-  data: UpdateItineraryArg;
-}) => {
+const updateItinerary = async (
+  itineraryId: string,
+  data: Omit<UpdateItineraryArg, "itineraryId">
+) => {
   return prisma.itinerary.update({
     where: { id: itineraryId },
     data,
@@ -58,5 +41,4 @@ export const itineraryRepo = {
   deleteItinerary,
   getItinerary,
   getItinerariesByStopId,
-  getItinerariesByTripId,
 };
