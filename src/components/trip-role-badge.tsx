@@ -16,7 +16,7 @@ interface TripRoleBadgeProps {
 
 export const TripRoleBadge = ({ tripRole }: TripRoleBadgeProps) => {
   return (
-    <Badge variant="outline" className={cn("font-medium ml-auto", roleBadgeColors[tripRole])}>
+    <Badge variant="outline" className={cn("font-medium text-nowrap", roleBadgeColors[tripRole])}>
       {TRIP_ROLE[tripRole]}
     </Badge>
   );

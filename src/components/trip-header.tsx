@@ -1,82 +1,92 @@
-"use client"
+"use client";
 
-import type React from "react"
-import type { DateRange } from "react-day-picker"
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import type { UserTrip } from "@/types/trip"
-import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date"
-import { isSameDay } from "date-fns"
-import { CheckIcon, Download, PlaneIcon as PaperPlane, Settings, XIcon } from "lucide-react"
-import { useSession } from "next-auth/react"
-import { DateRangePicker } from "./date-range-picker"
-import { TripRoleBadge } from "./trip-role-badge"
-import { UserDropdown } from "./user-dropdown"
+import type { UserTrip } from "@/types/trip";
+import type React from "react";
+import type { DateRange } from "react-day-picker";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date";
+import { isSameDay } from "date-fns";
+import { CheckIcon, Download, PlaneIcon as PaperPlane, Settings, XIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { AppLogo } from "./app-logo";
+import { DateRangePicker } from "./date-range-picker";
+import { TripRoleBadge } from "./trip-role-badge";
+import { UserDropdown } from "./user-dropdown";
 
 interface TripHeaderProps {
-  trip: UserTrip
-  onTripNameChange: (data: { name?: string }) => void
-  onDateRangeChange: (dateRange: DateRange | undefined) => void
-  onSettings: () => void
-  onShare: () => void
+  trip: UserTrip;
+  onTripNameChange: (data: { name?: string }) => void;
+  onDateRangeChange: (dateRange: DateRange | undefined) => void;
+  onSettings: () => void;
+  onShare: () => void;
 }
 
-export function TripHeader({ trip, onTripNameChange, onDateRangeChange, onSettings, onShare }: TripHeaderProps) {
-  const session = useSession()
-  const [name, setName] = useState(trip.name)
+export function TripHeader({
+  trip,
+  onTripNameChange,
+  onDateRangeChange,
+  onSettings,
+  onShare,
+}: TripHeaderProps) {
+  const session = useSession();
+  const [name, setName] = useState(trip.name);
   const currentDateRange = {
     from: trip.startDate,
     to: trip.endDate,
-  }
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(currentDateRange)
-  const collaborator = trip.collaborators.find((c) => c.userId === session.data?.user?.id)
+  };
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(
+    currentDateRange
+  );
+  const collaborator = trip.collaborators.find((c) => c.userId === session.data?.user?.id);
 
   // Sync local state if props change from parent (e.g., after a successful save)
   useEffect(() => {
-    setSelectedDateRange({ from: trip.startDate, to: trip.endDate })
-  }, [trip.startDate, trip.endDate])
+    setSelectedDateRange({ from: trip.startDate, to: trip.endDate });
+  }, [trip.startDate, trip.endDate]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value)
-  }
+    setName(e.target.value);
+  };
 
   const handleNameBlur = () => {
     if (name !== trip.name) {
-      onTripNameChange({ name })
+      onTripNameChange({ name });
     }
-  }
+  };
 
   const handleSaveDates = () => {
-    onDateRangeChange(selectedDateRange)
-  }
+    onDateRangeChange(selectedDateRange);
+  };
 
   const handleCancelDates = () => {
-    setSelectedDateRange(currentDateRange)
-  }
+    setSelectedDateRange(currentDateRange);
+  };
 
   const isDateRangeChanged =
     !isSameDay(currentDateRange.from, selectedDateRange?.from || currentDateRange.from) ||
-    !isSameDay(currentDateRange.to, selectedDateRange?.to || currentDateRange.to)
+    !isSameDay(currentDateRange.to, selectedDateRange?.to || currentDateRange.to);
 
   return (
     <div className="p-4 border-b">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Link href="/trips" className="flex items-center gap-2 text-foreground">
-            <PaperPlane className="w-8 h-8 text-primary" />
-            <span className="font-heading text-lg font-semibold">Trip Planner</span>
+          <Link href="/trips" className="flex items-center gap-1 text-foreground">
+            {/* <PaperPlane className="w-8 h-8 text-primary" /> */}
+            <AppLogo className="w-8 h-8 text-primary" />
+            <span className="font-heading text-lg font-semibold">RTP</span>
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
+          <Button variant="outline" size="sm">
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Download</span>
+            <span className="sr-only">Download</span>
           </Button>
-          <Button variant="ghost" size="sm" onClick={onSettings}>
+          <Button variant="outline" size="sm" onClick={onSettings}>
             <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Settings</span>
+            <span className="sr-only">Settings</span>
           </Button>
           <Button size="sm" onClick={onShare}>
             Share
@@ -124,9 +134,13 @@ export function TripHeader({ trip, onTripNameChange, onDateRangeChange, onSettin
             </>
           )}
 
-          {collaborator && <TripRoleBadge tripRole={collaborator.tripRole} />}
+          {collaborator && (
+            <span className="ml-auto">
+              <TripRoleBadge tripRole={collaborator.tripRole} />
+            </span>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
