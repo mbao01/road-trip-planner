@@ -6,16 +6,24 @@ import {
 import { itineraryService } from "@/services/itinerary";
 
 export async function addItineraryAction(values: CreateItineraryArg) {
-  const itinerary = await itineraryService.createItinerary(values);
+  try {
+    const itinerary = await itineraryService.createItinerary(values);
 
-  return itinerary;
+    return { itinerary, error: false };
+  } catch (error) {
+    return { error: ((error as any)?.message as string) || "Could not create itinerary" };
+  }
 }
 
 export async function updateItineraryAction(values: UpdateItineraryArg) {
-  const { itineraryId, ...data } = values;
-  const itinerary = await itineraryService.updateItinerary({ itineraryId }, data);
+  try {
+    const { itineraryId, ...data } = values;
+    const itinerary = await itineraryService.updateItinerary({ itineraryId }, data);
 
-  return itinerary;
+    return { itinerary, error: false };
+  } catch (error) {
+    return { error: (error as any)?.message || "Could not update itinerary" };
+  }
 }
 
 export async function deleteItineraryAction(values: DeleteItineraryArg) {

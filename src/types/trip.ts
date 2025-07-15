@@ -2,6 +2,7 @@ import { TravelMode } from "@/app/api/utilities/validation/enums";
 import {
   Collaborator,
   Day,
+  Itinerary,
   Settings,
   Stop,
   Travel,
@@ -44,6 +45,10 @@ export type UserTrips = Omit<UserTrip, "travel" | "settings" | "days">[];
 
 export type DayWithStops = Day & {
   stops: Stop[];
+};
+
+export type StopWithItineraries = Stop & {
+  itinerary: Itinerary[];
 };
 
 type StopId = string;

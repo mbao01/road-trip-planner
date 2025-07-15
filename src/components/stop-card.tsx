@@ -1,6 +1,6 @@
 "use client";
 
-import type { Day, Stop, Travel } from "@prisma/client";
+import type { Day, Travel } from "@prisma/client";
 import type { FC } from "react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { NormalizedSettings } from "@/helpers/settings";
+import { StopWithItineraries } from "@/types/trip";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -23,7 +23,6 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
   Fuel,
   GripVertical,
   Moon,
@@ -31,15 +30,16 @@ import {
   TreePine,
   Utensils,
 } from "lucide-react";
+import { StopItineraries } from "./stop-itineraries";
 import { TravelDetails } from "./travel-details";
 
 interface StopCardProps {
-  stop: Stop;
+  stop: StopWithItineraries;
   travel: Travel | null;
   dayId: Day["id"];
   settings: NormalizedSettings;
   stopNumber: number;
-  onDeleteStop: (dayId: Day["id"], stopId: Stop["id"]) => void;
+  onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   isFirstStopOfTrip: boolean;
 }
 
@@ -188,26 +188,7 @@ export const StopCard: FC<StopCardProps> = ({
                   placeholder="Enter custom name"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor={`notes-${stop.id}`} className="text-sm font-medium">
-                  Notes
-                </Label>
-                <Textarea
-                  id={`notes-${stop.id}`}
-                  className="w-full min-h-[80px]"
-                  placeholder="Add notes about this stop"
-                />
-              </div>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start bg-transparent">
-                  <CameraIcon className="w-4 h-4 mr-2" />
-                  Upload photo
-                </Button>
-                <Button variant="outline" className="w-full justify-start bg-transparent">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open in Google Maps
-                </Button>
-              </div>
+              <StopItineraries stopId={stop.id} itineraries={stop.itinerary} />
             </div>
           </CollapsibleContent>
         </div>
