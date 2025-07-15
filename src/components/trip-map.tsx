@@ -10,7 +10,6 @@ import {
   DirectionsService,
   GoogleMap,
   Marker,
-  // InfoWindow,
   OverlayView,
   useJsApiLoader,
 } from "@react-google-maps/api";
