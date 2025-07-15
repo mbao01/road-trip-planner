@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { HeroTitle } from "@/components/hero-title";
 import { Button } from "@/components/ui/button";
@@ -9,14 +8,7 @@ export default async function Home() {
   const session = await auth();
 
   return (
-    <main className="relative flex flex-col min-h-screen bg-background text-white">
-      <Image
-        src="/placeholder.svg?width=1920&height=1080"
-        alt="Scenic travel background"
-        fill
-        className="object-cover z-0"
-      />
-
+    <main className="relative flex flex-col bg-background text-white">
       <div className="relative z-20 flex flex-col flex-1 p-8 md:p-12 items-start">
         <nav className="absolute top-8 right-8 md:top-12 md:right-12 flex items-center gap-2 sm:gap-4">
           {session?.user ? (
@@ -43,9 +35,16 @@ export default async function Home() {
           )}
         </nav>
 
-        <HeroTitle />
+        <div className="mx-auto flex-1 grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-12">
+          <div className="flex flex-col items-start text-left">
+            <HeroTitle />
+          </div>
+          {/* <div className="w-full h-[60vh] max-h-[500px] md:h-auto md:min-h-[600px]">
+            <FeatureShowcase />
+          </div> */}
+        </div>
 
-        <div className="mt-auto flex flex-col items-center text-center w-full pb-3">
+        <div className="mt-auto flex flex-col items-center text-center w-full pb-3 pt-8">
           <p className="text-lg md:text-xl max-w-2xl mx-auto text-stone-800">
             Your adventure, your way — plan, discover, and explore altogether with friends, all in
             one fun spot!

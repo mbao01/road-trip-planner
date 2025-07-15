@@ -1,22 +1,17 @@
-"use client"
+"use client";
 
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
-import { CalendarDays, Car, Map, PenSquare, UserPlus } from "lucide-react"
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { CalendarDays, Car, Map, PenSquare, UserPlus } from "lucide-react";
 
 const iconVariants = {
   hidden: { opacity: 0, scale: 0.5 },
   visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
-}
-
-const carVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut", delay: 2 } },
-}
+};
 
 export function AnimatedJourney() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, amount: 0.5 })
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
 
   return (
     <div ref={ref} className="relative w-full h-full flex items-center justify-center">
@@ -103,5 +98,5 @@ export function AnimatedJourney() {
         </motion.g>
       </svg>
     </div>
-  )
+  );
 }

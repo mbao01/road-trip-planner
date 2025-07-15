@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 
 const svgVariants = {
   hidden: { opacity: 0 },
@@ -10,7 +10,7 @@ const svgVariants = {
       staggerChildren: 0.2,
     },
   },
-}
+};
 
 const textVariants = {
   hidden: (direction: "left" | "right") => ({
@@ -25,7 +25,7 @@ const textVariants = {
       ease: "easeOut",
     },
   },
-}
+} as const;
 
 export function HeroTitle() {
   return (
@@ -58,5 +58,5 @@ export function HeroTitle() {
         </motion.text>
       </g>
     </motion.svg>
-  )
+  );
 }

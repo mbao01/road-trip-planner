@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date";
 import { isSameDay } from "date-fns";
-import { CheckIcon, Download, PlaneIcon as PaperPlane, Settings, XIcon } from "lucide-react";
+import { CheckIcon, Download, Settings, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AppLogo } from "./app-logo";
 import { DateRangePicker } from "./date-range-picker";
