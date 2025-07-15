@@ -58,7 +58,7 @@ export async function updateProfileAction(formData: FormData) {
       },
     });
 
-    return { success: "Profile updated.", image: updatedUser.image };
+    return { success: "Profile updated.", image: updatedUser.image, name: updatedUser.name };
   } catch (error) {
     console.error("Update profile error:", error);
     return { error: "Something went wrong." };

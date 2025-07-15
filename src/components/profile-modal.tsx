@@ -37,7 +37,7 @@ type ProfileModalProps = {
 };
 
 export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
-  const { data: session, update: updateSession } = useSession();
+  const { data: session, update } = useSession();
   const [isPending, startTransition] = useTransition();
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
       if (result.error) {
         toast.error(result.error);
       } else {
-        await updateSession({ name: values.name, image: result.image });
+        await update(true);
         toast.success("Profile updated successfully!");
         setPreviewImage(null);
         profileForm.reset({ name: values.name, image: undefined });
@@ -134,7 +134,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <>
+                            <span>
                               <Button
                                 type="button"
                                 variant="outline"
@@ -156,7 +156,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
                                   }
                                 }}
                               />
-                            </>
+                            </span>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
