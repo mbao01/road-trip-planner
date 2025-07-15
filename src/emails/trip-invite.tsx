@@ -1,50 +1,99 @@
 import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
 import { TripRole } from "@prisma/client";
-import { Button, Section, Text } from "@react-email/components";
-import EmailContainer, { emailStyles } from "./container";
+import { Button, Column, Img, Link, Row, Section, Text } from "@react-email/components";
+import EmailContainer from "./container";
 
 interface TripInviteEmailProps {
-  invitedBy: string;
+  baseUrl: string;
+  invitedByName?: string | null;
+  invitedByEmail?: string | null;
+  invitedByImage?: string | null;
   tripName: string;
   tripRole: TripRole;
-  originUrl: string;
 }
 
 export const TripInviteEmail = ({
-  invitedBy,
+  invitedByName,
+  invitedByEmail,
+  invitedByImage,
   tripName,
   tripRole,
-  originUrl,
+  baseUrl,
 }: TripInviteEmailProps) => {
-  const callbackUrl = `${originUrl}/trips/accept`;
+  const acceptTripCallbackUrl = `${baseUrl}/trips/accept`;
+  const inviteLink = `${baseUrl}/auth/signup?callbackUrl=${encodeURIComponent(acceptTripCallbackUrl)}`;
 
   return (
     <EmailContainer
-      preview={`You have been invited to join ${tripName}`}
-      heading={<>You&apos;re Invited!</>}
-      footer={
+      baseUrl={baseUrl}
+      preview={`Join ${invitedByName} as an ${TRIP_ROLE[tripRole]} on ${tripName}`}
+      heading={
         <>
-          We&apos;re excited to have you on board. Plan, collaborate, and make memories that will
-          last a lifetime.
+          Join <strong className="text-foreground">{invitedByName}</strong> on{" "}
+          <strong className="text-foreground">{tripName}</strong>
         </>
       }
     >
-      <Text style={emailStyles.text}>
-        <strong>{invitedBy}</strong> has invited you to join the trip:
-        <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
+      <Text className="text-[14px] text-black leading-[24px]">Hello,</Text>
+      <Text className="text-[14px] text-black leading-[24px]">
+        <strong className="text-foreground">{invitedByName}</strong> (
+        <Link href={`mailto:${invitedByEmail}`} className="text-secondary no-underline">
+          {invitedByEmail}
+        </Link>
+        ) has invited you to join them on their{" "}
+        <strong className="text-foreground">{tripName}</strong> trip.
       </Text>
-      <Text style={emailStyles.text}>
-        To view the trip details and start collaborating, you&apos;ll need to create an account
-        first.
-      </Text>
-      <Section style={emailStyles.buttonContainer}>
+
+      <Section>
+        <Row>
+          <Column align="right">
+            <Img
+              className="rounded-full"
+              src={`${baseUrl}/static/images/you.png`}
+              width="64"
+              height="64"
+              alt="Profile picture"
+            />
+          </Column>
+          <Column align="center">
+            <Img
+              src={`${baseUrl}/static/images/arrow-right.png`}
+              width="12"
+              height="9"
+              alt="Arrow indicating invitation"
+            />
+          </Column>
+          <Column align="left">
+            <Img
+              className="rounded-full"
+              src={invitedByImage ?? `${baseUrl}/static/images/me.png`}
+              width="64"
+              height="64"
+              alt={`${invitedByName} logo`}
+            />
+          </Column>
+        </Row>
+      </Section>
+
+      <Section className="mt-[32px] mb-[32px] text-center">
         <Button
-          style={emailStyles.button}
-          href={`${originUrl}/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+          className="rounded bg-[#000000] px-5 py-3 text-center font-semibold text-[12px] text-white no-underline"
+          href={inviteLink}
         >
-          Create Account
+          Accept invite
         </Button>
       </Section>
+
+      <Text className="text-[14px] text-black leading-[24px]">
+        or copy and paste this URL into your browser:{" "}
+        <Link href={inviteLink} className="text-secondary no-underline">
+          {inviteLink}
+        </Link>
+      </Text>
+
+      <Text className="text-[14px] text-black leading-[24px]">
+        Start off collaborating on you're new adventure. Enjoy every moment!
+      </Text>
     </EmailContainer>
   );
 };

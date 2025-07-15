@@ -60,13 +60,14 @@ const addCollaborator = async (tripId: string, inviterId: string, data: AddColla
   // If the user already exists, add them as a collaborator and send them an email.
   const newCollaborator = await createCollaborator(collaboratorUser.id, tripId, data.tripRole);
 
-  await sendTripCollaboratorEmail(
-    collaboratorUser.email,
-    trip.id,
-    trip.name,
-    inviter.name ?? "<concealed>",
-    data.tripRole
-  );
+  await sendTripCollaboratorEmail({
+    email: collaboratorUser.email,
+    tripId: trip.id,
+    tripName: trip.name,
+    tripRole: data.tripRole,
+    invitedBy: inviter,
+    invitee: collaboratorUser,
+  });
 
   return newCollaborator;
 };

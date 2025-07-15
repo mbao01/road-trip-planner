@@ -76,7 +76,12 @@ const createTripInvite = async (
     },
   });
 
-  await sendTripInviteEmail(email, trip.name, user.name ?? "<concealed>", tripRole);
+  await sendTripInviteEmail({
+    email,
+    tripName: trip.name,
+    invitedBy: user,
+    tripRole,
+  });
 
   return tripInvite;
 };
