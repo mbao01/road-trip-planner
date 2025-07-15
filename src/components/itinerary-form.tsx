@@ -12,38 +12,40 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { addItineraryAction } from "@/lib/actions/itinerary";
-import { CreateItineraryArg, CreateItinerarySchema } from "@/lib/schemas/itinerary";
+import { upsertItineraryAction } from "@/lib/actions/itinerary";
+import { UpsertItineraryArg, UpsertItinerarySchema } from "@/lib/schemas/itinerary";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ListPlusIcon, Loader2Icon } from "lucide-react";
+import { Itinerary } from "@prisma/client";
+import { CameraIcon, Loader2Icon, SaveIcon } from "lucide-react";
 import { toast } from "sonner";
 
-export const ItineraryCreateForm = ({ stopId }: { stopId: string }) => {
+export const ItineraryForm = ({ stopId, itinerary }: { stopId: string; itinerary?: Itinerary }) => {
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<CreateItineraryArg>({
-    resolver: zodResolver(CreateItinerarySchema),
+  const form = useForm<UpsertItineraryArg>({
+    resolver: zodResolver(UpsertItinerarySchema),
     defaultValues: {
-      name: "",
-      notes: "",
-      stopId,
+      name: itinerary?.name ?? "",
+      notes: itinerary?.notes ?? "",
+      id: itinerary?.id,
+      stopId: itinerary?.stopId,
     },
   });
 
-  const onAddItinerary = (values: CreateItineraryArg) => {
+  const onUpdateItinerary = (values: UpsertItineraryArg) => {
     startTransition(async () => {
-      const result = await addItineraryAction(values);
+      const result = await upsertItineraryAction(values);
       if (result?.error) {
         toast.error(result.error);
       } else {
-        toast.success("Itinerary added successfully!");
+        toast.success("Itinerary updated successfully!");
       }
     });
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onAddItinerary)} className="space-y-2">
+      <form onSubmit={form.handleSubmit(onUpdateItinerary)} className="space-y-2">
         <FormField
           control={form.control}
           name="notes"
@@ -62,14 +64,19 @@ export const ItineraryCreateForm = ({ stopId }: { stopId: string }) => {
             </FormItem>
           )}
         />
-        <div className="space-y-2 flex justify-end">
+
+        <div className="space-y-2 flex justify-between gap-2">
+          <Button type="button" variant="outline" className="w-full justify-start bg-transparent">
+            <CameraIcon className="w-4 h-4 mr-2" />
+            Upload photo
+          </Button>
           <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
             {isPending ? (
               <Loader2Icon className="h-4 w-4 animate-spin" />
             ) : (
-              <ListPlusIcon className="h-4 w-4" />
+              <SaveIcon className="h-4 w-4" />
             )}
-            Add
+            Update
           </Button>
         </div>
       </form>

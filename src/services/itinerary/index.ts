@@ -1,19 +1,12 @@
-import { CreateItineraryArg, UpdateItineraryArg } from "@/lib/schemas/itinerary";
+import { UpsertItineraryArg } from "@/lib/schemas/itinerary";
 import { itineraryRepo } from "@/repository/itinerary";
 
 const getItinerariesByStopId = async ({ stopId }: { stopId: string }) => {
   return itineraryRepo.getItinerariesByStopId({ stopId });
 };
 
-const createItinerary = async (data: CreateItineraryArg) => {
-  return itineraryRepo.createItinerary(data);
-};
-
-const updateItinerary = async (
-  { itineraryId }: { itineraryId: string },
-  data: Omit<UpdateItineraryArg, "itineraryId">
-) => {
-  return itineraryRepo.updateItinerary(itineraryId, data);
+const upsertItinerary = async (data: UpsertItineraryArg) => {
+  return itineraryRepo.upsertItinerary(data);
 };
 
 const deleteItinerary = async ({ itineraryId }: { itineraryId: string }) => {
@@ -22,7 +15,6 @@ const deleteItinerary = async ({ itineraryId }: { itineraryId: string }) => {
 
 export const itineraryService = {
   getItinerariesByStopId,
-  createItinerary,
-  updateItinerary,
+  upsertItinerary,
   deleteItinerary,
 };

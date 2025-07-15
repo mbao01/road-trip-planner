@@ -213,7 +213,7 @@ export const StopCard: FC<StopCardProps> = ({
               </div>
               <StopItineraries stopId={stop.id} itineraries={stop.itinerary} />
               <Button type="button" variant="link" className="w-full bg-transparent justify-center">
-                <ExternalLinkIcon className="w-4 h-4 mr-2" />
+                <ExternalLinkIcon className="w-4 h-4" />
                 Open in Google Maps
               </Button>
             </div>

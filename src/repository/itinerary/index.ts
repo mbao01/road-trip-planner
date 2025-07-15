@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { CreateItineraryArg, UpdateItineraryArg } from "@/lib/schemas/itinerary";
+import { UpsertItineraryArg } from "@/lib/schemas/itinerary";
 
 const getItinerary = async ({ itineraryId }: { itineraryId: string }) => {
   return prisma.itinerary.findUnique({
@@ -13,19 +13,11 @@ const getItinerariesByStopId = async ({ stopId }: { stopId: string }) => {
   });
 };
 
-const createItinerary = async (data: CreateItineraryArg) => {
-  return prisma.itinerary.create({
-    data,
-  });
-};
-
-const updateItinerary = async (
-  itineraryId: string,
-  data: Omit<UpdateItineraryArg, "itineraryId">
-) => {
-  return prisma.itinerary.update({
-    where: { id: itineraryId },
-    data,
+const upsertItinerary = async (data: UpsertItineraryArg) => {
+  return prisma.itinerary.upsert({
+    where: { id: data.id },
+    create: data,
+    update: data,
   });
 };
 
@@ -36,8 +28,7 @@ const deleteItinerary = async ({ itineraryId }: { itineraryId: string }) => {
 };
 
 export const itineraryRepo = {
-  updateItinerary,
-  createItinerary,
+  upsertItinerary,
   deleteItinerary,
   getItinerary,
   getItinerariesByStopId,

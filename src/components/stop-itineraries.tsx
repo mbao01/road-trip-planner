@@ -1,6 +1,5 @@
 import { Itinerary } from "@prisma/client";
-import { ItineraryCreateForm } from "./itinerary-create-form";
-import { ItineraryUpdateForm } from "./itinerary-update-form";
+import { ItineraryForm } from "./itinerary-form";
 
 export const StopItineraries = ({
   stopId,
@@ -9,13 +8,15 @@ export const StopItineraries = ({
   stopId: string;
   itineraries: Itinerary[];
 }) => {
+  if (!itineraries || itineraries.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-2">
       {itineraries?.map((itinerary) => (
-        <ItineraryUpdateForm key={itinerary.id} stopId={stopId} itinerary={itinerary} />
+        <ItineraryForm key={itinerary.id} stopId={stopId} itinerary={itinerary} />
       ))}
-
-      <ItineraryCreateForm stopId={stopId} />
     </div>
   );
 };
