@@ -111,6 +111,23 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
     );
   };
 
+  const updateStop = (
+    dayId: Day["id"],
+    stopId: StopWithItineraries["id"],
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "customName">>
+  ) => {
+    const { clone } = stopHelpers.updateStop(trip, dayId, stopId, data);
+
+    handleAction(
+      async () => {
+        await api.updateStop(clone.id, stopId, data);
+      },
+      clone,
+      "Stop details updated",
+      "Failed to update stop details"
+    );
+  };
+
   const confirmDeleteDay = () => {
     if (!dayToDelete) return;
     const { clone } = dayHelpers.deleteDay(trip, dayToDelete.id);
@@ -159,6 +176,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
                 onMoveDay={moveDay}
                 onDeleteDay={() => setDayToDelete(day)}
                 onAddStop={addStop}
+                onUpdateStop={updateStop}
                 onDeleteStop={deleteStop}
                 settings={settings}
               />
@@ -173,6 +191,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
               dayId="0"
               stopNumber={0}
               settings={settings}
+              onUpdateStop={() => {}}
               onDeleteStop={() => {}}
               isFirstStopOfTrip={false}
             />

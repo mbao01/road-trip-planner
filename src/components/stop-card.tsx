@@ -14,10 +14,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
+import { STOP_EVENT } from "@/helpers/constants/stopEvent";
 import { NormalizedSettings } from "@/helpers/settings";
 import { StopWithItineraries } from "@/types/trip";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { StopEvent } from "@prisma/client";
 import {
   CameraIcon,
   Check,
@@ -40,33 +42,38 @@ interface StopCardProps {
   dayId: Day["id"];
   settings: NormalizedSettings;
   stopNumber: number;
+  onUpdateStop: (
+    dayId: Day["id"],
+    stopId: StopWithItineraries["id"],
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "customName">>
+  ) => void;
   onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   isFirstStopOfTrip: boolean;
 }
 
-const stopTypes = [
+const STOP_TYPES = [
   {
-    name: "Default",
+    value: StopEvent.DEFAULT,
     icon: <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white" />,
   },
-  { name: "Overnight", icon: <Moon className="w-4 h-4 text-blue-800" /> },
+  { value: StopEvent.OVERNIGHT, icon: <Moon className="w-4 h-4 text-blue-800" /> },
   {
-    name: "Outdoor Activity",
+    value: StopEvent.OUTDOOR_ACTIVITY,
     icon: <TreePine className="w-4 h-4 text-green-600" />,
   },
   {
-    name: "Place of Interest",
+    value: StopEvent.PLACE_OF_INTEREST,
     icon: <CameraIcon className="w-4 h-4 text-teal-500" />,
   },
-  { name: "Fuel", icon: <Fuel className="w-4 h-4 text-red-500" /> },
+  { value: StopEvent.FUEL, icon: <Fuel className="w-4 h-4 text-red-500" /> },
   {
-    name: "Food and Drink",
+    value: StopEvent.FOOD_AND_DRINK,
     icon: <Utensils className="w-4 h-4 text-orange-500" />,
   },
-];
+] as const;
 
-const StopTypeIcon: FC<{ name: string; className?: string }> = ({ name, className }) => {
-  const type = stopTypes.find((t) => t.name === name);
+const StopTypeIcon: FC<{ value: StopEvent; className?: string }> = ({ value, className }) => {
+  const type = STOP_TYPES.find((t) => t.value === value);
   if (!type) return null;
   return <div className={className}>{type.icon}</div>;
 };
@@ -77,11 +84,12 @@ export const StopCard: FC<StopCardProps> = ({
   dayId,
   settings,
   stopNumber,
+  onUpdateStop,
   onDeleteStop,
   isFirstStopOfTrip,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedType, setSelectedType] = useState("Default");
+  const [selectedType, setSelectedType] = useState<StopEvent>(StopEvent.DEFAULT);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `stop-${stop.id}`,
@@ -161,20 +169,26 @@ export const StopCard: FC<StopCardProps> = ({
                     className="w-full justify-between font-normal bg-transparent"
                   >
                     <div className="flex items-center gap-2">
-                      <StopTypeIcon name={selectedType} />
-                      <span>{selectedType}</span>
+                      <StopTypeIcon value={selectedType} />
+                      <span>{STOP_EVENT[selectedType]}</span>
                     </div>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                  {stopTypes.map((type) => (
-                    <DropdownMenuItem key={type.name} onSelect={() => setSelectedType(type.name)}>
+                  {STOP_TYPES.map(({ value }) => (
+                    <DropdownMenuItem
+                      key={value}
+                      onSelect={() => {
+                        setSelectedType(value);
+                        onUpdateStop(dayId, stop.id, { stopEvent: value });
+                      }}
+                    >
                       <div className="flex items-center gap-2">
-                        <StopTypeIcon name={type.name} />
-                        <span>{type.name}</span>
+                        <StopTypeIcon value={value} />
+                        <span>{STOP_EVENT[value]}</span>
                       </div>
-                      {selectedType === type.name && <Check className="w-4 h-4 ml-auto" />}
+                      {selectedType === value && <Check className="w-4 h-4 ml-auto" />}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>

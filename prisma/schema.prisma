@@ -89,6 +89,7 @@ model Stop {
   id         String      @id @default(cuid(2))
   name       String
   customName String?
+  stopEvent  StopEvent? @default(DEFAULT)
   latitude   Float
   longitude  Float
   placeId    String
@@ -203,6 +204,15 @@ enum TripStatus {
   COMPLETED
   IN_PROGRESS
   NOT_STARTED
+}
+
+enum StopEvent {
+  DEFAULT
+  OVERNIGHT
+  OUTDOOR_ACTIVITY
+  PLACE_OF_INTEREST
+  FUEL
+  FOOD_AND_DRINK 
 }
 
 enum Currency {

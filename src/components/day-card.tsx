@@ -32,6 +32,11 @@ interface DayCardProps {
   onMoveDay: (dayId: Day["id"], direction: "up" | "down") => void;
   onDeleteDay: () => void;
   onAddStop: (dayId: Day["id"], location: PlaceDetails) => void;
+  onUpdateStop: (
+    dayId: Day["id"],
+    stopId: StopWithItineraries["id"],
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "customName">>
+  ) => void;
   onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   settings: NormalizedSettings;
 }
@@ -46,6 +51,7 @@ export const DayCard: FC<DayCardProps> = ({
   onMoveDay,
   onDeleteDay,
   onAddStop,
+  onUpdateStop,
   onDeleteStop,
   settings,
 }) => {
@@ -118,6 +124,7 @@ export const DayCard: FC<DayCardProps> = ({
               travel={travel}
               settings={settings}
               stopNumber={stopNumberOffset + index + 1}
+              onUpdateStop={onUpdateStop}
               onDeleteStop={onDeleteStop}
               isFirstStopOfTrip={dayIndex === 0 && index === 0}
             />

@@ -2,7 +2,7 @@ import { PlaceDetails } from "@/lib/google-maps-api";
 import { StopWithItineraries, UserTrip } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
 import { UniqueIdentifier } from "@dnd-kit/core";
-import { Day, Stop } from "@prisma/client";
+import { Day, Stop, StopEvent } from "@prisma/client";
 
 const addStop = (trip: UserTrip, dayId: Day["id"], loc: PlaceDetails) => {
   const clone = structuredClone(trip);
@@ -13,6 +13,7 @@ const addStop = (trip: UserTrip, dayId: Day["id"], loc: PlaceDetails) => {
     placeId: loc.id,
     latitude: loc.latitude,
     longitude: loc.longitude,
+    stopEvent: StopEvent.DEFAULT,
     customName: null,
     order: day.stops.length,
     dayId: dayId,
@@ -28,6 +29,19 @@ const addStop = (trip: UserTrip, dayId: Day["id"], loc: PlaceDetails) => {
     clone,
     newStopData,
   };
+};
+
+const updateStop = (
+  trip: UserTrip,
+  dayId: Day["id"],
+  stopId: Stop["id"],
+  data: Partial<Pick<Stop, "stopEvent" | "customName">>
+) => {
+  const clone = structuredClone(trip);
+  const day = clone.days.find((d) => d.id === dayId)!;
+  day.stops = day.stops.map((s) => (s.id === stopId ? { ...s, ...data } : s));
+
+  return { clone };
 };
 
 const deleteStop = (trip: UserTrip, dayId: Day["id"], stopId: Stop["id"]) => {
@@ -72,6 +86,7 @@ const reorderStop = (
 
 export const stopHelpers = {
   addStop,
+  updateStop,
   deleteStop,
   reorderStop,
 };
