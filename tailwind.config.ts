@@ -1,4 +1,5 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
+import { fontFamily } from "tailwindcss/defaultTheme"
 
 // all in fixtures is set to tailwind v3 as interims solutions
 
@@ -9,9 +10,14 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", ...fontFamily.sans],
+        heading: ["var(--font-lexend)", ...fontFamily.sans],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -94,5 +100,5 @@ const config: Config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
-export default config;
+}
+export default config

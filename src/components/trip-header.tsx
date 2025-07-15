@@ -1,16 +1,17 @@
 "use client";
 
+import type { UserTrip } from "@/types/trip";
 import type React from "react";
 import type { DateRange } from "react-day-picker";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserTrip } from "@/types/trip";
 import { MAX__NO_OF_TRIP_DAYS } from "@/utilities/constants/date";
 import { isSameDay } from "date-fns";
 import { CheckIcon, Download, Settings, XIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { AppLogo } from "./app-logo";
 import { DateRangePicker } from "./date-range-picker";
 import { TripRoleBadge } from "./trip-role-badge";
 import { UserDropdown } from "./user-dropdown";
@@ -72,21 +73,22 @@ export function TripHeader({
     <div className="p-4 border-b">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Link href="/trips">
-            <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-              <div className="w-4 h-4 bg-white rounded-sm transform rotate-45"></div>
-            </div>
+          <Link href="/trips" className="flex items-center gap-1 text-foreground">
+            {/* <PaperPlane className="w-8 h-8 text-primary" /> */}
+            <AppLogo className="w-8 h-8 text-primary" />
+            <span className="font-heading text-lg font-semibold">RTP</span>
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
+          <Button variant="outline" size="sm">
             <Download className="w-4 h-4" />
+            <span className="sr-only">Download</span>
           </Button>
-          <Button variant="ghost" size="sm" onClick={onSettings}>
+          <Button variant="outline" size="sm" onClick={onSettings}>
             <Settings className="w-4 h-4" />
-            Settings
+            <span className="sr-only">Settings</span>
           </Button>
-          <Button size="sm" onClick={onShare} className="bg-orange-500 hover:bg-orange-600">
+          <Button size="sm" onClick={onShare}>
             Share
           </Button>
           <UserDropdown />
@@ -98,7 +100,7 @@ export function TripHeader({
           value={name}
           onChange={handleNameChange}
           onBlur={handleNameBlur}
-          className="!text-2xl font-bold mb-2 h-auto border-none focus-visible:ring-0 shadow-none p-1"
+          className="font-heading !text-2xl font-bold mb-2 h-auto border-none focus-visible:ring-0 shadow-none p-1"
         />
         <div className="flex items-center gap-2">
           <DateRangePicker
@@ -114,7 +116,7 @@ export function TripHeader({
                 size="icon"
                 variant="outline"
                 aria-label="Save date changes"
-                className="h-auto p-0.5 w-auto"
+                className="h-auto p-0.5 w-auto bg-transparent"
               >
                 <CheckIcon className="h-4 w-4" />
                 <span className="sr-only">Save</span>
@@ -124,7 +126,7 @@ export function TripHeader({
                 size="icon"
                 variant="outline"
                 aria-label="Cancel date changes"
-                className="h-auto p-0.5 w-auto"
+                className="h-auto p-0.5 w-auto bg-transparent"
               >
                 <XIcon className="h-4 w-4" />
                 <span className="sr-only">Cancel</span>
@@ -132,7 +134,11 @@ export function TripHeader({
             </>
           )}
 
-          {collaborator && <TripRoleBadge tripRole={collaborator.tripRole} />}
+          {collaborator && (
+            <span className="ml-auto">
+              <TripRoleBadge tripRole={collaborator.tripRole} />
+            </span>
+          )}
         </div>
       </div>
     </div>

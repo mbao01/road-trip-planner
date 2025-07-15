@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { hashPassword } from "@/helpers/passwordHash";
 import { PrismaClient, TripRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -31,7 +32,10 @@ async function main() {
   const usersData = JSON.parse(await fs.readFile(usersFilePath, "utf-8"));
   const accountsData = JSON.parse(await fs.readFile(accountsFilePath, "utf-8"));
   await prisma.user.createMany({
-    data: usersData,
+    data: usersData.map((user: any) => ({
+      ...user,
+      password: user.password ? hashPassword(user.password) : user.password,
+    })),
   });
   await prisma.account.createMany({
     data: accountsData,
