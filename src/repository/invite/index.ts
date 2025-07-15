@@ -52,13 +52,20 @@ const createTripInvite = async (
   email: string,
   tripRole: TripRole
 ) => {
-  const [trip, user] = await Promise.all([
+  const [trip, user, invite] = await Promise.all([
     tripRepo.getTripById(tripId),
     userRepo.getUserById(userId),
+    getTripInvite(tripId, email),
   ]);
 
   if (!trip || !user) {
     throw new Error("Trip or user not found");
+  }
+
+  console.log("Pending invite: ", invite);
+
+  if (invite) {
+    throw new Error("User already has an invite");
   }
 
   const tripInvite = await prisma.tripInvite.create({

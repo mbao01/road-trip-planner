@@ -80,32 +80,44 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
   };
 
   const handleInvite = () => {
-    const hasNoCollaborator =
-      inviteEmail && !trip.collaborators.some((c) => c.user.email === inviteEmail);
-
-    if (hasNoCollaborator) {
-      const newInvite = {
-        id: createTempId("invite"),
-        email: inviteEmail,
-        tripId: trip.id,
-        tripRole: inviteRole,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const clone = structuredClone(trip);
-      clone.invites = [newInvite, ...(clone.invites ?? [])];
-
-      handleAction(
-        async () => {
-          await api.addCollaborator(clone.id, newInvite);
-          setInviteEmail("");
-        },
-        clone,
-        "User invited successfully",
-        "Failed to invite user"
-      );
+    if (!inviteEmail) {
+      toast({ title: "Please enter a valid email address" });
     }
+
+    const isCollaborator = trip.collaborators.some((c) => c.user.email === inviteEmail);
+    const isInvited = trip.invites?.some((i) => i.email === inviteEmail);
+
+    if (isInvited) {
+      toast({ title: "User has already been invited" });
+      return;
+    }
+
+    if (isCollaborator) {
+      toast({ title: "User is already a collaborator" });
+      return;
+    }
+
+    const newInvite = {
+      id: createTempId("invite"),
+      email: inviteEmail,
+      tripId: trip.id,
+      tripRole: inviteRole,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const clone = structuredClone(trip);
+    clone.invites = [newInvite, ...(clone.invites ?? [])];
+
+    handleAction(
+      async () => {
+        await api.addCollaborator(clone.id, newInvite);
+        setInviteEmail("");
+      },
+      clone,
+      "User invited successfully",
+      "Failed to invite user"
+    );
   };
 
   const handleRoleChange = (collaboratorId: string, newTripRole: TripRole) => {
