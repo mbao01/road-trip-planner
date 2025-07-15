@@ -11,7 +11,9 @@ export async function addItineraryAction(values: CreateItineraryArg) {
 
     return { itinerary, error: false };
   } catch (error) {
-    return { error: ((error as any)?.message as string) || "Could not create itinerary" };
+    return {
+      error: ((error as { message: string })?.message as string) || "Could not create itinerary",
+    };
   }
 }
 
@@ -22,7 +24,7 @@ export async function updateItineraryAction(values: UpdateItineraryArg) {
 
     return { itinerary, error: false };
   } catch (error) {
-    return { error: (error as any)?.message || "Could not update itinerary" };
+    return { error: (error as { message: string })?.message || "Could not update itinerary" };
   }
 }
 

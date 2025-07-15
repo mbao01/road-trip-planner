@@ -31,7 +31,7 @@ export function TripHeader({
   onSettings,
   onShare,
 }: TripHeaderProps) {
-  const session = useSession();
+  const { data: session } = useSession();
   const [name, setName] = useState(trip.name);
   const currentDateRange = {
     from: trip.startDate,
@@ -40,7 +40,7 @@ export function TripHeader({
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(
     currentDateRange
   );
-  const collaborator = trip.collaborators.find((c) => c.userId === session.data?.user?.id);
+  const collaborator = trip.collaborators.find((c) => c.userId === session?.user?.id);
 
   // Sync local state if props change from parent (e.g., after a successful save)
   useEffect(() => {
@@ -91,7 +91,7 @@ export function TripHeader({
           <Button size="sm" onClick={onShare}>
             Share
           </Button>
-          <UserDropdown />
+          <UserDropdown user={session?.user} />
         </div>
       </div>
 

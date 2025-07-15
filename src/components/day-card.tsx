@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { NormalizedSettings } from "@/helpers/settings";
+import { StopWithItineraries } from "@/types/trip";
 import { formatDate } from "@/utilities/dates";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Day, Stop, Travel } from "@prisma/client";
+import { Day, Travel } from "@prisma/client";
 import { ArrowDown, ArrowUp, MoreVertical, Trash2 } from "lucide-react";
 import { AddStop } from "./add-stop";
 import { StopCard } from "./stop-card";
@@ -24,14 +25,14 @@ import { StopCard } from "./stop-card";
 interface DayCardProps {
   day: Day;
   travel: Travel | null;
-  stops: Stop[];
+  stops: StopWithItineraries[];
   dayIndex: number;
   totalDays: number;
   stopNumberOffset: number;
   onMoveDay: (dayId: Day["id"], direction: "up" | "down") => void;
   onDeleteDay: () => void;
   onAddStop: (dayId: Day["id"], location: PlaceDetails) => void;
-  onDeleteStop: (dayId: Day["id"], stopId: Stop["id"]) => void;
+  onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   settings: NormalizedSettings;
 }
 

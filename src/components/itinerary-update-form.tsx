@@ -16,7 +16,7 @@ import { updateItineraryAction } from "@/lib/actions/itinerary";
 import { UpdateItineraryArg, UpdateItinerarySchema } from "@/lib/schemas/itinerary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Itinerary } from "@prisma/client";
-import { CameraIcon, ExternalLinkIcon } from "lucide-react";
+import { CameraIcon, Loader2Icon, SaveIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const ItineraryUpdateForm = ({
@@ -77,6 +77,11 @@ export const ItineraryUpdateForm = ({
             Upload photo
           </Button>
           <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+            {isPending ? (
+              <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <SaveIcon className="mr-2 h-4 w-4" />
+            )}
             Update
           </Button>
         </div>

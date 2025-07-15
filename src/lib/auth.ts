@@ -1,10 +1,9 @@
 import { verifyPassword } from "@/helpers/passwordHash";
-import { userHelper } from "@/helpers/user";
 import { prisma } from "@/lib/prisma";
 import { SignInSchema } from "@/lib/schemas/auth";
 import { userService } from "@/services/user";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import NextAuth, { Session } from "next-auth";
+import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
@@ -57,13 +56,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return !isDeleted;
     },
     async session({ token, session }) {
-      if (!token?.sub) return null as unknown as Session;
+      // if (!token?.sub) return null as unknown as Session;
 
-      const isDeleted = await userService.isUserDeleted({ userId: token.sub });
+      // const isDeleted = await userService.isUserDeleted({ userId: token.sub });
 
-      if (isDeleted) {
-        return null as unknown as Session;
-      }
+      // if (isDeleted) {
+      //   return null as unknown as Session;
+      // }
 
       if (token.sub && session.user) {
         session.user.id = token.sub;

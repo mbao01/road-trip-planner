@@ -1,5 +1,5 @@
 import { PlaceDetails } from "@/lib/google-maps-api";
-import { UserTrip } from "@/types/trip";
+import { StopWithItineraries, UserTrip } from "@/types/trip";
 import { createTempId } from "@/utilities/identity";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { Day, Stop } from "@prisma/client";
@@ -17,9 +17,12 @@ const addStop = (trip: UserTrip, dayId: Day["id"], loc: PlaceDetails) => {
     order: day.stops.length,
     dayId: dayId,
     tripId: trip.id,
+    itinerary: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
   const tempId = createTempId();
-  day.stops.push({ ...newStopData, id: tempId } as Stop);
+  day.stops.push({ ...newStopData, id: tempId } as StopWithItineraries);
 
   return {
     clone,

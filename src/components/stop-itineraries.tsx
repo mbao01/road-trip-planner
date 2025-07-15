@@ -12,7 +12,7 @@ export const StopItineraries = ({
   return (
     <div className="space-y-2">
       {itineraries?.map((itinerary) => (
-        <ItineraryUpdateForm stopId={stopId} itinerary={itinerary} />
+        <ItineraryUpdateForm key={itinerary.id} stopId={stopId} itinerary={itinerary} />
       ))}
 
       <ItineraryCreateForm stopId={stopId} />

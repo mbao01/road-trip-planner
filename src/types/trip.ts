@@ -44,7 +44,7 @@ export type UserTrip = Omit<Trip, "ownerId"> &
 export type UserTrips = Omit<UserTrip, "travel" | "settings" | "days">[];
 
 export type DayWithStops = Day & {
-  stops: Stop[];
+  stops: StopWithItineraries[];
 };
 
 export type StopWithItineraries = Stop & {
