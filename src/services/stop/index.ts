@@ -1,7 +1,6 @@
 import { Resource, resourceGuard } from "@/app/api/utilities/guards";
 import { validator } from "@/app/api/utilities/validation";
 import { UpdateStopArg, updateStopSchema } from "@/app/api/utilities/validation/schemas/stop";
-import { UpdateTripArg } from "@/app/api/utilities/validation/schemas/trip";
 import { dayRepo } from "@/repository/day";
 import { stopRepo } from "@/repository/stop";
 import { TripRole } from "@prisma/client";

@@ -3,13 +3,15 @@
 /// <reference types="google.maps" />
 import type { Settings, Stop } from "@prisma/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { StopInfoWindow } from "@/components/stop-info-window";
 import { MapStyle } from "@prisma/client";
 import {
   DirectionsRenderer,
   DirectionsService,
   GoogleMap,
-  InfoWindow,
   Marker,
+  // InfoWindow,
+  OverlayView,
   useJsApiLoader,
 } from "@react-google-maps/api";
 import { Loader2 } from "lucide-react";
@@ -42,6 +44,16 @@ const mapStyleOptions = {
     },
   ],
   [MapStyle.SATELLITE]: [], // Satellite is a mapTypeId, not a style array
+};
+
+const getMarkerIcon = (index: number) => {
+  const svg = `
+    <svg viewBox="0 0 36 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 0C8.058 0 0 8.058 0 18C0 28.296 15.66 46.308 16.524 47.328C17.256 48.192 18.744 48.192 19.476 47.328C20.34 46.308 36 28.296 36 18C36 8.058 27.942 0 18 0Z" fill="#FFEDD5"/>
+      <path d="M18 0.5C27.663 0.5 35.5 8.286 35.5 18C35.5 27.852 20.652 45.228 18.888 47.34C18.36 47.964 17.64 47.964 17.112 47.34C15.348 45.228 0.5 27.852 0.5 18C0.5 8.286 8.337 0.5 18 0.5Z" stroke="#F97316" stroke-opacity="0.8"/>
+    </svg>
+  `;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
 export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
@@ -122,6 +134,12 @@ export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
     setMap(null);
   }, []);
 
+  const displayMarker = activeMarker;
+
+  const handleCloseInfoWindow = () => {
+    setActiveMarker(null);
+  };
+
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -150,20 +168,42 @@ export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
           position={{ lat: stop.latitude, lng: stop.longitude }}
           label={{
             text: (index + 1).toString(),
-            color: "white",
+            color: "#F97316",
             fontWeight: "bold",
           }}
-          onClick={() => setActiveMarker(stop)}
+          // onClick={() => setActiveMarker(stop)}
+          icon={{
+            url: getMarkerIcon(index + 1),
+            scaledSize: new google.maps.Size(36, 48),
+            anchor: new google.maps.Point(18, 48),
+          }}
+          zIndex={activeMarker?.id === stop.id ? 100 : index}
+          onClick={() => {
+            setActiveMarker(stop);
+          }}
         />
       ))}
 
-      {activeMarker && (
+      {/* {activeMarker && (
         <InfoWindow
           position={{ lat: activeMarker.latitude, lng: activeMarker.longitude }}
           onCloseClick={() => setActiveMarker(null)}
         >
           <div className="text-sm font-medium p-1">{activeMarker.name}</div>
         </InfoWindow>
+      )} */}
+
+      {displayMarker && (
+        <OverlayView
+          position={{ lat: displayMarker.latitude, lng: displayMarker.longitude }}
+          mapPaneName={OverlayView.FLOAT_PANE}
+          getPixelPositionOffset={(width, height) => ({
+            x: -(width / 2),
+            y: -(height + 10),
+          })}
+        >
+          <StopInfoWindow stop={displayMarker} onClose={handleCloseInfoWindow} />
+        </OverlayView>
       )}
 
       {directionsRequest && (

@@ -18,14 +18,14 @@ export function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export function useDebouncedCallback<T extends (...args: any[]) => void>(
+export function useDebouncedCallback<G, T extends (...args: G[]) => void>(
   callback: T,
   delay: number
 ) {
   const timer = useRef<NodeJS.Timeout | null>(null);
 
   return useCallback(
-    (...args: any[]) => {
+    (...args: G[]) => {
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         callback(...args);
