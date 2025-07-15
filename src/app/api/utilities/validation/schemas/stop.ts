@@ -13,6 +13,7 @@ export type AddStopArg = z.infer<typeof addStopSchema>;
 
 export const updateStopSchema = z.object({
   stopEvent: z.enum(StopEvent).optional(),
+  stopCost: z.coerce.number().optional(),
   customName: z.string().optional(),
 });
 

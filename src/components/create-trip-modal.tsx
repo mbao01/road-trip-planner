@@ -27,9 +27,9 @@ export function CreateTripModal({ trigger }: CreateTripModalProps) {
   const [dates, setDates] = useState<DateRange | undefined>();
   const [startStopQuery, setStartStopQuery] = useState("");
   const [startStopResults, setStartStopResults] = useState<PlaceSearchResult[]>([]);
-  const [selectedStartStop, setSelectedStartStop] = useState<Omit<
+  const [selectedStartStop, setSelectedStartStop] = useState<Pick<
     Stop,
-    "id" | "createdAt" | "updatedAt" | "tripId" | "dayId" | "customName" | "order"
+    "name" | "placeId" | "latitude" | "longitude"
   > | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isCreating, setIsCreating] = useState(false);

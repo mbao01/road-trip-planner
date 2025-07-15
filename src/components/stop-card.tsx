@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { STOP_EVENT } from "@/helpers/constants/stopEvent";
 import { NormalizedSettings } from "@/helpers/settings";
+import { useDebouncedCallback } from "@/hooks/use-debounce";
 import { StopWithItineraries } from "@/types/trip";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -45,7 +46,7 @@ interface StopCardProps {
   onUpdateStop: (
     dayId: Day["id"],
     stopId: StopWithItineraries["id"],
-    data: Partial<Pick<StopWithItineraries, "stopEvent" | "customName">>
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "stopCost" | "customName">>
   ) => void;
   onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   isFirstStopOfTrip: boolean;
@@ -99,6 +100,10 @@ export const StopCard: FC<StopCardProps> = ({
       dayId: dayId,
     },
   });
+
+  const handleStopDetailsChange = useDebouncedCallback((data) => {
+    onUpdateStop(dayId, stop.id, data);
+  }, 300);
 
   const details = useMemo(() => {
     const { display } = calculateTravelDetails("stop", travel, settings, stop.id);
@@ -157,7 +162,8 @@ export const StopCard: FC<StopCardProps> = ({
                   </span>
                   <Input
                     type="text"
-                    defaultValue="0"
+                    defaultValue={stop.stopCost ?? ""}
+                    onChange={(e) => handleStopDetailsChange({ stopCost: e.target.value })}
                     className="px-3 py-2 w-24 text-sm border-0 rounded-none focus:outline-none focus-visible:ring-0"
                   />
                 </div>
@@ -201,6 +207,8 @@ export const StopCard: FC<StopCardProps> = ({
                   id={`custom-name-${stop.id}`}
                   className="w-full"
                   placeholder="Enter custom name"
+                  defaultValue={stop.customName ?? ""}
+                  onChange={(e) => handleStopDetailsChange({ customName: e.target.value })}
                 />
               </div>
               <StopItineraries stopId={stop.id} itineraries={stop.itinerary} />

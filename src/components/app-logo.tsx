@@ -18,10 +18,10 @@ export const AppLogo = ({ className }: { className?: string }) => {
       <circle cx="50" cy="35" r="8" fill="white" />
 
       {/* Vertical Line through entire pin */}
-      <line x1="50" y1="5" x2="50" y2="90" stroke="white" stroke-width="2" />
+      <line x1="50" y1="5" x2="50" y2="90" stroke="white" strokeWidth="2" />
 
       {/* Horizontal Line through entire pin */}
-      <line x1="20" y1="35" x2="80" y2="35" stroke="white" stroke-width="2" />
+      <line x1="20" y1="35" x2="80" y2="35" stroke="white" strokeWidth="2" />
     </svg>
   );
 };

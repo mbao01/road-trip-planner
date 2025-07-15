@@ -114,7 +114,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
   const updateStop = (
     dayId: Day["id"],
     stopId: StopWithItineraries["id"],
-    data: Partial<Pick<StopWithItineraries, "stopEvent" | "customName">>
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "stopCost" | "customName">>
   ) => {
     const { clone } = stopHelpers.updateStop(trip, dayId, stopId, data);
 

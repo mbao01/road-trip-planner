@@ -90,6 +90,7 @@ model Stop {
   name       String
   customName String?
   stopEvent  StopEvent? @default(DEFAULT)
+  stopCost   Float?
   latitude   Float
   longitude  Float
   placeId    String

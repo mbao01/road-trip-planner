@@ -116,7 +116,7 @@ export async function addCollaborator(
 export async function updateStop(
   tripId: Trip["id"],
   stopId: Stop["id"],
-  data: Partial<Pick<Stop, "stopEvent" | "customName">>
+  data: Partial<Pick<Stop, "stopEvent" | "stopCost" | "customName">>
 ): Promise<void> {
   const res = await fetch(`/api/trips/${tripId}/stops/${stopId}`, {
     method: "PUT",

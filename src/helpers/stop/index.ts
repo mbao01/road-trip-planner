@@ -14,6 +14,7 @@ const addStop = (trip: UserTrip, dayId: Day["id"], loc: PlaceDetails) => {
     latitude: loc.latitude,
     longitude: loc.longitude,
     stopEvent: StopEvent.DEFAULT,
+    stopCost: null,
     customName: null,
     order: day.stops.length,
     dayId: dayId,
@@ -35,7 +36,7 @@ const updateStop = (
   trip: UserTrip,
   dayId: Day["id"],
   stopId: Stop["id"],
-  data: Partial<Pick<Stop, "stopEvent" | "customName">>
+  data: Partial<Pick<Stop, "stopEvent" | "stopCost" | "customName">>
 ) => {
   const clone = structuredClone(trip);
   const day = clone.days.find((d) => d.id === dayId)!;

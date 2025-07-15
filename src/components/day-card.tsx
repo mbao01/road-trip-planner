@@ -35,7 +35,7 @@ interface DayCardProps {
   onUpdateStop: (
     dayId: Day["id"],
     stopId: StopWithItineraries["id"],
-    data: Partial<Pick<StopWithItineraries, "stopEvent" | "customName">>
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "stopCost" | "customName">>
   ) => void;
   onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   settings: NormalizedSettings;
