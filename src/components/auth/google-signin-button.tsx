@@ -2,8 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ChromeIcon } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import { signIn } from "next-auth/react";
+import { siGoogle } from "simple-icons";
 
 export function GoogleSignInButton() {
   const searchParams = useSearchParams();
@@ -15,7 +16,7 @@ export function GoogleSignInButton() {
 
   return (
     <Button variant="outline" className="w-full bg-transparent" onClick={onClick}>
-      <ChromeIcon className="mr-2 h-4 w-4" />
+      <Icon src={siGoogle} className="mr-2 h-4 w-4" />
       Sign In with Google
     </Button>
   );
