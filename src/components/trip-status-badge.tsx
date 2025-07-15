@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { TRIP_STATUS } from "@/helpers/constants/tripStatus";
+import { cn } from "@/lib/utils";
 import { TripStatus } from "@prisma/client";
 
 const statusColors: Record<TripStatus, string> = {
@@ -16,7 +17,7 @@ interface TripStatusBadgeProps {
 
 export const TripStatusBadge = ({ status }: TripStatusBadgeProps) => {
   return (
-    <Badge variant="outline" className={statusColors[status]}>
+    <Badge variant="outline" className={cn("font-medium text-nowrap", statusColors[status])}>
       {TRIP_STATUS[status]}
     </Badge>
   );
