@@ -274,6 +274,25 @@ const SidebarTrigger = React.forwardRef<
 });
 SidebarTrigger.displayName = "SidebarTrigger";
 
+const SidebarToggle = ({
+  children,
+}: {
+  children: ({
+    open,
+    openMobile,
+    toggleSidebar,
+  }: {
+    open: boolean;
+    openMobile: boolean;
+    toggleSidebar: () => void;
+  }) => React.ReactNode;
+}) => {
+  const { open, openMobile, toggleSidebar } = useSidebar();
+
+  return children({ open, openMobile, toggleSidebar });
+};
+SidebarToggle.displayName = "SidebarToggle";
+
 const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button">>(
   ({ className, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
@@ -730,6 +749,7 @@ export {
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
+  SidebarToggle,
   SidebarTrigger,
   useSidebar,
 };

@@ -4,11 +4,13 @@ import type { DayWithStops, UserTrip } from "@/types/trip";
 import type { Settings, Travel, Trip } from "@prisma/client";
 import type { DateRange } from "react-day-picker";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
   SidebarInset,
   SidebarProvider,
+  SidebarToggle,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,7 +22,15 @@ import { tripHelpers } from "@/helpers/trip";
 import { useToast } from "@/hooks/use-toast";
 import * as api from "@/lib/api";
 import { formatCurrency } from "@/utilities/numbers";
-import { BanknoteIcon, Calendar, Clock, Globe, MapPin, Route } from "lucide-react";
+import {
+  ArrowBigUpDashIcon,
+  BanknoteIcon,
+  Calendar,
+  Clock,
+  Globe,
+  MapPin,
+  Route,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { DeleteDaysConfirmationDialog } from "./delete-days-confirmation-dialog";
 import { SettingsModal } from "./settings-modal";
@@ -264,6 +274,22 @@ export function TripPlanner({ trip: initialTrip }: TripPlannerProps) {
             <div className="absolute top-4 left-4 z-10">
               <SidebarTrigger className="bg-background text-primary rounded-sm" />
             </div>
+            <SidebarToggle>
+              {({ open, openMobile, toggleSidebar }) =>
+                !open && !openMobile ? (
+                  <div className="absolute top-1/2 -translate-y-1/2 z-50 -left-14">
+                    <Button
+                      size="sm"
+                      className="transform rotate-90 cursor-pointer rounded-b-none text-white"
+                      onClick={toggleSidebar}
+                    >
+                      <ArrowBigUpDashIcon className="w-4 h-4" />
+                      Open Itinerary
+                    </Button>
+                  </div>
+                ) : null
+              }
+            </SidebarToggle>
             <div className="flex-1 relative w-full">
               <TripMap
                 settings={settings}
