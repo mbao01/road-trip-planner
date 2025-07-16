@@ -89,7 +89,7 @@ export const TripCollaboratorEmail = ({
       </Section>
 
       <Text className="text-[14px] text-black leading-[24px]">
-        Start off collaborating on you're new adventure. And always enjoy every moment!
+        Start off collaborating on you&apos;re new adventure. And always enjoy every moment!
       </Text>
     </EmailContainer>
   );

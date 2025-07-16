@@ -92,7 +92,7 @@ export const TripInviteEmail = ({
       </Text>
 
       <Text className="text-[14px] text-black leading-[24px]">
-        Start off collaborating on you're new adventure. Enjoy every moment!
+        Start off collaborating on you&apos;re new adventure. Enjoy every moment!
       </Text>
     </EmailContainer>
   );

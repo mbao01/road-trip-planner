@@ -61,8 +61,8 @@ export const EmailContainer = ({ baseUrl, preview, heading, children }: Containe
           <Hr className="mx-0 my-[26px] w-full border border-[#eaeaea] border-solid" />
           <Text className="text-[#666666] text-[12px] leading-[24px]">
             This invitation was intended for the addressed email. If you were not expecting this
-            invitation, you can ignore this email. If you are concerned about your account's safety,
-            please reply to this email to get in touch with us.
+            invitation, you can ignore this email. If you are concerned about your account&apos;s
+            safety, please reply to this email to get in touch with us.
           </Text>
         </Container>
       </Body>
