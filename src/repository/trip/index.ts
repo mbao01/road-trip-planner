@@ -33,7 +33,7 @@ const TRIP_QUERY_BASE_INCLUDE = {
   days: {
     orderBy: { date: "asc" },
     include: {
-      stops: { orderBy: { order: "asc" }, include: { _count: true } },
+      stops: { orderBy: { order: "asc" }, include: { _count: true, itinerary: true } },
     },
   },
   collaborators: {

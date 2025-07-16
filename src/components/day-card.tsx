@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
 import { NormalizedSettings } from "@/helpers/settings";
+import { StopWithItineraries } from "@/types/trip";
 import { formatDate } from "@/utilities/dates";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Day, Stop, Travel } from "@prisma/client";
+import { Day, Travel } from "@prisma/client";
 import { ArrowDown, ArrowUp, MoreVertical, Trash2 } from "lucide-react";
 import { AddStop } from "./add-stop";
 import { StopCard } from "./stop-card";
@@ -24,14 +25,19 @@ import { StopCard } from "./stop-card";
 interface DayCardProps {
   day: Day;
   travel: Travel | null;
-  stops: Stop[];
+  stops: StopWithItineraries[];
   dayIndex: number;
   totalDays: number;
   stopNumberOffset: number;
   onMoveDay: (dayId: Day["id"], direction: "up" | "down") => void;
   onDeleteDay: () => void;
   onAddStop: (dayId: Day["id"], location: PlaceDetails) => void;
-  onDeleteStop: (dayId: Day["id"], stopId: Stop["id"]) => void;
+  onUpdateStop: (
+    dayId: Day["id"],
+    stopId: StopWithItineraries["id"],
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "stopCost" | "customName">>
+  ) => void;
+  onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   settings: NormalizedSettings;
 }
 
@@ -45,6 +51,7 @@ export const DayCard: FC<DayCardProps> = ({
   onMoveDay,
   onDeleteDay,
   onAddStop,
+  onUpdateStop,
   onDeleteStop,
   settings,
 }) => {
@@ -88,7 +95,7 @@ export const DayCard: FC<DayCardProps> = ({
             )}
             <DropdownMenuItem
               onClick={onDeleteDay}
-              className="text-red-500"
+              className="text-destructive"
               disabled={totalDays <= 1}
             >
               <Trash2 className="mr-2 h-4 w-4" />
@@ -99,7 +106,7 @@ export const DayCard: FC<DayCardProps> = ({
       </div>
 
       <div className="mb-4">
-        <div className="inline-block max-w-full px-3 py-1 bg-gray-100 rounded-full text-xs text-muted-foreground truncate">
+        <div className="inline-block max-w-full px-3 py-1 bg-background rounded-full text-xs text-muted-foreground truncate">
           {details}
         </div>
       </div>
@@ -117,6 +124,7 @@ export const DayCard: FC<DayCardProps> = ({
               travel={travel}
               settings={settings}
               stopNumber={stopNumberOffset + index + 1}
+              onUpdateStop={onUpdateStop}
               onDeleteStop={onDeleteStop}
               isFirstStopOfTrip={dayIndex === 0 && index === 0}
             />

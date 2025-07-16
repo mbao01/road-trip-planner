@@ -11,7 +11,7 @@ import { tripService } from "@/services/trip";
 export default async function TripsPage() {
   const session = await auth();
 
-  if (!session?.user?.id) {
+  if (!session?.user?.id || !session?.user?.email) {
     redirect("/auth/signin");
   }
 
@@ -34,7 +34,7 @@ export default async function TripsPage() {
                   </Button>
                 }
               />
-              <UserDropdown />
+              <UserDropdown user={session.user} />
             </div>
           </div>
           <TripsTable initialTrips={trips} />

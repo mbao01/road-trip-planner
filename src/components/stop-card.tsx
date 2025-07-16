@@ -1,6 +1,6 @@
 "use client";
 
-import type { Day, Stop, Travel } from "@prisma/client";
+import type { Day, Travel } from "@prisma/client";
 import type { FC } from "react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,62 +13,40 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { calculateTravelDetails } from "@/helpers/calculateTravelDetails";
+import { STOP_EVENT } from "@/helpers/constants/stopEvent";
 import { NormalizedSettings } from "@/helpers/settings";
+import { useDebouncedCallback } from "@/hooks/use-debounce";
+import { StopWithItineraries } from "@/types/trip";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { StopEvent } from "@prisma/client";
 import {
-  CameraIcon,
   Check,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
-  Fuel,
+  ExternalLinkIcon,
   GripVertical,
-  Moon,
   Trash2,
-  TreePine,
-  Utensils,
 } from "lucide-react";
+import { StopItineraries } from "./stop-itineraries";
+import { STOP_TYPES, StopTypeIcon } from "./stop-type-icon";
 import { TravelDetails } from "./travel-details";
 
 interface StopCardProps {
-  stop: Stop;
+  stop: StopWithItineraries;
   travel: Travel | null;
   dayId: Day["id"];
   settings: NormalizedSettings;
   stopNumber: number;
-  onDeleteStop: (dayId: Day["id"], stopId: Stop["id"]) => void;
+  onUpdateStop: (
+    dayId: Day["id"],
+    stopId: StopWithItineraries["id"],
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "stopCost" | "customName">>
+  ) => void;
+  onDeleteStop: (dayId: Day["id"], stopId: StopWithItineraries["id"]) => void;
   isFirstStopOfTrip: boolean;
 }
-
-const stopTypes = [
-  {
-    name: "Default",
-    icon: <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white" />,
-  },
-  { name: "Overnight", icon: <Moon className="w-4 h-4 text-blue-800" /> },
-  {
-    name: "Outdoor Activity",
-    icon: <TreePine className="w-4 h-4 text-green-600" />,
-  },
-  {
-    name: "Place of Interest",
-    icon: <CameraIcon className="w-4 h-4 text-teal-500" />,
-  },
-  { name: "Fuel", icon: <Fuel className="w-4 h-4 text-red-500" /> },
-  {
-    name: "Food and Drink",
-    icon: <Utensils className="w-4 h-4 text-orange-500" />,
-  },
-];
-
-const StopTypeIcon: FC<{ name: string; className?: string }> = ({ name, className }) => {
-  const type = stopTypes.find((t) => t.name === name);
-  if (!type) return null;
-  return <div className={className}>{type.icon}</div>;
-};
 
 export const StopCard: FC<StopCardProps> = ({
   stop,
@@ -76,11 +54,12 @@ export const StopCard: FC<StopCardProps> = ({
   dayId,
   settings,
   stopNumber,
+  onUpdateStop,
   onDeleteStop,
   isFirstStopOfTrip,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedType, setSelectedType] = useState("Default");
+  const [selectedType, setSelectedType] = useState<StopEvent>(StopEvent.DEFAULT);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `stop-${stop.id}`,
@@ -90,6 +69,10 @@ export const StopCard: FC<StopCardProps> = ({
       dayId: dayId,
     },
   });
+
+  const handleStopDetailsChange = useDebouncedCallback((data) => {
+    onUpdateStop(dayId, stop.id, data);
+  }, 300);
 
   const details = useMemo(() => {
     const { display } = calculateTravelDetails("stop", travel, settings, stop.id);
@@ -148,7 +131,8 @@ export const StopCard: FC<StopCardProps> = ({
                   </span>
                   <Input
                     type="text"
-                    defaultValue="0"
+                    defaultValue={stop.stopCost ?? ""}
+                    onChange={(e) => handleStopDetailsChange({ stopCost: e.target.value })}
                     className="px-3 py-2 w-24 text-sm border-0 rounded-none focus:outline-none focus-visible:ring-0"
                   />
                 </div>
@@ -160,20 +144,26 @@ export const StopCard: FC<StopCardProps> = ({
                     className="w-full justify-between font-normal bg-transparent"
                   >
                     <div className="flex items-center gap-2">
-                      <StopTypeIcon name={selectedType} />
-                      <span>{selectedType}</span>
+                      <StopTypeIcon value={selectedType} />
+                      <span>{STOP_EVENT[selectedType]}</span>
                     </div>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                  {stopTypes.map((type) => (
-                    <DropdownMenuItem key={type.name} onSelect={() => setSelectedType(type.name)}>
+                  {STOP_TYPES.map(({ value }) => (
+                    <DropdownMenuItem
+                      key={value}
+                      onSelect={() => {
+                        setSelectedType(value);
+                        onUpdateStop(dayId, stop.id, { stopEvent: value });
+                      }}
+                    >
                       <div className="flex items-center gap-2">
-                        <StopTypeIcon name={type.name} />
-                        <span>{type.name}</span>
+                        <StopTypeIcon value={value} />
+                        <span>{STOP_EVENT[value]}</span>
                       </div>
-                      {selectedType === type.name && <Check className="w-4 h-4 ml-auto" />}
+                      {selectedType === value && <Check className="w-4 h-4 ml-auto" />}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -186,28 +176,15 @@ export const StopCard: FC<StopCardProps> = ({
                   id={`custom-name-${stop.id}`}
                   className="w-full"
                   placeholder="Enter custom name"
+                  defaultValue={stop.customName ?? ""}
+                  onChange={(e) => handleStopDetailsChange({ customName: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor={`notes-${stop.id}`} className="text-sm font-medium">
-                  Notes
-                </Label>
-                <Textarea
-                  id={`notes-${stop.id}`}
-                  className="w-full min-h-[80px]"
-                  placeholder="Add notes about this stop"
-                />
-              </div>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start bg-transparent">
-                  <CameraIcon className="w-4 h-4 mr-2" />
-                  Upload photo
-                </Button>
-                <Button variant="outline" className="w-full justify-start bg-transparent">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open in Google Maps
-                </Button>
-              </div>
+              <StopItineraries stopId={stop.id} itineraries={stop.itinerary} />
+              <Button type="button" variant="link" className="w-full bg-transparent justify-center">
+                <ExternalLinkIcon className="w-4 h-4" />
+                Open in Google Maps
+              </Button>
             </div>
           </CollapsibleContent>
         </div>

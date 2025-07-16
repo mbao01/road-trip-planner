@@ -27,9 +27,9 @@ export function CreateTripModal({ trigger }: CreateTripModalProps) {
   const [dates, setDates] = useState<DateRange | undefined>();
   const [startStopQuery, setStartStopQuery] = useState("");
   const [startStopResults, setStartStopResults] = useState<PlaceSearchResult[]>([]);
-  const [selectedStartStop, setSelectedStartStop] = useState<Omit<
+  const [selectedStartStop, setSelectedStartStop] = useState<Pick<
     Stop,
-    "id" | "createdAt" | "updatedAt" | "tripId" | "dayId" | "customName" | "order"
+    "name" | "placeId" | "latitude" | "longitude"
   > | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -126,7 +126,7 @@ export function CreateTripModal({ trigger }: CreateTripModalProps) {
             disabled={!isFormValid || isCreating}
             className="bg-orange-500 hover:bg-orange-600"
           >
-            {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
             Create Trip
           </Button>
         </>
@@ -183,7 +183,7 @@ export function CreateTripModal({ trigger }: CreateTripModalProps) {
                     <li key={loc.id}>
                       <button
                         onMouseDown={() => handleSelectStop(loc)}
-                        className="w-full text-left p-2 rounded-md hover:bg-accent"
+                        className="w-full text-left p-2 rounded-md hover:bg-accent/40"
                       >
                         {loc.name}
                       </button>

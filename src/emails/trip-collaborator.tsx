@@ -1,94 +1,98 @@
 import { TRIP_ROLE } from "@/helpers/constants/tripAccess";
 import { TripRole } from "@prisma/client";
-import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Preview,
-  Section,
-  Text,
-} from "@react-email/components";
+import { Button, Column, Img, Link, Row, Section, Text } from "@react-email/components";
+import EmailContainer from "./container";
 
 interface TripCollaboratorEmailProps {
-  addedBy: string;
+  baseUrl: string;
+  invitedByName?: string | null;
+  invitedByEmail?: string | null;
+  invitedByImage?: string | null;
+  inviteeName?: string | null;
+  inviteeImage?: string | null;
   tripId: string;
   tripName: string;
   tripRole: TripRole;
-  originUrl: string;
 }
 
 export const TripCollaboratorEmail = ({
+  baseUrl,
+  invitedByName,
+  invitedByEmail,
+  invitedByImage,
+  inviteeName,
+  inviteeImage,
   tripId,
-  addedBy,
   tripName,
   tripRole,
-  originUrl,
-}: TripCollaboratorEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>You have been added to the trip: {tripName}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>You&apos;ve Been Added to a Trip!</Heading>
-        <Text style={text}>
-          <strong>{addedBy}</strong> has added you to the trip:
-          <strong> {tripName}</strong> as a <strong>{TRIP_ROLE[tripRole]}</strong>.
-        </Text>
-        <Section style={buttonContainer}>
-          <Button style={button} href={`${originUrl}/trips/${tripId}`}>
-            View Trip
-          </Button>
-        </Section>
-        <Text style={text}>You can now collaborate on the trip plan. Happy travels!</Text>
-      </Container>
-    </Body>
-  </Html>
-);
+}: TripCollaboratorEmailProps) => {
+  const tripLink = `${baseUrl}/trips/${tripId}`;
+
+  return (
+    <EmailContainer
+      baseUrl={baseUrl}
+      preview={`${invitedByName} has added you as an ${TRIP_ROLE[tripRole]} on ${tripName}`}
+      heading={
+        <>
+          Participate in the <strong className="text-foreground">{tripName}</strong> trip
+        </>
+      }
+    >
+      <Text className="text-[14px] text-black leading-[24px]">Fantastic,</Text>
+      <Text className="text-[14px] text-black leading-[24px]">
+        <strong className="text-foreground">{invitedByName}</strong> (
+        <Link href={`mailto:${invitedByEmail}`} className="text-secondary no-underline">
+          {invitedByEmail}
+        </Link>
+        ) has added you as an {TRIP_ROLE[tripRole]} in their{" "}
+        <strong className="text-foreground">{tripName}</strong> trip.
+      </Text>
+
+      <Section>
+        <Row>
+          <Column align="right">
+            <Img
+              className="rounded-full"
+              src={inviteeImage ?? `${baseUrl}/static/images/user.png`}
+              width="64"
+              height="64"
+              alt={`${inviteeName} picture`}
+            />
+          </Column>
+          <Column align="center">
+            <Img
+              src={`${baseUrl}/static/images/heart-handshake.png`}
+              width="12"
+              height="9"
+              alt="Arrow indicating collaboration"
+            />
+          </Column>
+          <Column align="left">
+            <Img
+              className="rounded-full"
+              src={invitedByImage ?? `${baseUrl}/static/images/user.png`}
+              width="64"
+              height="64"
+              alt={`${invitedByName} picture`}
+            />
+          </Column>
+        </Row>
+      </Section>
+
+      <Section className="mt-[32px] mb-[32px] text-center">
+        <Button
+          className="rounded bg-primary px-5 py-3 text-center font-semibold text-[12px] text-white no-underline"
+          href={tripLink}
+        >
+          View your trip
+        </Button>
+      </Section>
+
+      <Text className="text-[14px] text-black leading-[24px]">
+        Start off collaborating on you&apos;re new adventure. And always enjoy every moment!
+      </Text>
+    </EmailContainer>
+  );
+};
 
 export default TripCollaboratorEmail;
-
-const main = {
-  backgroundColor: "hsl(var(--background))",
-  fontFamily: '"Helvetica Neue",Helvetica,Arial,sans-serif',
-};
-
-const container = {
-  margin: "0 auto",
-  padding: "20px 0 48px",
-  width: "580px",
-  maxWidth: "100%",
-};
-
-const h1 = {
-  color: "hsl(var(--primary))",
-  fontSize: "24px",
-  fontWeight: "bold",
-  margin: "40px 0",
-  padding: "0",
-};
-
-const text = {
-  color: "hsl(var(--foreground))",
-  fontSize: "16px",
-  lineHeight: "26px",
-};
-
-const buttonContainer = {
-  textAlign: "center" as const,
-  marginTop: "32px",
-  marginBottom: "32px",
-};
-
-const button = {
-  backgroundColor: "hsl(var(--primary))",
-  color: "hsl(var(--primary-foreground))",
-  fontSize: "16px",
-  textDecoration: "none",
-  textAlign: "center" as const,
-  display: "block",
-  padding: "12px 24px",
-  borderRadius: "var(--radius)",
-};

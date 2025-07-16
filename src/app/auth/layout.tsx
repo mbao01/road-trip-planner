@@ -10,8 +10,6 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
-      {children}
-    </main>
+    <main className="flex min-h-screen items-center justify-center bg-background">{children}</main>
   );
 }

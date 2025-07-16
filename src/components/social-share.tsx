@@ -133,7 +133,7 @@ export function SocialShare({ shareUrl, tripName, isPublic }: SocialShareProps) 
             />
           </div>
           <Button onClick={handleCopyEmbed} className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-            <Copy className="w-4 h-4 mr-2" />
+            <Copy className="w-4 h-4" />
             Copy code
           </Button>
         </div>

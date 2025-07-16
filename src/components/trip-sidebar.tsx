@@ -2,7 +2,7 @@
 
 import type { PlaceDetails } from "@/lib/google-maps-api";
 import type { DragEndEvent } from "@dnd-kit/core";
-import type { Day, Stop } from "@prisma/client";
+import type { Day } from "@prisma/client";
 import type React from "react";
 import type { FC } from "react";
 import { useState } from "react";
@@ -10,7 +10,7 @@ import { dayHelpers } from "@/helpers/day";
 import { settingsHelpers } from "@/helpers/settings";
 import { stopHelpers } from "@/helpers/stop";
 import * as api from "@/lib/api";
-import { UserTrip } from "@/types/trip";
+import { StopWithItineraries, UserTrip } from "@/types/trip";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { DayCard } from "./day-card";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
@@ -63,7 +63,7 @@ interface TripSidebarProps {
 }
 
 export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
-  const [activeStop, setActiveStop] = useState<Stop | null>(null);
+  const [activeStop, setActiveStop] = useState<StopWithItineraries | null>(null);
   const [dayToDelete, setDayToDelete] = useState<Day | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   const settings = settingsHelpers.getNormalizedSettings(trip.settings);
@@ -90,14 +90,14 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
     const { clone, newStopData } = stopHelpers.addStop(trip, dayId, loc);
 
     handleAction(
-      () => api.addStop(clone.id, dayId, newStopData as Omit<Stop, "id">),
+      () => api.addStop(clone.id, dayId, newStopData as Omit<StopWithItineraries, "id">),
       clone,
       "Stop added",
       "Failed to add stop"
     );
   };
 
-  const deleteStop = (dayId: Day["id"], stopId: Stop["id"]) => {
+  const deleteStop = (dayId: Day["id"], stopId: StopWithItineraries["id"]) => {
     const { clone } = stopHelpers.deleteStop(trip, dayId, stopId);
 
     handleAction(
@@ -108,6 +108,23 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
       clone,
       "Stop deleted",
       "Failed to delete stop"
+    );
+  };
+
+  const updateStop = (
+    dayId: Day["id"],
+    stopId: StopWithItineraries["id"],
+    data: Partial<Pick<StopWithItineraries, "stopEvent" | "stopCost" | "customName">>
+  ) => {
+    const { clone } = stopHelpers.updateStop(trip, dayId, stopId, data);
+
+    handleAction(
+      async () => {
+        await api.updateStop(clone.id, stopId, data);
+      },
+      clone,
+      "Stop details updated",
+      "Failed to update stop details"
     );
   };
 
@@ -159,6 +176,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
                 onMoveDay={moveDay}
                 onDeleteDay={() => setDayToDelete(day)}
                 onAddStop={addStop}
+                onUpdateStop={updateStop}
                 onDeleteStop={deleteStop}
                 settings={settings}
               />
@@ -173,6 +191,7 @@ export const TripSidebar: FC<TripSidebarProps> = ({ trip, handleAction }) => {
               dayId="0"
               stopNumber={0}
               settings={settings}
+              onUpdateStop={() => {}}
               onDeleteStop={() => {}}
               isFirstStopOfTrip={false}
             />

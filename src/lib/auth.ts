@@ -48,7 +48,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
+    async signIn({ user }) {
+      if (!user.id) return false;
+
+      const isDeleted = await userService.isUserDeleted({ userId: user.id });
+
+      return !isDeleted;
+    },
+    async jwt({ token, session }) {
+      if (token.sub && session) {
+        const { user } = await userService.getUserById({ userId: token.sub });
+        if (user) {
+          token.name = user.name;
+          token.email = user.email;
+          token.picture = user.image;
+        }
+      }
+      return token;
+    },
     async session({ token, session }) {
+      // if (!token?.sub) return null as unknown as Session;
+
+      // const isDeleted = await userService.isUserDeleted({ userId: token.sub });
+
+      // if (isDeleted) {
+      //   return null as unknown as Session;
+      // }
+
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }

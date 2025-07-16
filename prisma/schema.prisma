@@ -18,6 +18,8 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  deletedAt     DateTime?
+
   accounts     Account[]
   sessions     Session[]
   trips        Trip[]
@@ -87,6 +89,8 @@ model Stop {
   id         String      @id @default(cuid(2))
   name       String
   customName String?
+  stopEvent  StopEvent? @default(DEFAULT)
+  stopCost   Float?
   latitude   Float
   longitude  Float
   placeId    String
@@ -203,6 +207,15 @@ enum TripStatus {
   NOT_STARTED
 }
 
+enum StopEvent {
+  DEFAULT
+  OVERNIGHT
+  OUTDOOR_ACTIVITY
+  PLACE_OF_INTEREST
+  FUEL
+  FOOD_AND_DRINK 
+}
+
 enum Currency {
   GBP
   EUR
@@ -232,4 +245,5 @@ enum MapStyle {
   SATELLITE
   HYBRID
   TERRAIN
+  MINIMAL
 }

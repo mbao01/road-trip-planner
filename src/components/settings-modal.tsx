@@ -94,6 +94,12 @@ export function SettingsModal({
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
+                <RadioGroupItem value={MapStyle.MINIMAL} id="default" />
+                <Label htmlFor="default" className="text-sm">
+                  Minimal
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem value={MapStyle.ROADMAP} id="roadmap" />
                 <Label htmlFor="roadmap" className="text-sm">
                   Roadmap

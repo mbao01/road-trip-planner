@@ -75,7 +75,7 @@ export const AddStop: FC<AddStopProps> = ({ dayId, onAddStop }) => {
           disabled={isFetchingDetails}
         />
         {(isLoading || isFetchingDetails) && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+          <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
         )}
         {query && !isLoading && !isFetchingDetails && (
           <button
@@ -99,7 +99,7 @@ export const AddStop: FC<AddStopProps> = ({ dayId, onAddStop }) => {
                 <li key={location.id}>
                   <button
                     onMouseDown={() => handleSelect(location)} // use onMouseDown to fire before onBlur
-                    className="w-full text-left p-2 rounded-md hover:bg-accent"
+                    className="w-full text-left p-2 rounded-md hover:bg-accent/40"
                   >
                     {location.name}
                   </button>

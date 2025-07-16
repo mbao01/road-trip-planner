@@ -1,4 +1,5 @@
 import { ReorderDaysArg } from "@/app/api/utilities/validation/schemas/day";
+import { UpdateStopArg } from "@/app/api/utilities/validation/schemas/stop";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -9,6 +10,18 @@ import { prisma } from "@/lib/prisma";
 async function getStopsByTripId(tripId: string) {
   return prisma.stop.findMany({
     where: { tripId },
+  });
+}
+
+/**
+ * Update stops by trip ID
+ * @param tripId - The ID of the trip
+ * @returns The stops for the trip
+ */
+async function updateStop(stopId: string, data: UpdateStopArg) {
+  return prisma.stop.update({
+    where: { id: stopId },
+    data,
   });
 }
 
@@ -47,5 +60,6 @@ async function deleteStopById(stopId: string) {
 export const stopRepo = {
   getStopsByTripId,
   bulkUpdateStopsOrder,
+  updateStop,
   deleteStopById,
 };

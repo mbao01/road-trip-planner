@@ -44,7 +44,7 @@ export function DeleteDaysConfirmationDialog({
         <div className="max-h-60 overflow-y-auto pr-2 -mr-2">
           <div className="space-y-4">
             {daysToDelete.map((day) => (
-              <Card key={day.id} className="bg-muted/50">
+              <Card key={day.id} className="bg-muted/40">
                 <CardHeader className="p-4">
                   <CardTitle className="text-sm font-semibold">
                     Day {day.order + 1} ({formatDate(day.date, "EEE, dd MMM")})

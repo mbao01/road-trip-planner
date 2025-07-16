@@ -52,7 +52,7 @@ export default async function Home() {
           <Button asChild size="lg" className="mt-8">
             <Link href={session?.user ? "/trips" : "/auth/signup"}>
               Start Your Journey
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="h-5 w-5" />
             </Link>
           </Button>
         </div>

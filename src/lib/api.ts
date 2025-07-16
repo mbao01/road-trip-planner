@@ -113,6 +113,19 @@ export async function addCollaborator(
   return res.json();
 }
 
+export async function updateStop(
+  tripId: Trip["id"],
+  stopId: Stop["id"],
+  data: Partial<Pick<Stop, "stopEvent" | "stopCost" | "customName">>
+): Promise<void> {
+  const res = await fetch(`/api/trips/${tripId}/stops/${stopId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+
 export async function deleteStop(tripId: Trip["id"], stopId: Stop["id"]): Promise<void> {
   const res = await fetch(`/api/trips/${tripId}/stops/${stopId}`, { method: "DELETE" });
   if (!res.ok) throw new Error(await res.text());
