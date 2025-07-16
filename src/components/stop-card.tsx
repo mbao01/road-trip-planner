@@ -99,7 +99,7 @@ export const StopCard: FC<StopCardProps> = ({
             </Button>
             <CollapsibleTrigger asChild>
               <button className="flex-1 flex items-center gap-2 text-left min-w-0">
-                <div className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center font-medium shrink-0">
+                <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium shrink-0">
                   {stopNumber}
                 </div>
                 <span className="font-medium flex-1 truncate">{stop.name}</span>

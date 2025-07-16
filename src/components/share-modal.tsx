@@ -197,7 +197,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
               <Button
                 onClick={handleInvite}
                 disabled={!inviteEmail}
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-primary hover:bg-orange-600"
               >
                 Invite
               </Button>

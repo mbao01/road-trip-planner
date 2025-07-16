@@ -70,7 +70,7 @@ export const ItineraryForm = ({ stopId, itinerary }: { stopId: string; itinerary
             <CameraIcon className="w-4 h-4 mr-2" />
             Upload photo
           </Button>
-          <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+          <Button size="sm" className="bg-primary hover:bg-orange-600">
             {isPending ? (
               <Loader2Icon className="h-4 w-4 animate-spin" />
             ) : (
