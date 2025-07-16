@@ -10,31 +10,6 @@ export default async function Home() {
   return (
     <main className="relative flex flex-col bg-background text-white">
       <div className="relative z-20 flex flex-col flex-1 p-8 md:p-12 items-start">
-        <nav className="absolute top-8 right-8 md:top-12 md:right-12 flex items-center gap-2 sm:gap-4">
-          {session?.user ? (
-            <Button
-              asChild
-              variant="outline"
-              className="bg-white/80 border-stone-700 text-stone-900 hover:bg-white"
-            >
-              <Link href="/trips">Go to Dashboard</Link>
-            </Button>
-          ) : (
-            <>
-              <Button asChild variant="ghost" className="text-stone-800 hover:bg-black/10">
-                <Link href="/auth/signin">Sign In</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="bg-white/80 border-stone-700 text-stone-900 hover:bg-white"
-              >
-                <Link href="/auth/signup">Sign Up</Link>
-              </Button>
-            </>
-          )}
-        </nav>
-
         <div className="mx-auto flex-1 grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-12">
           <div className="flex flex-col items-start text-left">
             <HeroTitle />

@@ -206,7 +206,7 @@ export function TripPlanner({ trip: initialTrip }: TripPlannerProps) {
       <div className="flex h-screen bg-background">
         <SidebarProvider style={{ "--sidebar-width": "24rem" } as React.CSSProperties}>
           <Sidebar>
-            <div className="w-96 border-r bg-background flex flex-col h-screen">
+            <div className="border-r bg-background flex flex-col h-screen">
               <TripHeader
                 trip={trip}
                 onTripNameChange={({ name }) => handleTripDetailsChange({ name })}
