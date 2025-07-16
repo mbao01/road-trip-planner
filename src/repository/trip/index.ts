@@ -234,14 +234,14 @@ async function createTrip({
     await tx.day.createMany({
       data: Array.from({ length: dayCount }, (_, i) => ({
         date: addDays(startDate, i),
-        tripId: trip.id,
+        tripId: newTrip.id,
         order: i,
       })),
     });
 
     const day = await tx.day.findFirst({
       where: {
-        tripId: trip.id,
+        tripId: newTrip.id,
         order: 0,
       },
     });
@@ -251,7 +251,7 @@ async function createTrip({
         data: {
           order: 0,
           name: startStop.name,
-          tripId: trip.id,
+          tripId: newTrip.id,
           placeId: startStop.placeId,
           latitude: startStop.latitude,
           longitude: startStop.longitude,
