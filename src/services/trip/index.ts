@@ -20,6 +20,17 @@ import { travelService } from "../travel";
  * @param tripId - The ID of the trip
  * @returns The trip for the user
  */
+const getPublicTrip = async ({ tripId }: { tripId: string }) => {
+  const trip = await tripRepo.getPublicTrip(tripId);
+
+  return { trip };
+};
+
+/**
+ * Gets a trip for a user
+ * @param tripId - The ID of the trip
+ * @returns The trip for the user
+ */
 const getUserTrip = async ({ tripId }: { tripId: string }) => {
   const session = await resourceGuard({
     [Resource.TRIP]: { tripId, roles: [TripRole.VIEWER] },
@@ -162,6 +173,7 @@ const deleteTrip = async ({ tripId }: { tripId: string }) => {
 };
 
 export const tripService = {
+  getPublicTrip,
   getUserTrip,
   getUserTrips,
   createTrip,

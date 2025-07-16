@@ -21,14 +21,8 @@ import { StopWithItineraries } from "@/types/trip";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { StopEvent } from "@prisma/client";
-import {
-  Check,
-  ChevronDown,
-  ChevronUp,
-  ExternalLinkIcon,
-  GripVertical,
-  Trash2,
-} from "lucide-react";
+import { Check, ChevronDown, ChevronUp, GripVertical, Trash2 } from "lucide-react";
+import { OpenInGoogleMaps } from "./open-in-google-maps";
 import { StopItineraries } from "./stop-itineraries";
 import { STOP_TYPES, StopTypeIcon } from "./stop-type-icon";
 import { TravelDetails } from "./travel-details";
@@ -105,7 +99,7 @@ export const StopCard: FC<StopCardProps> = ({
             </Button>
             <CollapsibleTrigger asChild>
               <button className="flex-1 flex items-center gap-2 text-left min-w-0">
-                <div className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center font-medium shrink-0">
+                <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium shrink-0">
                   {stopNumber}
                 </div>
                 <span className="font-medium flex-1 truncate">{stop.name}</span>
@@ -126,7 +120,7 @@ export const StopCard: FC<StopCardProps> = ({
             <div className="p-4 pt-0 space-y-4">
               <div className="flex gap-2">
                 <div className="flex items-center border rounded-md overflow-hidden">
-                  <span className="px-3 py-2 bg-gray-100 border-r text-sm font-medium text-muted-foreground">
+                  <span className="px-3 py-2 bg-transparent border-r text-sm font-medium text-muted-foreground">
                     £
                   </span>
                   <Input
@@ -181,10 +175,8 @@ export const StopCard: FC<StopCardProps> = ({
                 />
               </div>
               <StopItineraries stopId={stop.id} itineraries={stop.itinerary} />
-              <Button type="button" variant="link" className="w-full bg-transparent justify-center">
-                <ExternalLinkIcon className="w-4 h-4" />
-                Open in Google Maps
-              </Button>
+
+              <OpenInGoogleMaps placeId={stop.placeId} />
             </div>
           </CollapsibleContent>
         </div>

@@ -10,9 +10,9 @@ export const STOP_TYPES = [
     value: StopEvent.DEFAULT,
     icon: (isMapIcon = false) =>
       isMapIcon ? (
-        <div className="w-6 h-6 rounded-full bg-orange-500 border-2 border-white shadow-md" />
+        <div className="w-6 h-6 rounded-full bg-primary border-2 border-white shadow-md" />
       ) : (
-        <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white" />
+        <div className="w-4 h-4 rounded-full bg-primary border-2 border-white" />
       ),
   },
   {
@@ -72,7 +72,7 @@ export const STOP_TYPES = [
     icon: (isMapIcon = false) => (
       <div
         className={cn(
-          "rounded-full flex items-center justify-center bg-orange-500 border-2 border-white shadow-md",
+          "rounded-full flex items-center justify-center bg-primary border-2 border-white shadow-md",
           isMapIcon ? "w-6 h-6" : "w-4 h-4"
         )}
       >

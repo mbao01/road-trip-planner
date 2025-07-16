@@ -227,7 +227,7 @@ export function SettingsModal({
             />
           </div>
 
-          <Button onClick={handleUpdate} className="w-full bg-orange-500 hover:bg-orange-600">
+          <Button onClick={handleUpdate} className="w-full bg-primary hover:bg-orange-600">
             Update trip settings
           </Button>
         </div>

@@ -1,22 +1,36 @@
-"use client"
+"use client";
 
-import type { ReactNode } from "react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import type { ReactNode } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface AuthCardProps {
-  children: ReactNode
-  title: string
-  description: string
-  footerText: string
-  footerLink: string
-  footerLinkText: string
+  children: ReactNode;
+  title: string;
+  description: string;
+  footerText: string;
+  footerLink: string;
+  footerLinkText: string;
 }
 
-export function AuthCard({ children, title, description, footerText, footerLink, footerLinkText }: AuthCardProps) {
-  const searchParams = useSearchParams()
-  const searchString = searchParams.toString()
+export function AuthCard({
+  children,
+  title,
+  description,
+  footerText,
+  footerLink,
+  footerLinkText,
+}: AuthCardProps) {
+  const searchParams = useSearchParams();
+  const searchString = searchParams.toString();
 
   return (
     <Card className="w-full max-w-sm">
@@ -37,5 +51,5 @@ export function AuthCard({ children, title, description, footerText, footerLink,
         </p>
       </CardFooter>
     </Card>
-  )
+  );
 }

@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { UserDropdown } from "@/components/user-dropdown";
 import { auth } from "@/lib/auth";
 import { tripService } from "@/services/trip";
+import { PlusIcon } from "lucide-react";
 
 export default async function TripsPage() {
   const session = await auth();
@@ -29,7 +30,8 @@ export default async function TripsPage() {
             <div className="flex items-center gap-2">
               <CreateTripModal
                 trigger={
-                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                  <Button size="sm">
+                    <PlusIcon className="h-4 w-4" />
                     Create Trip
                   </Button>
                 }

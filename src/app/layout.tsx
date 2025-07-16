@@ -1,43 +1,48 @@
-import type { Metadata } from "next"
-import type React from "react"
-import { Inter, Lexend } from "next/font/google"
-import AuthProvider from "@/components/auth-provider"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
-import { cn } from "@/lib/utils"
-import "./globals.css"
+import type { Metadata } from "next";
+import type React from "react";
+import { Inter, Lexend } from "next/font/google";
+import AuthProvider from "@/components/auth-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-})
+});
 
 const lexend = Lexend({
   subsets: ["latin"],
   variable: "--font-lexend",
-})
+});
 
 export const metadata: Metadata = {
   title: "Trip Planner",
   description: "Plan your next adventure",
   generator: "v0.dev",
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("font-sans", inter.variable, lexend.variable)}>
         <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             {children}
             <Toaster />
           </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
-  )
+  );
 }

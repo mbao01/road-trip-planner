@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getAbbreviation } from "@/utilities/helpers";
-import { CreditCard, LogOut, Mail, MessageSquare, PlusCircle, User, UserPlus } from "lucide-react";
+import { LogOut, MoonIcon, PaletteIcon, RouteIcon, SunIcon, SunMoonIcon, User } from "lucide-react";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
@@ -57,7 +57,7 @@ export function UserDropdown({ user }: { user: Session["user"] }) {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/trips">
-                <CreditCard className="mr-2 h-4 w-4" />
+                <RouteIcon className="mr-2 h-4 w-4" />
                 <span>Trips</span>
               </Link>
             </DropdownMenuItem>
@@ -66,21 +66,21 @@ export function UserDropdown({ user }: { user: Session["user"] }) {
           <DropdownMenuGroup>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <UserPlus className="mr-2 h-4 w-4" />
+                <PaletteIcon className="mr-2 h-4 w-4" />
                 <span>Theme</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem onSelect={() => setTheme("light")}>
-                    <Mail className="mr-2 h-4 w-4" />
+                    <SunIcon className="mr-2 h-4 w-4" />
                     <span>Light</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => setTheme("dark")}>
-                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <MoonIcon className="mr-2 h-4 w-4" />
                     <span>Dark</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => setTheme("system")}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
+                    <SunMoonIcon className="mr-2 h-4 w-4" />
                     <span>System</span>
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>

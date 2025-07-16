@@ -197,7 +197,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
               <Button
                 onClick={handleInvite}
                 disabled={!inviteEmail}
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-primary hover:bg-orange-600"
               >
                 Invite
               </Button>
@@ -330,7 +330,7 @@ export function ShareModal({ open, trip, userId, onTripChange, onOpenChange }: S
                 <Button
                   disabled={!isTripPublic}
                   onClick={handleCopy}
-                  className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  className="bg-gray-200 text-gray-800 hover:bg-gray-300"
                 >
                   <Copy className="w-4 h-4" />
                   Copy link

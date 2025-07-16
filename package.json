@@ -61,7 +61,7 @@
     "@react-google-maps/api": "latest",
     "@sentry/nextjs": "latest",
     "@types/debug": "latest",
-    "@vercel/blob": "^1.1.1",
+    "@vercel/blob": "latest",
     "@vitest/browser": "latest",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",

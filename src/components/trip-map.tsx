@@ -1,9 +1,10 @@
 "use client";
 
 /// <reference types="google.maps" />
-import type { Settings, Stop } from "@prisma/client";
+import type { Stop } from "@prisma/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { StopInfoWindow } from "@/components/stop-info-window";
+import { NormalizedSettings } from "@/helpers/settings";
 import { MapStyle } from "@prisma/client";
 import {
   DirectionsRenderer,
@@ -16,7 +17,7 @@ import {
 import { Loader2 } from "lucide-react";
 
 interface TripMapProps {
-  mapStyle: Settings["mapStyle"];
+  settings: NormalizedSettings;
   stops: Stop[];
   googleMapsApiKey: string;
 }
@@ -117,7 +118,7 @@ const getMarkerIcon = () => {
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
-export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
+export function TripMap({ settings, stops, googleMapsApiKey }: TripMapProps) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: googleMapsApiKey,
@@ -217,8 +218,10 @@ export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
       onLoad={onLoad}
       onUnmount={onUnmount}
       options={{
-        styles: mapStyle ? mapStyleOptions[mapStyle] : mapStyleOptions[MapStyle.DEFAULT],
-        mapTypeId: mapStyle === MapStyle.SATELLITE ? "satellite" : "roadmap",
+        styles: settings.mapStyle
+          ? mapStyleOptions[settings.mapStyle]
+          : mapStyleOptions[MapStyle.DEFAULT],
+        mapTypeId: settings.mapStyle === MapStyle.SATELLITE ? "satellite" : "roadmap",
         disableDefaultUI: true,
         zoomControl: true,
       }}
@@ -260,7 +263,11 @@ export function TripMap({ mapStyle, stops, googleMapsApiKey }: TripMapProps) {
             y: -(height + 10),
           })}
         >
-          <StopInfoWindow stop={displayMarker} onClose={handleCloseInfoWindow} />
+          <StopInfoWindow
+            stop={displayMarker}
+            settings={settings}
+            onClose={handleCloseInfoWindow}
+          />
         </OverlayView>
       )}
 

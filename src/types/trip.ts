@@ -29,6 +29,13 @@ export type CollaboratorWithUser = Collaborator & {
   user: Pick<User, "id" | "name" | "email" | "image">;
 };
 
+export type PublicTrip = Trip & {
+  days: DayWithStops[];
+  stops: Stop[];
+  travel: Travel | null;
+  settings: Settings | null;
+};
+
 export type UserTrip = Omit<Trip, "ownerId"> &
   Partial<Pick<Trip, "ownerId">> & {
     days: DayWithStops[];

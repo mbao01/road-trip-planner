@@ -19,6 +19,24 @@ const getTripById = async (tripId: string) => {
 };
 
 /**
+ * @param tripId - The ID of the trip to retrieve
+ * @returns The trip with the specified ID, or null if not found
+ */
+const getPublicTrip = async (tripId: string) => {
+  return prisma.trip.findFirst({
+    where: { id: tripId, access: TripAccess.PUBLIC },
+    include: {
+      days: {
+        include: { stops: { include: { itinerary: true } } },
+      },
+      stops: true,
+      travel: true,
+      settings: true,
+    },
+  });
+};
+
+/**
  * @param userId - The ID of the user to retrieve
  * @param tripId - The ID of the trip to retrieve
  * @returns The collaborator with the specified user ID and trip ID, or null if not found
@@ -234,14 +252,14 @@ async function createTrip({
     await tx.day.createMany({
       data: Array.from({ length: dayCount }, (_, i) => ({
         date: addDays(startDate, i),
-        tripId: trip.id,
+        tripId: newTrip.id,
         order: i,
       })),
     });
 
     const day = await tx.day.findFirst({
       where: {
-        tripId: trip.id,
+        tripId: newTrip.id,
         order: 0,
       },
     });
@@ -251,7 +269,7 @@ async function createTrip({
         data: {
           order: 0,
           name: startStop.name,
-          tripId: trip.id,
+          tripId: newTrip.id,
           placeId: startStop.placeId,
           latitude: startStop.latitude,
           longitude: startStop.longitude,
@@ -279,6 +297,7 @@ async function deleteTrip(userId: string, tripId: string) {
 
 export const tripRepo = {
   getTripById,
+  getPublicTrip,
   getTripCollaborator,
   getUserTrips,
   getUserTrip,
