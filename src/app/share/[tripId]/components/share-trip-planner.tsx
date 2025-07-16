@@ -27,7 +27,7 @@ export function ShareTripPlanner({ trip, settings }: ShareTripPlannerProps) {
           </div>
           <div className="flex-1 relative w-full">
             <TripMap
-              mapStyle={settings.mapStyle}
+              settings={settings}
               stops={trip.days.flatMap((day) => day.stops)}
               googleMapsApiKey={googleMapsApiKey}
             />

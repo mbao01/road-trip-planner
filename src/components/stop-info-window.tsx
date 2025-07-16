@@ -1,31 +1,57 @@
 "use client";
 
-import type { Stop } from "@prisma/client";
+import { StopTypeIcon } from "@/components/stop-type-icon";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DescriptionDetail,
+  DescriptionItem,
+  DescriptionList,
+  DescriptionTerm,
+} from "@/components/ui/description-list";
+import { STOP_EVENT } from "@/helpers/constants/stopEvent";
+import { NormalizedSettings } from "@/helpers/settings";
 import { formatCurrency } from "@/utilities/numbers";
-import { Currency } from "@prisma/client";
-import { X } from "lucide-react";
+import { Stop, StopEvent } from "@prisma/client";
+import { XIcon } from "lucide-react";
 
 interface StopInfoWindowProps {
   stop: Stop;
+  settings: NormalizedSettings;
   onClose: () => void;
 }
 
-export function StopInfoWindow({ stop, onClose }: StopInfoWindowProps) {
+export function StopInfoWindow({ stop, settings, onClose }: StopInfoWindowProps) {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 w-64 relative text-gray-900 font-sans">
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 transition-colors"
-        aria-label="Close"
-      >
-        <X className="w-5 h-5" />
-      </button>
-      <h3 className="text-base font-medium pr-6">{stop.customName ?? stop.name}</h3>
-      {stop.stopCost ? (
-        <p className="text-sm text-gray-500">
-          {formatCurrency(stop.stopCost, { currency: Currency.GBP })}
-        </p>
-      ) : null}
-    </div>
+    <Card className="w-80">
+      <CardHeader className="flex-row items-start justify-between">
+        <CardTitle>{stop.name}</CardTitle>
+        <Button variant="ghost" size="icon" className="h-6 w-6 -translate-y-1" onClick={onClose}>
+          <XIcon className="h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <DescriptionList>
+          <DescriptionItem>
+            <DescriptionTerm>Plan</DescriptionTerm>
+            <DescriptionDetail>
+              <div className="flex items-center text-muted-foreground">
+                <StopTypeIcon
+                  value={stop.stopEvent ?? StopEvent.DEFAULT}
+                  className="mr-2 h-4 w-4"
+                />
+                <span>{STOP_EVENT[stop.stopEvent ?? StopEvent.DEFAULT]}</span>
+              </div>
+            </DescriptionDetail>
+          </DescriptionItem>
+          <DescriptionItem>
+            <DescriptionTerm>Cost</DescriptionTerm>
+            <DescriptionDetail>
+              {formatCurrency(stop.stopCost ?? 0, { currency: settings.currency })}
+            </DescriptionDetail>
+          </DescriptionItem>
+        </DescriptionList>
+      </CardContent>
+    </Card>
   );
 }
