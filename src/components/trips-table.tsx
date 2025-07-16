@@ -11,6 +11,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Table,
   TableBody,
   TableCell,
@@ -27,11 +34,14 @@ import {
   EarthIcon,
   MapIcon,
   MoreHorizontalIcon,
+  PlaneTakeoffIcon,
+  PlusIcon,
   RouteIcon,
   Share2Icon,
   Trash2Icon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { CreateTripModal } from "./create-trip-modal";
 import { DeleteTripConfirmationDialog } from "./delete-trip-confirmation-dialog";
 import { ShareModal } from "./share-modal";
 import { TripRoleBadge } from "./trip-role-badge";
@@ -41,11 +51,14 @@ interface TripsTableProps {
   initialTrips: UserTrips;
 }
 
+const PAGE_SIZE = 10;
+
 export function TripsTable({ initialTrips }: TripsTableProps) {
   const session = useSession();
   const [trips, setTrips] = useState(initialTrips);
   const [tripToDelete, setTripToDelete] = useState<UserTrips[number] | null>(null);
   const [tripToShare, setTripToShare] = useState<UserTrips[number] | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   const handleArchive = async (tripId: string) => {
@@ -62,6 +75,31 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
     toast({ title: "Trip deleted" });
     await deleteTrip(tripToDelete.id);
   };
+
+  const totalPages = Math.ceil(trips.length / PAGE_SIZE);
+  const paginatedTrips = trips.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  if (trips.length > 0) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+          <PlaneTakeoffIcon className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <h2 className="mt-6 text-xl font-semibold">No trips yet</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Get started on your adventure by creating a new Trip.
+        </p>
+        <CreateTripModal
+          trigger={
+            <Button className="mt-6">
+              <PlusIcon className="h-4 w-4" />
+              Create Trip
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -81,7 +119,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {trips.map((trip) => {
+            {paginatedTrips.map((trip) => {
               const { ownerId, collaborators } = trip;
               const collaborator = ownerId
                 ? collaborators.find((c) => c.userId === ownerId)!
@@ -156,6 +194,41 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
           </TableBody>
         </Table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage((prev) => Math.max(prev - 1, 1));
+                  }}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : undefined}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <span className="p-2 text-sm">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                  }}
+                  className={
+                    currentPage === totalPages ? "pointer-events-none opacity-50" : undefined
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
       {tripToDelete && (
         <DeleteTripConfirmationDialog
           open={!!tripToDelete}
