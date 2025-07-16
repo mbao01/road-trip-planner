@@ -8,6 +8,9 @@ CREATE TYPE "TripAccess" AS ENUM ('PRIVATE', 'PUBLIC');
 CREATE TYPE "TripStatus" AS ENUM ('ARCHIVED', 'DELETED', 'COMPLETED', 'IN_PROGRESS', 'NOT_STARTED');
 
 -- CreateEnum
+CREATE TYPE "StopEvent" AS ENUM ('DEFAULT', 'OVERNIGHT', 'OUTDOOR_ACTIVITY', 'PLACE_OF_INTEREST', 'FUEL', 'FOOD_AND_DRINK');
+
+-- CreateEnum
 CREATE TYPE "Currency" AS ENUM ('GBP', 'EUR', 'USD');
 
 -- CreateEnum
@@ -20,7 +23,7 @@ CREATE TYPE "ItineraryAssetType" AS ENUM ('PDF', 'PHOTO', 'VIDEO', 'AUDIO');
 CREATE TYPE "Provider" AS ENUM ('CREDENTIAL', 'GOOGLE');
 
 -- CreateEnum
-CREATE TYPE "MapStyle" AS ENUM ('DEFAULT', 'ROADMAP', 'SATELLITE', 'HYBRID', 'TERRAIN');
+CREATE TYPE "MapStyle" AS ENUM ('DEFAULT', 'ROADMAP', 'SATELLITE', 'HYBRID', 'TERRAIN', 'MINIMAL');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -95,6 +98,8 @@ CREATE TABLE "Stop" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "customName" TEXT,
+    "stopEvent" "StopEvent" DEFAULT 'DEFAULT',
+    "stopCost" DOUBLE PRECISION,
     "latitude" DOUBLE PRECISION NOT NULL,
     "longitude" DOUBLE PRECISION NOT NULL,
     "placeId" TEXT NOT NULL,

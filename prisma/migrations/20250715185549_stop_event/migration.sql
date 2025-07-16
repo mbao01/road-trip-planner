@@ -1,5 +1,0 @@
--- CreateEnum
-CREATE TYPE "StopEvent" AS ENUM ('DEFAULT', 'OVERNIGHT', 'OUTDOOR_ACTIVITY', 'PLACE_OF_INTEREST', 'FUEL', 'FOOD_AND_DRINK');
-
--- AlterTable
-ALTER TABLE "Stop" ADD COLUMN     "stopEvent" "StopEvent" DEFAULT 'DEFAULT';
