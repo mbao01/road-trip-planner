@@ -77,7 +77,7 @@ export const TripInviteEmail = ({
 
       <Section className="mt-[32px] mb-[32px] text-center">
         <Button
-          className="rounded bg-[#000000] px-5 py-3 text-center font-semibold text-[12px] text-white no-underline"
+          className="rounded bg-primary px-5 py-3 text-center font-semibold text-[12px] text-white no-underline"
           href={inviteLink}
         >
           Accept invite

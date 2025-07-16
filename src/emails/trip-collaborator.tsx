@@ -81,7 +81,7 @@ export const TripCollaboratorEmail = ({
 
       <Section className="mt-[32px] mb-[32px] text-center">
         <Button
-          className="rounded bg-background px-5 py-3 text-center font-semibold text-[12px] text-white no-underline"
+          className="rounded bg-primary px-5 py-3 text-center font-semibold text-[12px] text-white no-underline"
           href={tripLink}
         >
           View your trip
