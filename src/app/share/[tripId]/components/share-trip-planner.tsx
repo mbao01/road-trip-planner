@@ -3,8 +3,16 @@
 import type { PublicTrip } from "@/types/trip";
 import type React from "react";
 import { TripMap } from "@/components/trip-map";
-import { Sidebar, SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  Sidebar,
+  SidebarInset,
+  SidebarProvider,
+  SidebarToggle,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { NormalizedSettings } from "@/helpers/settings";
+import { ArrowBigUpDashIcon } from "lucide-react";
 import { ShareTripSidebar } from "./share-trip-sidebar";
 
 interface ShareTripPlannerProps {
@@ -22,6 +30,22 @@ export function ShareTripPlanner({ trip, settings }: ShareTripPlannerProps) {
           <ShareTripSidebar trip={trip} settings={settings} />
         </Sidebar>
         <SidebarInset>
+          <SidebarToggle>
+            {({ open, openMobile, toggleSidebar }) =>
+              !open && !openMobile ? (
+                <div className="absolute top-1/2 -translate-y-1/2 z-50 -left-14">
+                  <Button
+                    size="sm"
+                    className="transform rotate-90 cursor-pointer rounded-b-none text-white"
+                    onClick={toggleSidebar}
+                  >
+                    <ArrowBigUpDashIcon className="w-4 h-4" />
+                    Open Itinerary
+                  </Button>
+                </div>
+              ) : null
+            }
+          </SidebarToggle>
           <div className="absolute top-4 left-4 z-10">
             <SidebarTrigger className="bg-background text-primary rounded-sm" />
           </div>

@@ -38,7 +38,7 @@ export function ShareStopCard({
     <Card className="bg-background">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <div className="flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+          <div className="flex items-center justify-center h-6 w-6 rounded-full bg-primary text-white text-sm font-bold">
             {stopNumber}
           </div>
           {stop.customName ?? stop.name}

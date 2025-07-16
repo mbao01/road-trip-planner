@@ -12,9 +12,9 @@ interface ShareTripSidebarProps {
 export function ShareTripSidebar({ trip, settings }: ShareTripSidebarProps) {
   let stopCounter = 0;
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background">
       <ShareTripHeader trip={trip} settings={settings} />
-      <ScrollArea className="flex-1">
+      <ScrollArea className="block flex-1">
         <div className="p-4 space-y-4">
           {trip.days.map((day, index) => {
             const offset = stopCounter;

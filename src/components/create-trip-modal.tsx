@@ -164,7 +164,7 @@ export function CreateTripModal({ trigger }: CreateTripModalProps) {
               className="pl-9"
             />
             {isSearching && (
-              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin" />
+              <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
             )}
             {startStopQuery && !selectedStartStop && !isSearching && (
               <button

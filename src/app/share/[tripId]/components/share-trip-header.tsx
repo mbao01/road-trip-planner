@@ -55,8 +55,8 @@ export function ShareTripHeader({ trip, settings }: ShareTripHeaderProps) {
   }, [trip, settings]);
 
   return (
-    <header>
-      <div className="absolute right-2 top-2">
+    <header className="relative">
+      <div className="absolute right-4 top-2">
         {theme === "dark" && (
           <Button size="icon" variant="ghost" onClick={() => setTheme("light")} className="h-4 w-4">
             <SunIcon className="h-4 w-4" />

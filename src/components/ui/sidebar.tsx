@@ -15,8 +15,8 @@ import { PanelLeft } from "lucide-react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "18rem";
+const SIDEBAR_WIDTH = "24rem";
+const SIDEBAR_WIDTH_MOBILE = "20rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -273,6 +273,25 @@ const SidebarTrigger = React.forwardRef<
   );
 });
 SidebarTrigger.displayName = "SidebarTrigger";
+
+const SidebarToggle = ({
+  children,
+}: {
+  children: ({
+    open,
+    openMobile,
+    toggleSidebar,
+  }: {
+    open: boolean;
+    openMobile: boolean;
+    toggleSidebar: () => void;
+  }) => React.ReactNode;
+}) => {
+  const { open, openMobile, toggleSidebar } = useSidebar();
+
+  return children({ open, openMobile, toggleSidebar });
+};
+SidebarToggle.displayName = "SidebarToggle";
 
 const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button">>(
   ({ className, ...props }, ref) => {
@@ -730,6 +749,7 @@ export {
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
+  SidebarToggle,
   SidebarTrigger,
   useSidebar,
 };

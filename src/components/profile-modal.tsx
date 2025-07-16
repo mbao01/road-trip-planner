@@ -103,7 +103,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
         isPending={isPending}
       />
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="max-h-screen">
           <DialogHeader>
             <DialogTitle>Profile Settings</DialogTitle>
             <DialogDescription>Manage your account details.</DialogDescription>

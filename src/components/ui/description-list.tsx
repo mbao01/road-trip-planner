@@ -5,7 +5,7 @@ const DescriptionList = React.forwardRef<HTMLDListElement, React.HTMLAttributes<
   ({ className, ...props }, ref) => (
     <dl
       ref={ref}
-      className={cn("grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2", className)}
+      className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-y-6", className)}
       {...props}
     />
   )

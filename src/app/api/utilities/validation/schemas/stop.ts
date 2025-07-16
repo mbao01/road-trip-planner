@@ -6,15 +6,15 @@ export const addStopSchema = z.object({
   placeId: z.string(),
   latitude: z.number(),
   longitude: z.number(),
-  customName: z.string().optional(),
+  customName: z.string().nullish(),
 });
 
 export type AddStopArg = z.infer<typeof addStopSchema>;
 
 export const updateStopSchema = z.object({
   stopEvent: z.enum(StopEvent).optional(),
-  stopCost: z.coerce.number().optional(),
-  customName: z.string().optional(),
+  stopCost: z.coerce.number().nullish(),
+  customName: z.string().nullish(),
 });
 
 export type UpdateStopArg = z.infer<typeof updateStopSchema>;
