@@ -19,6 +19,24 @@ const getTripById = async (tripId: string) => {
 };
 
 /**
+ * @param tripId - The ID of the trip to retrieve
+ * @returns The trip with the specified ID, or null if not found
+ */
+const getPublicTrip = async (tripId: string) => {
+  return prisma.trip.findFirst({
+    where: { id: tripId, access: TripAccess.PUBLIC },
+    include: {
+      days: {
+        include: { stops: { include: { itinerary: true } } },
+      },
+      stops: true,
+      travel: true,
+      settings: true,
+    },
+  });
+};
+
+/**
  * @param userId - The ID of the user to retrieve
  * @param tripId - The ID of the trip to retrieve
  * @returns The collaborator with the specified user ID and trip ID, or null if not found
@@ -279,6 +297,7 @@ async function deleteTrip(userId: string, tripId: string) {
 
 export const tripRepo = {
   getTripById,
+  getPublicTrip,
   getTripCollaborator,
   getUserTrips,
   getUserTrip,

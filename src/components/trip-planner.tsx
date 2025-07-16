@@ -266,7 +266,6 @@ export function TripPlanner({ trip: initialTrip }: TripPlannerProps) {
             </div>
             <div className="flex-1 relative w-full">
               <TripMap
-                // className="flex-1"
                 mapStyle={settings.mapStyle}
                 stops={trip.days.flatMap((day) => day.stops)}
                 googleMapsApiKey={googleMapsApiKey}

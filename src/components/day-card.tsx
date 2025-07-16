@@ -65,6 +65,9 @@ export const DayCard: FC<DayCardProps> = ({
     return display;
   }, [travel, settings, day]);
 
+  const stopsDetail =
+    stops.length === 0 ? "No stop" : stops.length === 1 ? "1 stop" : `${stops.length} stops`;
+
   return (
     <Card ref={setNodeRef} className="p-4">
       <div className="flex items-center justify-between mb-2">
@@ -105,10 +108,13 @@ export const DayCard: FC<DayCardProps> = ({
         </DropdownMenu>
       </div>
 
-      <div className="mb-4">
+      <div className="flex justify-between items-center gap-2 mb-4">
         <div className="inline-block max-w-full px-3 py-1 bg-background rounded-full text-xs text-muted-foreground truncate">
           {details}
         </div>
+        <span className="inline-block max-w-full px-3 py-1 bg-background rounded-full text-xs text-muted-foreground truncate">
+          {stopsDetail}
+        </span>
       </div>
 
       <SortableContext

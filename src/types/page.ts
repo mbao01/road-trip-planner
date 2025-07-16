@@ -1,4 +1,4 @@
 export type PageProps<T = never, G = never> = Readonly<{
-  params: T;
+  params: Promise<T>;
   searchParams?: G;
 }>;

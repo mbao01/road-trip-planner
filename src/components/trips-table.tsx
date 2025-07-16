@@ -79,7 +79,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
   const totalPages = Math.ceil(trips.length / PAGE_SIZE);
   const paginatedTrips = trips.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  if (trips.length > 0) {
+  if (trips.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
@@ -162,7 +162,7 @@ export function TripsTable({ initialTrips }: TripsTableProps) {
                               <span>View trip</span>
                             </Link>
                           ) : (
-                            <Link href={`/trips/share/${trip.id}`}>
+                            <Link href={`/share/${trip.id}`}>
                               <EarthIcon className="mr-2 h-4 w-4" />
                               <span>View trip</span>
                             </Link>
