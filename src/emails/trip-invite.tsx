@@ -49,7 +49,7 @@ export const TripInviteEmail = ({
           <Column align="right">
             <Img
               className="rounded-full"
-              src={`${baseUrl}/static/images/you.png`}
+              src={`${baseUrl}/static/images/user.png`}
               width="64"
               height="64"
               alt="Profile picture"
@@ -66,7 +66,7 @@ export const TripInviteEmail = ({
           <Column align="left">
             <Img
               className="rounded-full"
-              src={invitedByImage ?? `${baseUrl}/static/images/me.png`}
+              src={invitedByImage ?? `${baseUrl}/static/images/user.png`}
               width="64"
               height="64"
               alt={`${invitedByName} logo`}

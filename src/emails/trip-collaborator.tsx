@@ -53,7 +53,7 @@ export const TripCollaboratorEmail = ({
           <Column align="right">
             <Img
               className="rounded-full"
-              src={inviteeImage ?? `${baseUrl}/static/images/you.png`}
+              src={inviteeImage ?? `${baseUrl}/static/images/user.png`}
               width="64"
               height="64"
               alt={`${inviteeName} picture`}
@@ -70,7 +70,7 @@ export const TripCollaboratorEmail = ({
           <Column align="left">
             <Img
               className="rounded-full"
-              src={invitedByImage ?? `${baseUrl}/static/images/me.png`}
+              src={invitedByImage ?? `${baseUrl}/static/images/user.png`}
               width="64"
               height="64"
               alt={`${invitedByName} picture`}
